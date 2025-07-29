@@ -85,7 +85,7 @@ class UserController extends Controller
                 ->get();
 
             $overviewComments->transform(function($comment){
-                $comment->vote = $comment->getVoteCountAttribute();
+                $comment->votes = $comment->getVoteCountAttribute();
                 $comment->userVote = $comment->getUserVoteAttribute();
                 $comment->type = 'comment';
                 return $comment;

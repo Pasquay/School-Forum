@@ -100,8 +100,18 @@
     </style>
 </head>
 <body>
-    <div id="login" class='hidden'>
-        <h2>Welcome Back!</h2>
+    <div id="login" class=''>
+        <h2>Login</h2>
+        @if (session()->has('success'))
+            <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session()->has('error'))
+            <div style="display: flex; background-color: #f8d7da; color: #000000; padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f5c6cb; text-align: center; align-items: center; justify-content: center;">
+                <p style='margin: 0;'>{{ session('error') }}</p>
+            </div>
+        @endif
         <form action="/login" method="post">
             @csrf
             <input type="text" name="login-name" placeholder="Name" required>
@@ -110,7 +120,7 @@
         </form>
         <p>Don't have an account? <a href="" id="showRegister">Sign up</a></p>
     </div>
-    <div id="register" class=''>
+    <div id="register" class='hidden'>
         <h2>Sign Up</h2>
         @if (session()->has('success'))
             <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">

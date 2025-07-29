@@ -138,6 +138,30 @@
             flex: 1 1 800px;
             max-width: 800px;
         }
+        
+        .overview-column {
+            max-width: 800px;
+            margin: 1.5rem 0 1.5rem 0;
+            padding: 0 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .overview-column-bottom {
+            display: block;
+            text-align: center;
+            margin: 3rem auto 2rem auto;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            line-height: 1.5;
+            transition: background 0.2s;
+        }
+
+        .overview-column .profile-comment {
+            width: 744px;
+            align-self: flex-end;
+        }
 
         .overview-column-bottom {
             display: block;
@@ -578,11 +602,11 @@
 </body>
 <script>
     const userID = document.body.dataset.userId;
-    const posts = document.getElementsByClassName('post');
+    const posts = document.querySelectorAll('#posts-column .post');
     const postContainer = document.querySelector('#posts-column');
     const postLoader = document.querySelector('#post-loader');
     
-    const comments = document.getElementsByClassName('profile-comment');
+    const comments = document.querySelectorAll('#comments-column .profile-comment');
     const commentContainer = document.querySelector('#comments-column');
     const commentLoader = document.querySelector('#comment-loader');
 
@@ -657,10 +681,10 @@
     // Scrolling
         // Variables
             // Overview - Under Construction
-            // Posts - Under Construction
+            // Posts
                 let postNextPage = 2;
                 let postLoading = false;
-            // Comments - Under Construction
+            // Comments
                 let commentNextPage = 2;
                 let commentLoading = false;
             // Deleted Posts - Under Construction
@@ -731,7 +755,9 @@
     // Scroll Event Listeners
         // Posts
             function attachPostEventListeners(){
-                Array.from(posts).forEach(post => {
+                const posts = document.querySelectorAll('#posts-column .post');
+
+                posts.forEach(post => {
                     if(!post.dataset.listenersAttached){
                         post.dataset.listenersAttached = 'true';
                 // Post cards link to post pages
@@ -845,7 +871,9 @@
             };
         // Profile-comments
             function attachCommentEventListeners(){
-                Array.from(comments).forEach(comment => {
+                const comments = document.querySelectorAll('#comments-column .profile-comment');
+
+                comments.forEach(comment => {
                     if(!comment.dataset.listenersAttached){
                         comment.dataset.listenersAttached = 'true';
                 // Profile-comment cards linking to comment pages
