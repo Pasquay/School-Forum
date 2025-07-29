@@ -111,6 +111,8 @@
             transition: color 0.2s;
             padding: 0.5rem 1rem;
             margin: 0 0.6rem;
+            flex: 1;
+            text-align: center;
         }
 
         .left-side .nav button:hover {
@@ -159,7 +161,8 @@
         }
 
         .overview-column .profile-comment {
-            width: 744px;
+            width: 95%;
+            min-width: 200px;
             align-self: flex-end;
         }
 

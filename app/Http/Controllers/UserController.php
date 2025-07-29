@@ -154,7 +154,10 @@ class UserController extends Controller
             }
             else{
                 return view('user', compact(
-                    'user', 
+                    'user',
+                    'postCount',
+                    'commentCount',
+                    'likeCount',
                     'overview',
                     'posts',
                     'comments',
