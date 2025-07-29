@@ -93,11 +93,15 @@ class UserController extends Controller
                 $comment->type = 'comment';
                 return $comment;
             });
-
+            
             $overviewAll = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
             $overviewCount = $overviewAll->count();
             $offset = ($currentPage - 1) * $perPage;
             $overviewItems = $overviewAll->slice($offset, $perPage)->values();
+
+            $postCount = $overviewPosts->count();
+            $commentCount = $overviewComments->count();
+            $likeCount = $overviewAll->sum('votes');
 
             $overview = new \Illuminate\Pagination\LengthAwarePaginator(
                 $overviewItems,
@@ -140,6 +144,9 @@ class UserController extends Controller
             if($user->id == Auth::id()){
                 return view('profile', compact(
                     'user',
+                    'postCount',
+                    'commentCount',
+                    'likeCount',
                     'overview',
                     'posts',
                     'comments',

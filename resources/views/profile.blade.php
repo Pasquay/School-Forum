@@ -489,9 +489,131 @@
             margin-bottom: 2rem;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 1.2rem;
+            align-items: start;
+            gap: 1rem;
             width: 100%;
+        }
+
+        .user-info-row-1 {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .user-info-row-1 p {
+            margin: 0;
+            font-size: 20px; 
+            flex: 1;
+            line-height: 1.5;
+            color: #4a90e2;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .user-info-row-1 button {
+            min-width: 5rem;
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .user-info-row-1 button:hover {
+            background-color: #357abd;
+        }
+
+        .user-info-row-2 {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            padding: 1rem 0;
+            border-top: 1px solid #e1e1e1;
+            border-bottom: 1px solid #e1e1e1;
+            margin: 0.5rem 0;
+        }
+
+        .user-info-row-2 p {
+            margin: 0;
+            line-height: 1.5;
+            color: #333;
+            font-weight: 500;
+            text-align: justify;
+        }
+
+        .user-info-row-2 span {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-info-row-3 {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .user-info-row-3 span {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .contributionContainer, .reputationContainer {
+            flex: 1;
+            background-color: #f8f9fa;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .contributionContainer:hover, .reputationContainer:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .contributionContainer p, .reputationContainer p {
+            margin: 0;
+            line-height: 1.5;
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .user-info-row-4 {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e1e1;
+            margin-top: 0.5rem;
+        }
+
+        .user-info-row-4 span {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .user-info-row-4 p {
+            margin: 0;
+            line-height: 1.5;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .user-info-row-4 {
+            display: flex;
+            flex-direction: row;
         }
         
         .user-bottom {
@@ -577,25 +699,31 @@
                     You're all caught up!
                 </div>
             </div>
-            <!-- <div class="user-bottom" id='user-bottom' style='display:none;'>
-                You're all caught up!
-            </div> -->
         </div>
         <div class="right-side">
             <div class="user-info" id='user-info'>
-                UNDER CONSTRUCTION...<br>
-                Finish left nav first!
-                <!-- <img src="" alt="Banner">
-                <p>Username</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                <p>Number of Posts</p>
-                <p>Number of Comments</p>
-                <p>Post likes received</p>
-                <p>Comment likes received</p>
-                <p>Date created</p> -->
+                <div class="user-info-row-1">
+                    <p>{{ '@' . $user->name }}</p>
+                    <button class='profile-share-button' id='profile-share-button'>Share</button>
+                </div>
+                <div class="user-info-row-2">
+                    <p><span>About:</span><br>
+                    {{ $user->bio }}</p>
+                </div>
+                <div class="user-info-row-3">
+                    <div class="contributionContainer">
+                        <p><span>Contributions:</span><br>{{ $postCount + $commentCount }}</p>
+                    </div>
+                    <div class="reputationContainer">
+                        <p><span>Reputation:</span><br>{{ $likeCount }}</p>
+                    </div>
+                </div>
+                <div class="user-info-row-4">
+                    <p><span>Joined:</span><br>{{ $user->created_at->format('F j, Y') }}</p>
+                </div>
             </div>
             <div class="user-settings">
-
+                <!--  -->
             </div>
         </div>
     </main>
@@ -613,7 +741,23 @@
     const overviewContainer = document.querySelector('#overview-column');
     const overviewLoader = document.querySelector('#overview-loader');
 
-    // LEFT NAV
+    const userInfoContainer = document.querySelector('.user-info');
+
+    // RIGHT SIDE   
+        // Profile Share Button
+            const profileShareButton = userInfoContainer.querySelector('#profile-share-button');
+            profileShareButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileUrl = `${window.location.origin}/user/${userID}`;
+                navigator.clipboard.writeText(profileUrl)
+                .then(() => {
+                    profileShareButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        profileShareButton.textContent = 'Share';
+                    }, 1200);
+                })
+            })
+    // LEFT SIDE
         const leftnav = document.querySelector('.left-side .nav');
         
         const overviewForm = leftnav.querySelector('#overview-form');
@@ -679,7 +823,7 @@
 
     // Scrolling
         // Variables
-            // Overview - Under Construction
+            // Overview
                 let overviewNextPage = 2;
                 let overviewLoading = false;
             // Posts
@@ -692,7 +836,7 @@
             // Deleted Comments - Under Construction 
         document.addEventListener('scroll', () => {
             if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
-                // Overview - Under Construction
+                // Overview
                     if(overviewBtn.classList.contains('active') && !overviewLoading && overviewNextPage){
                         overviewLoading = true;
                         overviewLoader.style.display = 'block';
@@ -782,7 +926,7 @@
             }
         })
     // Scroll Event Listeners
-        // Overview - Under Construnction
+        // Overview
         // Posts
             function attachPostEventListeners(column = '#posts-column'){
                 const posts = document.querySelectorAll(`${column} .post`);
