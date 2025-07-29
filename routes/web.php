@@ -15,6 +15,7 @@ Route::controller(UserController::class)->group(function() {
     Route::post('/login', 'login'); // user login
     Route::post('/logout', 'logout')->middleware('auth'); // user logout
     Route::get('/user/{id}', 'loadUser')->middleware('auth'); // load user
+    Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
 });
 
 Route::controller(PostController::class)->group(function() {

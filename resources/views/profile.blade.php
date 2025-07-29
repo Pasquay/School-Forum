@@ -536,7 +536,7 @@
                 <div class="loader" id='overview-loader'
                     style=
                         'display:none;
-                        margin:5rem;
+                        margin:3rem;
                         text-align:center;'
                 >
                     Loading...
@@ -610,7 +610,6 @@
     const commentContainer = document.querySelector('#comments-column');
     const commentLoader = document.querySelector('#comment-loader');
 
-    // const overviews = ;
     const overviewContainer = document.querySelector('#overview-column');
     const overviewLoader = document.querySelector('#overview-loader');
 
@@ -681,6 +680,8 @@
     // Scrolling
         // Variables
             // Overview - Under Construction
+                let overviewNextPage = 2;
+                let overviewLoading = false;
             // Posts
                 let postNextPage = 2;
                 let postLoading = false;
@@ -692,6 +693,34 @@
         document.addEventListener('scroll', () => {
             if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
                 // Overview - Under Construction
+                    if(overviewBtn.classList.contains('active') && !overviewLoading && overviewNextPage){
+                        overviewLoading = true;
+                        overviewLoader.style.display = 'block';
+                        fetch(`/user/${userID}/overview?page=${overviewNextPage}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            overviewLoader.insertAdjacentHTML('beforebegin', data.html);
+                            overviewNextPage = data.next_page;
+                            overviewLoading = false;
+                            overviewLoader.style.display = 'none';
+
+                            attachOverviewEventListeners();
+
+                            if(!postNextPage){
+                                document.getElementById('overview-column-bottom').style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error: ', error);
+                            overviewLoading = false;
+                            overviewLoader.style.display = 'none';
+                        });
+
+                    };
                 // Posts
                     if(postsBtn.classList.contains('active') && !postLoading && postNextPage){
                         postLoading = true;
@@ -708,7 +737,7 @@
                             postLoading = false;
                             postLoader.style.display = 'none';
 
-                            attachPostEventListeners();
+                            attachPostEventListeners('#posts-column');
 
                             if(!postNextPage){
                                 document.getElementById('post-column-bottom').style.display = 'block';
@@ -736,7 +765,7 @@
                             commentLoading = false;
                             commentLoader.style.display = 'none';
 
-                            attachCommentEventListeners();
+                            attachCommentEventListeners('#comments-column');
 
                             if(!commentNextPage){
                                 document.querySelector('#comment-column-bottom').style.display = 'block';
@@ -753,9 +782,10 @@
             }
         })
     // Scroll Event Listeners
+        // Overview - Under Construnction
         // Posts
-            function attachPostEventListeners(){
-                const posts = document.querySelectorAll('#posts-column .post');
+            function attachPostEventListeners(column = '#posts-column'){
+                const posts = document.querySelectorAll(`${column} .post`);
 
                 posts.forEach(post => {
                     if(!post.dataset.listenersAttached){
@@ -870,8 +900,8 @@
                 });
             };
         // Profile-comments
-            function attachCommentEventListeners(){
-                const comments = document.querySelectorAll('#comments-column .profile-comment');
+            function attachCommentEventListeners(column = '#comments-column'){
+                const comments = document.querySelectorAll(`${column} .profile-comment`);
 
                 comments.forEach(comment => {
                     if(!comment.dataset.listenersAttached){
@@ -983,224 +1013,13 @@
                     }
                 });
             };
-    // Posts
-        Array.from(posts).forEach(post => {
-        // Post cards link to post pages
-            post.addEventListener('click', () => {
-                window.location.href = `/post/${post.id}`;
-            });
-            // Post share buttons
-            const shareButton = post.querySelector('.post-share-button');
-            shareButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                postUrl = `${window.location.origin}/post/${post.id}`;
-                navigator.clipboard.writeText(postUrl)
-                .then(() => {
-                    shareButton.textContent = 'Copied!';
-                    setTimeout(() => {
-                        shareButton.textContent = 'Share';
-                    }, 1200);
-                })
-            })
-        // Upvote and downvote logic
-            const voteContainer = post.querySelector('#vote-container');
-            const upvoteForm = voteContainer.querySelector('form:first-child');
-            const downvoteForm = voteContainer.querySelector('form:last-child');
-            const voteCount = voteContainer.querySelector('form:first-child + p');
-
-            const postID = post.id;
-            upvoteForm.action = `/post/upvote/${postID}`;
-            downvoteForm.action = `/post/downvote/${postID}`;
-    
-            voteContainer.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        // UPVOTE
-            upvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                try {
-                    const response = await fetch(upvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content
-                        })
-                    });
-
-                    if(response.ok){
-                        const data = await response.json();
-                        
-                        voteCount.textContent = data.voteCount;
-
-                        const upArrow = upvoteForm.querySelector('img');
-                        upArrow.src = data.voteValue == 1 ?
-                            "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/up-arrow.png') }}" ;
-                        
-                        const downArrow = downvoteForm.querySelector('img');
-                        if (data.voteValue == 1){
-                            downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            })
-        // DOWNVOTE
-            downvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                try {
-                    const response = await fetch(downvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content
-                        })
-                    });
-            
-                    if(response.ok){
-                        const data = await response.json();
-            
-                        voteCount.textContent = data.voteCount;
-                        
-                        const downArrow = downvoteForm.querySelector('img');
-                        downArrow.src = data.voteValue == -1 ?
-                            "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/down-arrow.png') }}" ;
-            
-                        const upArrow = upvoteForm.querySelector('img');
-                        if(data.voteValue == -1){
-                            upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
-                        }
-                    }
-                } catch(error){
-                    console.error('Error:', error);
-                }
-            })
-        post.dataset.listenersAttached = 'true';
-        });
-    
-    // Profile-comment
-        Array.from(comments).forEach(comment => {
-        // Profile-comment cards linking to comment pages
-            const originalPostLink = comment.querySelector('.original-post-link').href;
-            const originalPostID = originalPostLink.split('/').pop();
-
-            const commentID = comment.id.split('-').pop();
-            comment.addEventListener('click', () => {
-                window.location.href = `/post/${originalPostID}#comment-${commentID}`;
-            });
-
-            const shareButton = comment.querySelector('.profile-comment-share-button');
-            shareButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                commentUrl = `${window.location.origin}/post/${originalPostID}#comment-${commentID}`;
-                navigator.clipboard.writeText(commentUrl)
-                    .then(() => {
-                        shareButton.textContent = 'Copied!';
-                        setTimeout(() => {
-                            shareButton.textContent = 'Share';
-                        }, 1200)
-                    });
-            });
-        // Upvote and downvote logic
-            const voteContainer = comment.querySelector('#vote-container');
-            const upvoteForm = voteContainer.querySelector('form:first-child');
-            const downvoteForm = voteContainer.querySelector('form:last-child');
-            const voteCount = voteContainer.querySelector('form:first-child + p');
-
-            voteContainer.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        // UPVOTE
-            upvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                try {
-                    const response = await fetch(upvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content
-                        })
-                    });
-
-                    if(response.ok){
-                        const data = await response.json();
-
-                        voteCount.textContent = data.voteCount;
-                        const upArrow = upvoteForm.querySelector('img');
-                        upArrow.src = data.voteValue == 1 ?
-                            "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/up-arrow.png') }}" ;
-
-                        if(data.voteValue == 1){
-                            const downArrow = downvoteForm.querySelector('img');
-                            downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
-                        }
-                    }
-                } catch(error) {
-                    console.error('Error: ', error);
-                }
-            })
-        // DOWNVOTE
-            downvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                try{
-                    const response = await fetch(downvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content,
-                        })
-                    });
-
-                    if(response.ok){
-                        const data = await response.json();
-
-                        voteCount.textContent = data.voteCount;
-                        const downArrow = downvoteForm.querySelector('img');
-                        downArrow.src = data.voteValue == -1 ?
-                            "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/down-arrow.png') }}" ;
-                        
-                        if(data.voteValue == -1){
-                            const upArrow = upvoteForm.querySelector('img');
-                            upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
-                        }
-                    }
-                } catch(error) {
-                    console.error('Error: ', error);
-                }
-            })
-        comment.dataset.listenersAttached = 'true';
-        });
+    // First page event Listeners
+        attachPostEventListeners('#posts-column'); // POST
+        attachCommentEventListeners('#comments-column'); // COMMENTS
+        function attachOverviewEventListeners(){
+            attachPostEventListeners('#overview-column');
+            attachCommentEventListeners('#overview-column');
+        }
+        attachOverviewEventListeners(); // OVERVIEW
 </script>
 </html>

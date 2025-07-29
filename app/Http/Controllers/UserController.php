@@ -62,6 +62,9 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Overview
+            $perPage = 15;
+            $currentPage = request('page', 1);
+
             $overviewPosts = Post::where([
                 'deleted_at' => NULL,
                 'user_id' => $user->id
@@ -91,7 +94,18 @@ class UserController extends Controller
                 return $comment;
             });
 
-            $overview = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
+            $overviewAll = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
+            $overviewCount = $overviewAll->count();
+            $offset = ($currentPage - 1) * $perPage;
+            $overviewItems = $overviewAll->slice($offset, $perPage)->values();
+
+            $overview = new \Illuminate\Pagination\LengthAwarePaginator(
+                $overviewItems,
+                $overviewCount,
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
             
         // Posts
             $posts = Post::where([
@@ -139,5 +153,71 @@ class UserController extends Controller
                     'comments',
                 ));
             }
+    }
+
+    public function getUserOverview($id){
+        $user = User::findOrFail($id);
+        $perPage = 15;
+        $currentPage = request('page', 1);
+
+        $overviewPosts = Post::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withcount(['votes', 'comments'])
+            ->get();
+
+        $overviewPosts->transform(function($post){
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->type = 'post';
+            return $post;
+        });
+
+        $overviewComments = Comment::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withcount(['votes'])
+            ->with(['post', 'post.user'])
+            ->get();
+
+        $overviewComments->transform(function($comment){
+            $comment->votes = $comment->getVoteCountAttribute();
+            $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->type = 'comment';
+            return $comment;
+        });
+
+        $overviewAll = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
+        $overviewCount = $overviewAll->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $overviewItems = $overviewAll->slice($offset, $perPage)->values();
+
+        $overview = new \Illuminate\Pagination\LengthAwarePaginator(
+            $overviewItems,
+            $overviewCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        if(request()->ajax()){
+            $html = '';
+            foreach($overview as $item){
+                if($item->type === 'post'){
+                    $html .= view('components.post', ['post' => $item])->render();
+                } else {
+                    $html .= view('components.profile-comment', ['comment' => $item])->render();
+                }
+            }
+
+            return response()->json([
+                'html' => $html,
+                'next_page' => $overview->hasMorePages() ? $overview->currentPage()+1 : NULL
+            ]);
+        }
+
+        return view('profile', compact('user', 'overview'));
     }
 }
