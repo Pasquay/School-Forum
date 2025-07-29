@@ -1,7 +1,7 @@
 <div class="profile-comment" id='profile-comment-{{ $comment->id }}'>
     <span class='original-post-details'>
-        <p><a href="/user/{{ $comment->post->user_id }}" class='username-link'>{{ '@' . $comment->post->user->name}}</a> | 
-        <a href="/post/{{ $comment->post->id }}" class='original-post-link'>{{ $comment->post->title}}</a></p>
+        <a href="/user/{{ $comment->post->user_id }}" class='username-link'>{{ '@' . $comment->post->user->name}}</a> | 
+        <a href="/post/{{ $comment->post->id }}" class='original-post-link'>{{ $comment->post->title}}</a>
     </span>
     <small>
         <a href="/user/{{ $comment->user_id }}" class='username-link'>{{ '@' . $comment->user->name }}</a> commented on {{ $comment->created_at->format('F j, Y \a\t g:i a') }}

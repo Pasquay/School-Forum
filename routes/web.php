@@ -11,10 +11,11 @@ use App\Http\Controllers\CommentVoteController;
 
 Route::controller(UserController::class)->group(function() {
     Route::get('/', 'showLogin'); // load login page
-    Route::post('/register', 'register'); // user register
     Route::post('/login', 'login'); // user login
+    Route::post('/register', 'register'); // user register
     Route::post('/logout', 'logout')->middleware('auth'); // user logout
     Route::get('/user/{id}', 'loadUser')->middleware('auth'); // load user
+    Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth'); // load user settings
     Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
 });
 

@@ -343,6 +343,10 @@
             transition: background 0.2s;
         }
     /* COMMENTS */
+        .original-post-details {
+            margin-top: 1.5rem;
+        }
+
         .original-post-link {
             color: #111;
             text-decoration: none;
@@ -483,6 +487,11 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: flex-start;
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+            max-height: calc(100vh - 88px);
+            overflow-y: auto;
         }
 
         .user-info {

@@ -483,6 +483,11 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: flex-start;
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+            max-height: calc(100vh - 88px);
+            overflow-y: auto;
         }
 
         .user-info {
@@ -619,6 +624,45 @@
             display: flex;
             flex-direction: row;
         }
+
+        .user-info-row-5 {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e1e1;
+        }
+
+        .user-info-row-5 p {
+            color: #666;
+        }
+
+        .user-info-row-6 {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .user-info-row-6 p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-info-row-6 button {
+            min-width: 5rem;
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .user-info-row-6 button:hover {
+            background-color: #357abd;
+        }
         
         .user-bottom {
             display: block;
@@ -725,9 +769,17 @@
                 <div class="user-info-row-4">
                     <p><span>Joined:</span><br>{{ $user->created_at->format('F j, Y') }}</p>
                 </div>
-            </div>
-            <div class="user-settings">
-                <!--  -->
+                <!-- PROFILE SETTINGS -->
+                <div class="user-info-row-5">
+                    <p>Settings:</p>
+                </div>
+                <div class="user-info-row-6">
+                    <div class="row-6-left">
+                        <span>Profile</span>
+                        <p>Customize your profile</p>
+                    </div> 
+                    <button>Edit</button>
+                </div>
             </div>
         </div>
     </main>
@@ -760,6 +812,11 @@
                         profileShareButton.textContent = 'Share';
                     }, 1200);
                 })
+            })
+        // Profile Edit Button
+            const profileEditButton = document.querySelector('.user-info-row-6 button');
+            profileEditButton.addEventListener('click', () => {
+                window.location.href = `${window.location.origin}/user/${userID}/settings`;
             })
     // LEFT SIDE
         const leftnav = document.querySelector('.left-side .nav');

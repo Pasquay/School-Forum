@@ -165,6 +165,16 @@ class UserController extends Controller
             }
     }
 
+    public function loadSettings($id){
+        $user = User::findOrFail($id);
+
+        if($user->id === Auth::id()){
+            return view('user-settings');
+        } else {
+            return $this->loadUser($id);
+        }
+    }
+
     public function getUserOverview($id){
         $user = User::findOrFail($id);
         $perPage = 15;
