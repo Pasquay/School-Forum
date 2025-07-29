@@ -1144,7 +1144,7 @@
             </div>
             <div id='post-content-container' class="post-content" style='display:block;'>
                 <h2>{{ $post->title }}</h2>
-                <p>{{ $post->content }}</p>
+                <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
                 <div class="post-bottom">
                     <div id="vote-container">
                         <form action="/post/upvote/{{ $post->id }}" method="POST">
@@ -1234,7 +1234,7 @@
                         @endauth
                     </div>
                     <div class="comment-content">
-                        <p>{{ $comment->content }}</p>
+                        <p style='white-space: pre-wrap;'>{{ $comment->content }}</p>
                     </div>
                     <div class="comment-bottom">
                         <div class='comment-vote-container' id="vote-container-{{ $comment->id }}">

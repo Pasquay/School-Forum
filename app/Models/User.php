@@ -46,4 +46,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public static function rules()
+    {
+        return [
+            'bio' => 'nullable|max:500',
+        ];
+    }
 }

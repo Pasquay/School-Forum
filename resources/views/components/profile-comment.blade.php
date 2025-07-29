@@ -5,7 +5,7 @@
     </span>
     <small>
         <a href="/user/{{ $comment->user_id }}" class='username-link'>{{ '@' . $comment->user->name }}</a> commented on {{ $comment->created_at->format('F j, Y \a\t g:i a') }}
-        <p>{{ $comment->content }}</p>
+        <p style='white-space: pre-wrap;'>{{ $comment->content }}</p>
         <div class="profile-comment-bottom">
             <div class='vote-container' id="vote-container">
                 <form action="/comment/upvote/{{ $comment->id }}" method="POST">

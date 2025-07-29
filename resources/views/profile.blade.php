@@ -385,6 +385,7 @@
         .profile-comment p {
             color: #444;
             line-height: 1.6;
+            font-size: 16px;
             margin-top: 0.7rem;
             margin-bottom: 0.5rem;
         }
@@ -854,7 +855,7 @@
 
                             attachOverviewEventListeners();
 
-                            if(!postNextPage){
+                            if(!overviewNextPage){
                                 document.getElementById('overview-column-bottom').style.display = 'block';
                             }
                         })

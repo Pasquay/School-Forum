@@ -6,7 +6,7 @@
         @endif
     </small>
     <h2>{{ $post->title }}</h2>
-    <p>{{ $post->content }}</p>
+    <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
     <div class="post-bottom">
         <div class='vote-container' id="vote-container">
             <form action="/home/upvote/{{ $post->id }}" method="POST">
