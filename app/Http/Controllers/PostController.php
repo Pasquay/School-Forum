@@ -60,6 +60,31 @@ class PostController extends Controller
         ]);
     }
 
+    public function getUserDeletedPosts(Request $request, $userId){
+        $deletedPosts = Post::onlyTrashed()
+            ->where(['user_id' => $userId])
+            ->latest()
+            ->withCount(['votes', 'comments'])
+            ->paginate(15, ['*'], 'page', $request->get('page', 1));
+
+        $deletedPosts->getCollection()->transform(function($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            return $post;
+        });
+
+        $html = '';
+        foreach($deletedPosts as $deletedPost){
+            $html .= view('components.post', 
+                ['post' => $deletedPost]
+            )->render();
+        }
+        return response()->json([
+            'html' => $html,
+            'next_page' => $deletedPosts->currentPage() < $deletedPosts->lastPage() ? $deletedPosts->currentPage()+1 : NULL,
+        ]);
+    }
+
     public function getPost($id){
         $post = Post::where('id', $id)
             ->withCount('comments')
@@ -104,7 +129,7 @@ class PostController extends Controller
             'edit-post-content' => ['required', 'max:2000'],
         ]);
         $post = Post::findOrFail($id);
-        if ($post->user_id == Auth::id()){
+        if ($post->user_id === Auth::id()){
             $post->update([
                 'title' => $postData['edit-post-title'],
                 'content' => $postData['edit-post-content'],
@@ -122,6 +147,18 @@ class PostController extends Controller
             return redirect('/home')->with('success', 'Post deleted successfully');    
         } else {
             return redirect('/home')->with('error', 'Invalid credentials');
+        }
+    }
+
+    public function restore($id){
+        $post = Post::onlyTrashed()->findOrFail($id);
+        if ($post->user_id === Auth::id() && $post->deleted_at){
+            $post->restore();
+            return redirect('/post/' . $id)->with('success', 'Post restored successfully');
+        } else if ($post->user_id != Auth::id()){
+            return redirect('/user/' . Auth::id())->with('error', 'Invalid Credentials');
+        } else {
+            return redirect('/user/' . Auth::id())->with('error', 'Post must be deleted to be restored');
         }
     }
 }

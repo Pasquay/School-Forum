@@ -26,6 +26,8 @@ Route::controller(PostController::class)->group(function() {
     Route::post('/edit-post/{id}', 'edit')->middleware('auth'); // edit post
     Route::post('/delete-post/{id}', 'delete')->middleware('auth'); // delete post
     Route::get('/user/{id}/posts', 'getUserPost')->middleware('auth'); // load page 2+ user posts
+    Route::get('/user/{id}/deleted-posts', 'getUserDeletedPosts')->middleware('auth'); // load page 2+ user deleted posts
+    Route::post('/restore-post/{id}', 'restore')->middleware('auth'); // restore deleted post
 });
 
 Route::controller(VoteController::class)->group(function() {

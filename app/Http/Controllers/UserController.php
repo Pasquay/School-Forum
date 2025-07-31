@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Container\Attributes\DB;
 
 class UserController extends Controller
 {
@@ -139,6 +140,34 @@ class UserController extends Controller
                 $comment->userVote = $comment->getUserVoteAttribute();
                 return $comment;
             });
+        
+        // Deleted Posts
+            $deletedPosts = Post::onlyTrashed()
+                ->where(['user_id' => $user->id])
+                ->latest()
+                ->withCount(['votes', 'comments'])
+                ->paginate(15);
+
+            $deletedPosts->getCollection()->transform(function($post) {
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                return $post;
+            });
+                
+        // Deleted Comments
+            $deletedComments = Comment::where([
+                'user_id' => $user->id
+            ])->whereNotNull('deleted_at')
+                ->latest()
+                ->withCount(['votes'])
+                ->with(['post', 'post.user'])
+                ->paginate(15);
+
+            $deletedComments->getCollection()->transform(function ($comment) {
+                $comment->votes = $comment->getVoteCountAttribute();
+                $comment->userVote = $comment->getUserVoteAttribute();
+                return $comment;
+            });
 
         // Response
             if($user->id == Auth::id()){
@@ -150,6 +179,8 @@ class UserController extends Controller
                     'overview',
                     'posts',
                     'comments',
+                    'deletedPosts',
+                    'deletedComments',
                 ));
             }
             else{
