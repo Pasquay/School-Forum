@@ -498,13 +498,13 @@
             cursor: default;
         }
 
-        #vote-container button:disabled {
+        .post.deleted #vote-container button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             pointer-events: none;
         }
 
-        #vote-container button:disabled img {
+        .post.deleted #vote-container button:disabled img {
             filter: grayscale(100%);
         }
 
@@ -530,6 +530,68 @@
             color: #218838;
         }
     /* DELETED COMMENTS */
+        .deleted-comments-column {
+            max-width: 800px;
+            margin: 1.5rem 0 1.5rem 0;
+            padding: 0 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .profile-comment.deleted {
+            cursor: default;
+        }
+
+        .original-post-details em {
+            color: #666;
+        }
+
+        .profile-comment.deleted .vote-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .profile-comment.deleted .vote-container button:disabled img {
+            filter: grayscale(100%);
+        }
+
+        .comment-restore-button {
+            font-size: 0.9rem;
+            background-color: white;
+            color: #28a745;
+            margin-top: 40px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .comment-restore-button:hover {
+            transform: scale(1.1);
+        }
+
+        .comment-restore-button:active {
+            transform: scale(1.0);
+            color: #218838;
+        }
+
+        .disabled-comment-restore-button {
+            font-size: 0.9rem;
+            background-color: white;
+            color: #28a745;
+            filter: grayscale(100%);
+            margin-top: 40px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: default;
+            transition: transform 0.2s;
+        }
     /* USER */
         .right-side {
             flex: 0 0 340px;
@@ -820,15 +882,28 @@
                         'display:none;
                         margin:3rem;
                         text-align:center'
-                    >
-                        Loading...
-                    </div>
-                    <div class="deleted-post-column-bottom" id='deleted-post-column-bottom' style='display:none;'>
-                        You're all caught up!
-                    </div>
+                >
+                    Loading...
+                </div>
+                <div class="deleted-post-column-bottom" id='deleted-post-column-bottom' style='display:none;'>
+                    You're all caught up!
+                </div>
             </div>
             <div class="deleted-comments-column" id='deleted-comments-column' style='display:none;'>
-                <p>test</p>
+                @foreach($deletedComments as $deletedComment)
+                    @include('components.profile-comment', ['comment' => $deletedComment])
+                @endforeach
+                <div class="loader" id='deleted-comment-loader'
+                    style=
+                        'display:none;
+                        margin:3rem;
+                        text-align:center'
+                >
+                    Loading...
+                </div>
+                <div class="deleted-comment-column-bottom" id='deleted-comment-column-bottom' style='display:none;'>
+                    You're all caught up!
+                </div>
             </div>
         </div>
         <div class="right-side">
@@ -883,6 +958,9 @@
 
     const deletedPostsContainer = document.querySelector('#deleted-posts-column');
     const deletedPostsLoader = document.querySelector('#deleted-post-loader');
+
+    const deletedCommentsContainer = document.querySelector('#deleted-comments-column');
+    const deletedCommentsLoader = document.querySelector('#deleted-comment-loader');
 
     const userInfoContainer = document.querySelector('.user-info');
 
@@ -951,7 +1029,7 @@
                     }
                     if(deletedCommentsBtn.classList.contains('active')){
                         deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none;'
+                        deletedCommentsCol.style.display = 'none';
                     }
                 });
             // Posts
@@ -975,7 +1053,7 @@
                     }
                     if(deletedCommentsBtn.classList.contains('active')){
                         deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none;'
+                        deletedCommentsCol.style.display = 'none';
                     }
                 });
             // Comments
@@ -999,7 +1077,7 @@
                     }
                     if(deletedCommentsBtn.classList.contains('active')){
                         deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none;'
+                        deletedCommentsCol.style.display = 'none';
                     }
                 });
             // Deleted Posts
@@ -1023,7 +1101,7 @@
                     }
                     if(deletedCommentsBtn.classList.contains('active')){
                         deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none;'
+                        deletedCommentsCol.style.display = 'none';
                     }
                 });
             // Deleted Comments
@@ -1047,7 +1125,7 @@
                     }
                     if(!deletedCommentsBtn.classList.contains('active')){
                         deletedCommentsBtn.classList.add('active');
-                        deletedCommentsCol.style.display = 'flex;'
+                        deletedCommentsCol.style.display = 'flex';
                     }
                 })
 
@@ -1065,7 +1143,9 @@
                 // Deleted Posts
                     let deletedPostsNextPage = 2;
                     let deletedPostsLoading = false;
-                // Deleted Comments - Under Construction 
+                // Deleted Comments
+                    let deletedCommentsNextPage = 2;
+                    let deletedCommentsLoading = false; 
             document.addEventListener('scroll', () => {
                 if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
                     // Overview
@@ -1182,10 +1262,41 @@
                             });
                         }
                     // Deleted Comments - Under Construction 
+                        if(deletedCommentsBtn.classList.contains('active') && !deletedCommentsLoading && deletedCommentsNextPage){
+                            deletedCommentsLoading = true;
+                            deletedCommentsLoader.style.display = 'block';
+                            fetch(`/user/${userID}/deleted-comments?page=${deletedCommentsNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                deletedCommentsLoader.insertAdjacentHTML('beforebegin', data.html);
+                                deletedCommentsNextPage = data.next_page;
+                                deletedCommentsLoading = false;
+                                deletedCommentsLoader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!deletedCommentsNextPage){
+                                    document.querySelector('deleted-comment-column-bottom').style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                deletedCommentsLoading = false;
+                                deletedCommentsLoader.style.display = 'none';
+                            })
+                        }
                 }
             });
         // Scroll Event Listeners
             // Overview
+            function attachOverviewEventListeners(){
+                attachPostEventListeners('#overview-column');
+                attachCommentEventListeners('#overview-column');
+            }
             // Posts
                 function attachPostEventListeners(column = '#posts-column'){
                     const posts = document.querySelectorAll(`${column} .post`);
@@ -1436,10 +1547,6 @@
         // First page event Listeners
             attachPostEventListeners('#posts-column'); // POST
             attachCommentEventListeners('#comments-column'); // COMMENTS
-            function attachOverviewEventListeners(){
-                attachPostEventListeners('#overview-column');
-                attachCommentEventListeners('#overview-column');
-            }
             attachOverviewEventListeners(); // OVERVIEW
             attachDeletedPostEventListeners(); // DELETED POSTS
 </script>

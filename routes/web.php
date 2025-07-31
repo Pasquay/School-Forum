@@ -44,6 +44,8 @@ Route::controller(CommentController::class)->group(function() {
     Route::post('/post/{postId}/edit-comment/{commentId}', 'edit')->middleware('auth'); // edit comment
     Route::post('/post/{postId}/delete-comment/{commentId}', 'delete')->middleware('auth'); // delete comment
     Route::get('/user/{id}/comments', 'getUserComment')->middleware('auth'); // load page 2+ user comments
+    Route::get('/user/{id}/deleted-comments', 'getUserDeletedComments')->middleware('auth'); // load page 2+ user deleted comments
+    Route::post('/restore-comment/{id}', 'restore')->middleware('auth'); //restore deleted comment
 });
 
 Route::controller(CommentVoteController::class)->group(function() {

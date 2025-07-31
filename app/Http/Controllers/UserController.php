@@ -7,9 +7,10 @@ use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Container\Attributes\DB;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -155,13 +156,16 @@ class UserController extends Controller
             });
                 
         // Deleted Comments
-            $deletedComments = Comment::where([
-                'user_id' => $user->id
-            ])->whereNotNull('deleted_at')
+            $deletedComments = Comment::onlyTrashed()
+                ->where(['user_id' => $user->id])
                 ->latest()
                 ->withCount(['votes'])
-                ->with(['post', 'post.user'])
+                ->with(['post' => function($query){
+                    $query->withTrashed();
+                }, 'post.user'])
                 ->paginate(15);
+                Log::info($deletedComments->total());
+                Log::info($deletedComments->pluck('id')->toArray());
 
             $deletedComments->getCollection()->transform(function ($comment) {
                 $comment->votes = $comment->getVoteCountAttribute();
