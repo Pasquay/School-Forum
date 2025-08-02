@@ -998,7 +998,7 @@
         }
     </style>
 </head>
-<body data-user-id='{{ Auth::id() }}'>
+<body data-user-id='{{ $user->id }}'>
     @include('components.navbar')
     @include('components.success-header')
     @include('components.error-header')
