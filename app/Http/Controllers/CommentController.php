@@ -46,29 +46,41 @@ class CommentController extends Controller
         }
     }
 
-    public function getUserComment($userId, Request $request){
+    public function getUserCommentsData($userId) {
         $comments = Comment::where([
             'deleted_at' => NULL,
             'user_id' => $userId
         ])->latest()
             ->withCount(['votes'])
-            ->with(['post', 'post.user'])
-            ->paginate(15);
+            ->with(['post' => function($query){
+                $query->withTrashed();
+            }, 'post.user'])
+            ->get();
 
-        $comments->getCollection()->transform(function($comment){
+        return $comments->transform(function($comment){
             $comment->votes = $comment->getVoteCountAttribute();
             $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->type = 'comment';
             return $comment;
         });
+    }
 
-        $html = '';
-        foreach($comments as $comment){
-            $html .= view('components.profile-comment', compact('comment'))->render();
-        }
+
+    public function getUserComment($userId, Request $request){
+        $comments = $this->getUserCommentsData($userId);
+
         return response()->json([
-            'html' => $html,
-            'next_page' => $comments->currentPage() < $comments->lastPage() ? $comments->currentPage()+1 : NULL,
+            'comments' => $comments
         ]);
+
+        // $html = '';
+        // foreach($comments as $comment){
+        //     $html .= view('components.profile-comment', compact('comment'))->render();
+        // }
+        // return response()->json([
+        //     'html' => $html,
+        //     'next_page' => $comments->currentPage() < $comments->lastPage() ? $comments->currentPage()+1 : NULL,
+        // ]);
     }
 
     public function getUserDeletedComments(Request $request, $userId){

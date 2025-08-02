@@ -17,6 +17,7 @@ Route::controller(UserController::class)->group(function() {
     Route::get('/user/{id}', 'loadUser')->middleware('auth'); // load user
     Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth'); // load user settings
     Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
+    Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
 });
 
 Route::controller(PostController::class)->group(function() {
@@ -43,11 +44,11 @@ Route::controller(CommentController::class)->group(function() {
     Route::post('/post/{postId}/create-comment', 'create')->middleware('auth'); // create comment
     Route::post('/post/{postId}/edit-comment/{commentId}', 'edit')->middleware('auth'); // edit comment
     Route::post('/post/{postId}/delete-comment/{commentId}', 'delete')->middleware('auth'); // delete comment
-    Route::get('/user/{id}/comments', 'getUserComment')->middleware('auth'); // load page 2+ user comments
+    Route::get('/user/{id}/comments', 'getUserComment')->middleware('auth'); // fetch page 2+ user comments
     Route::get('/user/{id}/deleted-comments', 'getUserDeletedComments')->middleware('auth'); // load page 2+ user deleted comments
     Route::post('/restore-comment/{id}', 'restore')->middleware('auth'); //restore deleted comment
 });
-
+ 
 Route::controller(CommentVoteController::class)->group(function() {
     Route::post('/comment/upvote/{id}', 'toggleCommentUpvote')->middleware('auth'); // upvote comment
     Route::post('/comment/downvote/{id}', 'toggleCommentDownvote')->middleware('auth'); // downvote comment
@@ -58,6 +59,7 @@ Route::controller(ReplyController::class)->group(function() {
     Route::post('/post/{postId}/comment/{commentId}/create-reply', 'create')->middleware('auth'); // create reply
     Route::post('/post/{postId}/edit-reply/{replyId}', 'edit')->middleware('auth'); // edit reply
     Route::post('/post/{postId}/delete-reply/{replyId}', 'delete')->middleware('auth'); // delete reply
+    Route::get('/user/{id}/replies', 'getUserReply')->middleware('auth'); // fetch page 2+ user replies
 });
 
 Route::controller(ReplyVoteController::class)->group(function() {

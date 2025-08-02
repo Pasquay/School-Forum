@@ -1317,7 +1317,7 @@
                     <div class="reply-settings"></div>
                 </div>
                 <div class="reply-content">
-                    <p>Content</p>
+                    <p style='white-space:pre-wrap;'>Content</p>
                 </div>
                 <div class='reply-bottom'>
                     <div class="reply-vote-container">
@@ -1383,16 +1383,74 @@ function formatDate(dateString){
 
 // Post burger menu
 document.addEventListener('DOMContentLoaded', () => {
-    // Post share buttons
-    const postShareButton = document.querySelector(`#post-share-button-{{ $post->id }}`);
-    postShareButton.addEventListener('click', (e) => {
-        postUrl = `${window.location.origin}/post/{{ $post->id }}`;
-        navigator.clipboard.writeText(postUrl);
-        postShareButton.textContent = 'Copied!';
-        setTimeout(() => {
-            postShareButton.textContent = 'Share';
-        }, 1200);
-    });
+    // Loading in replies
+        const urlHash = window.location.hash;
+        
+        if(urlHash.startsWith('#reply-')){
+            const replyId = urlHash.replace('#reply-', '');
+            
+            // Since replies aren't loaded yet, we need to load ALL replies and then find the target
+            console.log(`Looking for reply ID: ${replyId}`);
+            
+            // Get all comments on the page
+            const allComments = document.querySelectorAll('.comment');
+            let targetCommentFound = false;
+            
+            // For each comment, try to load its replies
+            allComments.forEach((comment, index) => {
+                const commentId = comment.id.split('-')[1];
+                const repliesForm = comment.querySelector(`#replies-form-${commentId}`);
+                
+                if(repliesForm){
+                    // Add a delay for each comment to avoid overwhelming the server
+                    setTimeout(() => {
+                        console.log(`Loading replies for comment ${commentId}`);
+                        repliesForm.dispatchEvent(new Event('submit'));
+                    }, index * 200); // 200ms delay between each request
+                }
+            });
+            
+            // Check for the target reply multiple times with increasing delays
+            const checkForTargetReply = (attempt = 1) => {
+                console.log(`Checking for reply ${replyId}, attempt ${attempt}`);
+                const targetReply = document.querySelector(`#reply-${replyId}`);
+                
+                if(targetReply){
+                    console.log(`Found reply ${replyId}!`);
+                    targetReply.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    // Blue border highlight effect
+                    targetReply.style.border = '2px solid #4a90e2';
+                    targetReply.style.borderRadius = '8px';
+                    setTimeout(() => {
+                        targetReply.style.border = '';
+                        targetReply.style.borderRadius = '6px'; // Reset to original border radius
+                    }, 3000);
+                    targetCommentFound = true;
+                } else if (attempt < 5) {
+                    // Try again with longer delay
+                    setTimeout(() => checkForTargetReply(attempt + 1), 1000 * attempt);
+                } else {
+                    console.log(`Could not find reply ${replyId} after 5 attempts`);
+                }
+            };
+            
+            // Start checking after initial delay
+            setTimeout(() => checkForTargetReply(), 2000);
+        }
+    
+        // Post share buttons
+        const postShareButton = document.querySelector(`#post-share-button-{{ $post->id }}`);
+        postShareButton.addEventListener('click', (e) => {
+            postUrl = `${window.location.origin}/post/{{ $post->id }}`;
+            navigator.clipboard.writeText(postUrl);
+            postShareButton.textContent = 'Copied!';
+            setTimeout(() => {
+                postShareButton.textContent = 'Share';
+            }, 1200);
+        });
     // Post Settings button functions
         const settingsButton = document.getElementById('settings-button');
         const dotsIcon = document.getElementById('dots-icon');

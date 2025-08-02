@@ -59,4 +59,38 @@ class ReplyController extends Controller
             return redirect('/post/' . $postId)->with('error', 'Invalid credentials');
         }
     }
+
+    public function getUserRepliesData($userId) {
+        $replies = Reply::where([
+            'deleted_at' => NULL,
+            'user_id' => $userId
+        ])->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.post.user',
+            ])
+            ->get();
+        
+        return $replies->transform(function($reply){
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
+    }
+
+    public function getUserReply($userId){
+        $replies = $this->getUserRepliesData($userId);
+
+        return response()->json([
+            'replies' => $replies
+        ]);
+    }
 }

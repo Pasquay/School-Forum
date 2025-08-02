@@ -62,6 +62,14 @@
             color: #4a90e2;
         }
 
+        #profile-nav-link {
+            color: #4a90e2;
+        }
+
+        #profile-nav-link:hover {
+            color: #357abd;
+        }
+
         .logout-btn {
             background-color: #4a90e2;
             color: white;
@@ -132,6 +140,57 @@
         }
 
         .left-side .nav button.active:hover {
+            color: #666;
+            background-color: #e9eef3;
+        }
+    /* LEFT SUB NAV */
+        .left-side .nav.deleted {
+            background-color: white;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            display: flex;
+            transition: transform 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .left-side .nav.deleted button.first {
+            margin-left: 0;
+        }
+
+        .left-side .nav.deleted button {
+            border: 0;
+            cursor: pointer;
+            color: #666;
+            background-color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.6rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .left-side .nav.deleted button:hover {
+            color: #4a90e2;
+        }
+
+        .left-side .nav.deleted button.active {
+            border: 0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: #4a90e2;
+            background-color: #eaf4fb;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .left-side .nav.deleted button.active:hover {
             color: #666;
             background-color: #e9eef3;
         }
@@ -234,7 +293,7 @@
         }
 
         /* Vote container styles */
-        #vote-container {
+        .vote-container {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -243,11 +302,11 @@
             border-top: none;
         }
 
-        #vote-container form {
+        .vote-container form {
             margin: 0;
         }
 
-        #vote-container button {
+        .vote-container button {
             background: none;
             border: none;
             padding: 0;
@@ -255,18 +314,18 @@
             transition: transform 0.2s ease;
         }
 
-        #vote-container button:hover {
+        .vote-container button:hover {
             transform: scale(1.1);
         }
 
-        #vote-container img {
+        .vote-container img {
             width: 16px;
             height: 16px;
             display: block;
             object-fit: contain;
         }
 
-        #vote-container p {
+        .vote-container p {
             margin: 0;
             min-width: 1.5rem;
             text-align: center;
@@ -353,6 +412,12 @@
         .original-post-link:hover {
             color: #357abd;
             text-decoration: underline;
+        }
+
+        .original-post-link.deleted {
+            text-decoration: none;
+            pointer-events: none;
+            cursor: default;
         }
 
         .comments-column {
@@ -444,6 +509,53 @@
             font-size: 0.9rem;
         }
 
+        .profile-comment .reply-image {
+            width: 18px;  
+            height: 18px; 
+            margin-right: 2px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+ 
+        .profile-comment .reply-count-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 0.25rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+
+        .profile-comment .reply-count-container:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-comment .reply-count-container:active {
+            transform: scale(0.95);
+        }
+
+        .profile-comment .reply-image {
+            width: 18px;  
+            height: 18px; 
+            margin-right: 2px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .profile-comment .reply-count {
+            margin: 0 !important;
+            padding: 0;
+            line-height: 1;
+            color: #333;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
         .profile-comment-share-button {
             font-size: 0.9rem;
             background-color: white;
@@ -473,6 +585,217 @@
             letter-spacing: 0.02em;
             line-height: 1.5;
             transition: background 0.2s;
+        }
+    /* REPLIES */
+        .profile-reply {
+            display: flex;
+            flex-direction: column;
+            align-self: flex-end;
+            cursor: pointer;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
+            transition: transform 0.2s ease;
+            margin-right: 0;
+            width: 90%;
+            border-left: 3px solid #dee2e6;
+        }
+        
+        .profile-reply:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .profile-reply small {
+            color: #666;
+            display: block;
+            margin-top: 0.2rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .profile-reply p {
+            color: #444;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            margin-top: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .original-comment-content {
+            background-color: #f8f9fa;
+            border-left: 3px solid #dee2e6;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            margin: 0.75rem 0 0.5rem 0;
+            font-style: italic;
+            color: #666;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            text-decoration: none;
+            display: block;
+        }
+
+        .original-comment-content:hover {
+            text-decoration: underline;
+        }
+
+        .original-comment-content-p {
+            width: 100%;
+        }
+
+        .original-comment-content::before {
+            content: '"';
+            color: #999;
+        }
+
+        .original-comment-content::after {
+            content: '"';
+            color: #999;
+        }
+
+        .reply-content {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+            font-weight: normal;
+        }
+
+        
+        .profile-reply p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .profile-reply-bottom {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e1e1e1;
+        }
+        
+        .profile-reply .vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-reply .vote-container form {
+            margin: 0;
+        }
+        
+        .profile-reply .vote-container button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .profile-reply .vote-container button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply .vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+        
+        .profile-reply .vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .profile-reply-share-button {
+            font-size: 0.85rem;
+            background-color: white;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .profile-reply-share-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply-share-button:active {
+            transform: scale(1.0);
+        }
+        
+        .original-comment-link {
+            color: #111;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .original-comment-link:hover {
+            color: #357abd;
+            text-decoration: underline;
+        }  
+
+        .profile-reply .reply-vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-reply .reply-vote-container form {
+            margin: 0;
+        }
+        
+        .profile-reply .reply-vote-container button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .profile-reply .reply-vote-container button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply .reply-vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+        
+        .profile-reply .reply-vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .profile-reply.deleted .reply-vote-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .profile-reply.deleted .reply-vote-container button:disabled img {
+            filter: grayscale(100%);
         }
     /* DELETED POSTS */
         .deleted-posts-column {
@@ -799,7 +1122,7 @@
     @include('components.error-header')
     <main>
         <div class="left-side">
-            <div class="nav">
+            <div class="nav" id='nav-1'>
                 <form action="#" method='GET' id='overview-form'>
                     @csrf
                     <button type="submit" class='active first'>Overview</button>
@@ -811,6 +1134,16 @@
                 <form action="#" method='GET' id='comments-form'>
                     @csrf
                     <button type="submit">Comments</button>
+                </form>
+                <form action="#" method='GET' id='deleted-form'>
+                    @csrf
+                    <button type="submit">Deleted</button>
+                </form>
+            </div>
+            <div class="nav deleted" id='nav-2' style='display:none;'>
+                <form action="#" method='GET' id='deleted-overview-form'>
+                    @csrf
+                    <button type='submit' class='active first'>Deleted Overview</button>
                 </form>
                 <form action="#" method='GET' id='deleted-posts-form'>
                     @csrf
@@ -827,6 +1160,8 @@
                         @include('components.post', ['post' => $item])
                     @elseif($item->type === 'comment')
                         @include('components.profile-comment', ['comment' => $item])
+                    @elseif($item->type === 'reply')
+                        @include('components.profile-reply', ['reply' => $item])
                     @endif
                 @endforeach
                 <div class="loader" id='overview-loader'
@@ -859,7 +1194,11 @@
             </div>
             <div class="comments-column" id='comments-column' style='display:none;'>
                 @foreach($comments as $comment)
-                    @include('components.profile-comment', ['comment' => $comment])
+                    @if($comment->type === 'comment')
+                        @include('components.profile-comment', ['comment' => $comment])
+                    @elseif($comment->type === 'reply')
+                        @include('components.profile-reply', ['reply' => $comment])
+                    @endif
                 @endforeach
                 <div class="loader" id='comment-loader'
                     style=
@@ -873,36 +1212,41 @@
                     You're all caught up!
                 </div>
             </div>
-            <div class="deleted-posts-column" id='deleted-posts-column' style='display:none;'>
-                @foreach($deletedPosts as $deletedPost)
-                    @include('components.post', ['post' => $deletedPost])
-                @endforeach
-                <div class="loader" id='deleted-post-loader'
-                    style=
-                        'display:none;
-                        margin:3rem;
-                        text-align:center'
-                >
-                    Loading...
+            <div class='deleted-container' style='display:none;'>
+                <div class="deleted-overview-column" id='deleted-overview-column'>
+                    deleted overview
                 </div>
-                <div class="deleted-post-column-bottom" id='deleted-post-column-bottom' style='display:none;'>
-                    You're all caught up!
+                <div class="deleted-posts-column" id='deleted-posts-column' style='display:none;'>
+                    @foreach($deletedPosts as $deletedPost)
+                        @include('components.post', ['post' => $deletedPost])
+                    @endforeach
+                    <div class="loader" id='deleted-post-loader'
+                        style=
+                            'display:none;
+                            margin:3rem;
+                            text-align:center'
+                    >
+                        Loading...
+                    </div>
+                    <div class="deleted-post-column-bottom" id='deleted-post-column-bottom' style='display:none;'>
+                        You're all caught up!
+                    </div>
                 </div>
-            </div>
-            <div class="deleted-comments-column" id='deleted-comments-column' style='display:none;'>
-                @foreach($deletedComments as $deletedComment)
-                    @include('components.profile-comment', ['comment' => $deletedComment])
-                @endforeach
-                <div class="loader" id='deleted-comment-loader'
-                    style=
-                        'display:none;
-                        margin:3rem;
-                        text-align:center'
-                >
-                    Loading...
-                </div>
-                <div class="deleted-comment-column-bottom" id='deleted-comment-column-bottom' style='display:none;'>
-                    You're all caught up!
+                <div class="deleted-comments-column" id='deleted-comments-column' style='display:none;'>
+                    @foreach($deletedComments as $deletedComment)
+                        @include('components.profile-comment', ['comment' => $deletedComment])
+                    @endforeach
+                    <div class="loader" id='deleted-comment-loader'
+                        style=
+                            'display:none;
+                            margin:3rem;
+                            text-align:center'
+                    >
+                        Loading...
+                    </div>
+                    <div class="deleted-comment-column-bottom" id='deleted-comment-column-bottom' style='display:none;'>
+                        You're all caught up!
+                    </div>
                 </div>
             </div>
         </div>
@@ -918,7 +1262,7 @@
                 </div>
                 <div class="user-info-row-3">
                     <div class="contributionContainer">
-                        <p><span>Contributions:</span><br>{{ $postCount + $commentCount }}</p>
+                        <p><span>Contributions:</span><br>{{ $postCount + $commentCount + $replyCount }}</p>
                     </div>
                     <div class="reputationContainer">
                         <p><span>Reputation:</span><br>{{ $likeCount }}</p>
@@ -943,26 +1287,30 @@
     </main>
 </body>
 <script>
-    const userID = document.body.dataset.userId;
-    
-    const posts = document.querySelectorAll('#posts-column .post');
-    const postContainer = document.querySelector('#posts-column');
-    const postLoader = document.querySelector('#post-loader');
-    
-    const comments = document.querySelectorAll('#comments-column .profile-comment');
-    const commentContainer = document.querySelector('#comments-column');
-    const commentLoader = document.querySelector('#comment-loader');
+    // VARIABLES
+        const userID = document.body.dataset.userId;
+        
+        const posts = document.querySelectorAll('#posts-column .post');
+        const postContainer = document.querySelector('#posts-column');
+        const postLoader = document.querySelector('#post-loader');
+        
+        const comments = document.querySelectorAll('#comments-column .profile-comment');
+        const commentContainer = document.querySelector('#comments-column');
+        const commentLoader = document.querySelector('#comment-loader');
 
-    const overviewContainer = document.querySelector('#overview-column');
-    const overviewLoader = document.querySelector('#overview-loader');
+        const overviewContainer = document.querySelector('#overview-column');
+        const overviewLoader = document.querySelector('#overview-loader');
 
-    const deletedPostsContainer = document.querySelector('#deleted-posts-column');
-    const deletedPostsLoader = document.querySelector('#deleted-post-loader');
+        const repliesContainer = document.querySelector('#replies-column');
+        const repliesLoader = document.querySelector('#replies-loader');
 
-    const deletedCommentsContainer = document.querySelector('#deleted-comments-column');
-    const deletedCommentsLoader = document.querySelector('#deleted-comment-loader');
+        const deletedPostsContainer = document.querySelector('#deleted-posts-column');
+        const deletedPostsLoader = document.querySelector('#deleted-post-loader');
 
-    const userInfoContainer = document.querySelector('.user-info');
+        const deletedCommentsContainer = document.querySelector('#deleted-comments-column');
+        const deletedCommentsLoader = document.querySelector('#deleted-comment-loader');
+
+        const userInfoContainer = document.querySelector('.user-info');
 
     // RIGHT SIDE   
         // Profile Share Button
@@ -987,6 +1335,7 @@
         // Navbar
             // Variables
                 const leftnav = document.querySelector('.left-side .nav');
+                const leftsubnav = document.querySelector('.left-side #nav-2');
                 
                 const overviewForm = leftnav.querySelector('#overview-form');
                 const overviewBtn = leftnav.querySelector('#overview-form button');
@@ -1000,13 +1349,21 @@
                 const commentsBtn = leftnav.querySelector('#comments-form button');
                 const commentsCol = document.querySelector('.left-side .comments-column');
 
-                const deletedPostsForm = leftnav.querySelector('#deleted-posts-form');
-                const deletedPostsBtn = leftnav.querySelector('#deleted-posts-form button');
-                const deletedPostsCol = document.querySelector('.left-side .deleted-posts-column');
+                const deletedForm = leftnav.querySelector('#deleted-form');
+                const deletedBtn = leftnav.querySelector('#deleted-form button');
+                const deletedContainer = document.querySelector('.deleted-container');
 
-                const deletedCommentsForm = leftnav.querySelector('#deleted-comments-form');
-                const deletedCommentsBtn = leftnav.querySelector('#deleted-comments-form button');
-                const deletedCommentsCol = document.querySelector('.left-side .deleted-comments-column');
+                const deletedOverviewForm = leftsubnav.querySelector('#deleted-overview-form');
+                const deletedOverviewBtn = leftsubnav.querySelector('#deleted-overview-form button');
+                const deletedOverviewCol = document.querySelector('.deleted-container .deleted-overview-column');
+
+                const deletedPostsForm = leftsubnav.querySelector('#deleted-posts-form');
+                const deletedPostsBtn = leftsubnav.querySelector('#deleted-posts-form button');
+                const deletedPostsCol = document.querySelector('.deleted-container .deleted-posts-column');
+
+                const deletedCommentsForm = leftsubnav.querySelector('#deleted-comments-form');
+                const deletedCommentsBtn = leftsubnav.querySelector('#deleted-comments-form button');;
+                const deletedCommentsCol = document.querySelector('.deleted-container .deleted-comments-column');
 
             // Overview
                 overviewForm.addEventListener('submit', (e) => {
@@ -1023,13 +1380,10 @@
                         commentsBtn.classList.remove('active');
                         commentsCol.style.display = 'none';
                     }
-                    if(deletedPostsBtn.classList.contains('active')){
-                        deletedPostsBtn.classList.remove('active');
-                        deletedPostsCol.style.display = 'none';
-                    }
-                    if(deletedCommentsBtn.classList.contains('active')){
-                        deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none';
+                    if(deletedBtn.classList.contains('active')){
+                        deletedBtn.classList.remove('active');
+                        deletedContainer.style.display = 'none';
+                        leftsubnav.style.display = 'none';
                     }
                 });
             // Posts
@@ -1047,13 +1401,10 @@
                         commentsBtn.classList.remove('active');
                         commentsCol.style.display = 'none';
                     }
-                    if(deletedPostsBtn.classList.contains('active')){
-                        deletedPostsBtn.classList.remove('active');
-                        deletedPostsCol.style.display = 'none';
-                    }
-                    if(deletedCommentsBtn.classList.contains('active')){
-                        deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none';
+                    if(deletedBtn.classList.contains('active')){
+                        deletedBtn.classList.remove('active');
+                        deletedContainer.style.display = 'none';
+                        leftsubnav.style.display = 'none';
                     }
                 });
             // Comments
@@ -1071,17 +1422,14 @@
                         commentsBtn.classList.add('active');
                         commentsCol.style.display = 'flex';
                     }
-                    if(deletedPostsBtn.classList.contains('active')){
-                        deletedPostsBtn.classList.remove('active');
-                        deletedPostsCol.style.display = 'none';
-                    }
-                    if(deletedCommentsBtn.classList.contains('active')){
-                        deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none';
+                    if(deletedBtn.classList.contains('active')){
+                        deletedBtn.classList.remove('active');
+                        deletedContainer.style.display = 'none';
+                        leftsubnav.style.display = 'none';
                     }
                 });
-            // Deleted Posts
-                deletedPostsForm.addEventListener('submit', (e) => {
+            // Deleted
+                deletedForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     if(overviewBtn.classList.contains('active')){
                         overviewBtn.classList.remove('active');
@@ -1095,40 +1443,60 @@
                         commentsBtn.classList.remove('active');
                         commentsCol.style.display = 'none';
                     }
-                    if(!deletedPostsBtn.classList.contains('active')){
-                        deletedPostsBtn.classList.add('active');
-                        deletedPostsCol.style.display = 'flex';
-                    }
-                    if(deletedCommentsBtn.classList.contains('active')){
-                        deletedCommentsBtn.classList.remove('active');
-                        deletedCommentsCol.style.display = 'none';
-                    }
-                });
-            // Deleted Comments
-                deletedCommentsForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    if(overviewBtn.classList.contains('active')){
-                        overviewBtn.classList.remove('active');
-                        overviewCol.style.display = 'none';
-                    }
-                    if(postsBtn.classList.contains('active')){
-                        postsBtn.classList.remove('active');
-                        postsCol.style.display = 'none';
-                    }
-                    if(commentsBtn.classList.contains('active')){
-                        commentsBtn.classList.remove('active');
-                        commentsCol.style.display = 'none';
-                    }
-                    if(deletedPostsBtn.classList.contains('active')){
-                        deletedPostsBtn.classList.remove('active');
-                        deletedPostsCol.style.display = 'none';
-                    }
-                    if(!deletedCommentsBtn.classList.contains('active')){
-                        deletedCommentsBtn.classList.add('active');
-                        deletedCommentsCol.style.display = 'flex';
+                    if(!deletedBtn.classList.contains('active')){
+                        deletedBtn.classList.add('active');
+                        deletedContainer.style.display = 'flex';
+                        leftsubnav.style.display = 'flex';
                     }
                 })
-
+                // Deleted Overview
+                    deletedOverviewForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                            if(!deletedOverviewBtn.classList.contains('active')){
+                                deletedOverviewBtn.classList.add('active');
+                                deletedOverviewCol.style.display = 'flex';
+                            }
+                            if(deletedPostsBtn.classList.contains('active')){
+                                deletedPostsBtn.classList.remove('active');
+                                deletedPostsCol.style.display = 'none';
+                            }
+                            if(deletedCommentsBtn.classList.contains('active')){
+                                deletedCommentsBtn.classList.remove('active');
+                                deletedCommentsCol.style.display = 'none';
+                            }
+                        });
+                // Deleted Posts
+                    deletedPostsForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        if(deletedOverviewBtn.classList.contains('active')){
+                            deletedOverviewBtn.classList.remove('active');
+                            deletedOverviewCol.style.display = 'none';
+                        }
+                        if(!deletedPostsBtn.classList.contains('active')){
+                            deletedPostsBtn.classList.add('active');
+                            deletedPostsCol.style.display = 'flex';
+                        }
+                        if(deletedCommentsBtn.classList.contains('active')){
+                            deletedCommentsBtn.classList.remove('active');
+                            deletedCommentsCol.style.display = 'none';
+                        }
+                    })
+                // Deleted Comments
+                    deletedCommentsForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        if(deletedOverviewBtn.classList.contains('active')){
+                            deletedOverviewBtn.classList.remove('active');
+                            deletedOverviewCol.style.display = 'none';
+                        }
+                        if(deletedPostsBtn.classList.contains('active')){
+                            deletedPostsBtn.classList.remove('active');
+                            deletedPostsCol.style.display = 'none';
+                        }
+                        if(!deletedCommentsBtn.classList.contains('active')){
+                            deletedCommentsBtn.classList.add('active');
+                            deletedCommentsCol.style.display = 'flex';
+                        }
+                    })
         // Scrolling
             // Variables
                 // Overview
@@ -1209,7 +1577,7 @@
                         if(commentsBtn.classList.contains('active') && !commentLoading && commentNextPage){
                             commentLoading = true;
                             commentLoader.style.display = 'block';
-                            fetch(`/user/${userID}/comments?page=${commentNextPage}`, {
+                            fetch(`/user/${userID}/comments-and-replies?page=${commentNextPage}`, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1222,6 +1590,7 @@
                                 commentLoader.style.display = 'none';
 
                                 attachCommentEventListeners('#comments-column');
+                                attachReplyEventListeners('#comments-column');
 
                                 if(!commentNextPage){
                                     document.querySelector('#comment-column-bottom').style.display = 'block';
@@ -1277,8 +1646,6 @@
                                 deletedCommentsLoading = false;
                                 deletedCommentsLoader.style.display = 'none';
 
-                                // attach event listeners
-
                                 if(!deletedCommentsNextPage){
                                     document.querySelector('deleted-comment-column-bottom').style.display = 'block';
                                 }
@@ -1293,10 +1660,11 @@
             });
         // Scroll Event Listeners
             // Overview
-            function attachOverviewEventListeners(){
-                attachPostEventListeners('#overview-column');
-                attachCommentEventListeners('#overview-column');
-            }
+                function attachOverviewEventListeners(){
+                    attachPostEventListeners('#overview-column');
+                    attachCommentEventListeners('#overview-column');
+                    attachReplyEventListeners('#overview-column');
+                }
             // Posts
                 function attachPostEventListeners(column = '#posts-column'){
                     const posts = document.querySelectorAll(`${column} .post`);
@@ -1322,7 +1690,7 @@
                                 })
                             })
                     // Upvote and downvote logic
-                            const voteContainer = post.querySelector('#vote-container');
+                            const voteContainer = post.querySelector('.vote-container');
                             const upvoteForm = voteContainer.querySelector('form:first-child');
                             const downvoteForm = voteContainer.querySelector('form:last-child');
                             const voteCount = voteContainer.querySelector('form:first-child + p');
@@ -1415,34 +1783,176 @@
                 };
             // Profile-comments
                 function attachCommentEventListeners(column = '#comments-column'){
-                    const comments = document.querySelectorAll(`${column} .profile-comment`);
-
-                    comments.forEach(comment => {
-                        if(!comment.dataset.listenersAttached){
-                            comment.dataset.listenersAttached = 'true';
-                    // Profile-comment cards linking to comment pages
-                            const originalPostLink = comment.querySelector('.original-post-link').href;
-                            const originalPostID = originalPostLink.split('/').pop();
-
-                            const commentID = comment.id.split('-').pop();
-                            comment.addEventListener('click', () => {
-                                window.location.href = `/post/${originalPostID}#comment-${commentID}`;
-                            });
-
-                            const shareButton = comment.querySelector('.profile-comment-share-button');
-                            shareButton.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                commentUrl = `${window.location.origin}/post/${originalPostID}#comment-${commentID}`;
-                                navigator.clipboard.writeText(commentUrl)
-                                    .then(() => {
-                                        shareButton.textContent = 'Copied!';
-                                        setTimeout(() => {
-                                            shareButton.textContent = 'Share';
-                                        }, 1200)
+                    const comments = document.querySelectorAll(`${column} .profile-comment:not(.profile-reply)`);
+                        comments.forEach(comment => {
+                            if(!comment.dataset.listenersAttached){
+                                comment.dataset.listenersAttached = 'true';
+                        // Profile-comment cards linking to comment pages
+                                const originalPostLinkElement = comment.querySelector('.original-post-link');
+                                if (!originalPostLinkElement) {
+                                    return; // Skip this comment if no original post link found
+                                }
+                                
+                                const isPostDeleted = originalPostLinkElement.classList.contains('deleted');
+                                
+                                // Only add click listener if post is NOT deleted
+                                if (!isPostDeleted) {
+                                    const originalPostLink = originalPostLinkElement.href;
+                                    const originalPostID = originalPostLink.split('/').pop();
+                                    const commentID = comment.id.split('-').pop();
+                                    
+                                    comment.addEventListener('click', () => {
+                                        window.location.href = `/post/${originalPostID}#comment-${commentID}`;
                                     });
-                            });
-                    // Upvote and downvote logic
-                            const voteContainer = comment.querySelector('#vote-container');
+                                }
+
+                                const shareButton = comment.querySelector('.profile-comment-share-button');
+                                if (shareButton) {
+                                    shareButton.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        if (!isPostDeleted) {
+                                            const originalPostLink = originalPostLinkElement.href;
+                                            const originalPostID = originalPostLink.split('/').pop();
+                                            const commentID = comment.id.split('-').pop();
+                                            commentUrl = `${window.location.origin}/post/${originalPostID}#comment-${commentID}`;
+                                            navigator.clipboard.writeText(commentUrl)
+                                                .then(() => {
+                                                    shareButton.textContent = 'Copied!';
+                                                    setTimeout(() => {
+                                                        shareButton.textContent = 'Share';
+                                                    }, 1200)
+                                                });
+                                        }
+                                    });
+                                }
+                        // Upvote and downvote logic
+                                const voteContainer = comment.querySelector('.vote-container');
+                                const upvoteForm = voteContainer.querySelector('form:first-child');
+                                const downvoteForm = voteContainer.querySelector('form:last-child');
+                                const voteCount = voteContainer.querySelector('form:first-child + p');
+
+                                voteContainer.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                });
+                        // UPVOTE
+                                upvoteForm.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    try {
+                                        const response = await fetch(upvoteForm.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded',
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content
+                                            })
+                                        });
+
+                                        if(response.ok){
+                                            const data = await response.json();
+
+                                            voteCount.textContent = data.voteCount;
+                                            const upArrow = upvoteForm.querySelector('img');
+                                            upArrow.src = data.voteValue == 1 ?
+                                                "{{ asset('storage/icons/up-arrow-alt.png') }}" :
+                                                "{{ asset('storage/icons/up-arrow.png') }}" ;
+
+                                            if(data.voteValue == 1){
+                                                const downArrow = downvoteForm.querySelector('img');
+                                                downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                            }
+                                        }
+                                    } catch(error) {
+                                        console.error('Error: ', error);
+                                    }
+                                })
+                        // DOWNVOTE
+                                downvoteForm.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    try{
+                                        const response = await fetch(downvoteForm.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded',
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content,
+                                            })
+                                        });
+
+                                        if(response.ok){
+                                            const data = await response.json();
+
+                                            voteCount.textContent = data.voteCount;
+                                            const downArrow = downvoteForm.querySelector('img');
+                                            downArrow.src = data.voteValue == -1 ?
+                                                "{{ asset('storage/icons/down-arrow-alt.png') }}" :
+                                                "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                            
+                                            if(data.voteValue == -1){
+                                                const upArrow = upvoteForm.querySelector('img');
+                                                upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                            }
+                                        }
+                                    } catch(error) {
+                                        console.error('Error: ', error);
+                                    }
+                                });
+                            }
+                        });
+                    };
+            // Profile-replies
+                function attachReplyEventListeners(column = '#comments-column'){
+                    const replies = document.querySelectorAll(`${column} .profile-reply:not(.profile-comment)`);
+                    
+                    replies.forEach(reply => {
+                        if(!reply.dataset.listenersAttached){
+                            reply.dataset.listenersAttached = 'true';
+                    // Profile-reply cards linking to reply pages
+                            const originalPostLinkElement = reply.querySelector('.original-post-link');
+                            if(!originalPostLinkElement) return;
+
+                            const isCommentDeleted = reply.querySelector('.original-comment-content em') !== null;
+
+                            if(!isCommentDeleted){
+                                const originalPostLink = originalPostLinkElement.href;
+                                const originalPostID = originalPostLink.split('/').pop();
+                                const commentID = reply.querySelector('.original-comment-content').href.split('-').pop();
+                                const replyID = reply.id.split('-').pop();
+
+                                reply.addEventListener('click', () => {
+                                    window.location.href = `/post/${originalPostID}#reply-${replyID}`;
+                                });
+                    // Share Button
+                            const shareButton = reply.querySelector('.profile-reply-share-button');
+                            if(shareButton){
+                                shareButton.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    if(originalPostLinkElement){
+                                        const replyUrl = `${window.location.origin}/post/${originalPostID}#reply-${replyID}`;
+                                        navigator.clipboard.writeText(replyUrl)
+                                        .then(() => {
+                                            shareButton.textContent = 'Copied!';
+                                            setTimeout(() => {
+                                                shareButton.textContent = 'Share';
+                                            }, 1200);
+                                        });
+                                    }
+                                });
+                            }
+                            }
+                    // Upvote and downvote
+                            const voteContainer = reply.querySelector('.reply-vote-container');
                             const upvoteForm = voteContainer.querySelector('form:first-child');
                             const downvoteForm = voteContainer.querySelector('form:last-child');
                             const voteCount = voteContainer.querySelector('form:first-child + p');
@@ -1465,7 +1975,7 @@
                                         },
                                         credentials: 'same-origin',
                                         body: new URLSearchParams({
-                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                            _token: document.querySelector('meta[name="csrf-token"]').content,
                                         })
                                     });
 
@@ -1483,16 +1993,16 @@
                                             downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
                                         }
                                     }
-                                } catch(error) {
+                                } catch(error){
                                     console.error('Error: ', error);
                                 }
-                            })
+                            });
                     // DOWNVOTE
                             downvoteForm.addEventListener('submit', async(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
 
-                                try{
+                                try {
                                     const response = await fetch(downvoteForm.action, {
                                         method: 'POST',
                                         headers: {
@@ -1503,7 +2013,7 @@
                                         credentials: 'same-origin',
                                         body: new URLSearchParams({
                                             _token: document.querySelector('meta[name="csrf-token"]').content,
-                                        })
+                                        }),
                                     });
 
                                     if(response.ok){
@@ -1520,13 +2030,13 @@
                                             upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
                                         }
                                     }
-                                } catch(error) {
+                                } catch(error){
                                     console.error('Error: ', error);
                                 }
-                            });
+                            })
                         }
                     });
-                };
+                }
             // Deleted Posts
                 function attachDeletedPostEventListeners(column = '#deleted-posts-column'){
                     const deletedPosts = document.querySelectorAll(`${column} .post.deleted`);
@@ -1543,11 +2053,14 @@
                         }
                     })
                 }
-            // Deleted Comments - Under Construction
-        // First page event Listeners
+            // Deleted Comments
+                // Didnt need to add an event listener
+                // First page event Listeners
+            // First Page Event Listeners
+            attachOverviewEventListeners(); // OVERVIEW
             attachPostEventListeners('#posts-column'); // POST
             attachCommentEventListeners('#comments-column'); // COMMENTS
-            attachOverviewEventListeners(); // OVERVIEW
+            attachReplyEventListeners('#comments-column'); // REPLIES
             attachDeletedPostEventListeners(); // DELETED POSTS
 </script>
 </html>

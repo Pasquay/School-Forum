@@ -52,6 +52,6 @@ class Comment extends Model
     }
 
     public function getReplyCountAttribute(){
-        return $this->replies()->count();
+        return $this->replies()->whereNull('deleted_at')->count();
     }
 }

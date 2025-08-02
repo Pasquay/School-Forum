@@ -4,7 +4,7 @@
         @if($comment->post->deleted_at === NULL)
             <a href='/post/{{ $comment->post->id }}' class='original-post-link'>{{ $comment->post->title}}</a>
         @else
-            <span><em>DELETED POST</em></span>
+            <a href='#' class='original-post-link deleted'><span><em>DELETED POST</em></span></a>
         @endif
     </span>
     <small>
@@ -30,6 +30,14 @@
                         <img src="{{ asset('storage/icons/down-arrow' . ($comment->userVote == -1 ? '-alt' : '') . '.png') }}" alt="Downvote">
                     </button>
                 </form>
+            </div>
+            <div class='reply-count-container'>
+                <img src="{{ asset('storage/icons/chat.png') }}" alt="" class='reply-image'>
+                @if($comment->replyCount === 0)
+                    <p class='reply-count'>Replies</p>
+                @else
+                    <p class='reply-count'>Replies ({{ $comment->replyCount }})</p>
+                @endif
             </div>
             @if($comment->deleted_at === NULL)
                 <button type="button" class='profile-comment-share-button' id='profile-comment-share-button-{{ $comment->id }}'>

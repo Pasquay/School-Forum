@@ -35,13 +35,13 @@
         .brand {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #4a90e2;  /* Changed from #333 to match the blue theme */
+            color: #4a90e2; 
             text-decoration: none;
-            transition: color 0.2s;  /* Added transition for hover effect */
+            transition: color 0.2s;
         }
 
         .brand:hover {
-            color: #357abd;  /* Added hover state to match other interactive elements */
+            color: #357abd;
         }
 
         .nav-links {
@@ -59,6 +59,14 @@
 
         .nav-link:hover {
             color: #4a90e2;
+        }
+
+        .nav-link.active {
+            color: #4a90e2;
+        }
+
+        .nav-link.active:hover {
+            color: #357abd;
         }
 
         .logout-btn {
@@ -86,15 +94,15 @@
 
         .search form {
             display: flex;
-            flex-direction: row; /* Changed from column to row */
+            flex-direction: row;
             align-items: center;
             gap: 1rem;
             width: 100%;
-            max-width: 600px; /* Increased to accommodate inline elements */
+            max-width: 600px;
         }
 
         .search input {
-            flex: 1; /* This makes the input take up remaining space */
+            flex: 1;
             padding: 0.75rem 1rem;
             border: 2px solid #e1e1e1;
             border-radius: 8px;
@@ -109,7 +117,7 @@
         }
 
         .search button {
-            width: auto; /* Changed from 100% to auto */
+            width: auto;
             background-color: #4a90e2;
             color: white;
             padding: 0.75rem 1.5rem;
@@ -119,7 +127,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
-            white-space: nowrap; /* Prevents button text from wrapping */
+            white-space: nowrap;
         }
 
         .search button:hover {
@@ -179,7 +187,7 @@
         .create-post-form {
             max-width: 800px;
             margin: 2rem auto;
-            padding: 0 1rem; /* Changed from 1.5rem to match posts-column */
+            padding: 0 1rem;
         }
 
         .create-post-form form {
@@ -201,11 +209,11 @@
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.2s ease;
-            margin-bottom: 0; /* Remove margin-bottom since we're using gap */
+            margin-bottom: 0;
         }
 
         .create-post-form button {
-            width: 100%; /* Make button full width */
+            width: 100%;
             background-color: #4a90e2;
             color: white;
             padding: 0.75rem 1.5rem;
@@ -215,7 +223,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 0; /* Remove negative margin */
+            margin-top: 0;
         }
 
         .create-post-form input:focus,
@@ -236,24 +244,22 @@
             margin-left: 0.5rem;
         }
 
-        /* Update existing #vote-container style */
         #vote-container {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-top: 0;  /* Remove margin */
-            padding-top: 0; /* Remove padding */
-            border-top: none; /* Remove border */
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
         }
 
-        /* Add new styles */
         .post-bottom {
             display: flex;
             align-items: center;
             gap: 1rem;
             margin-top: 0.75rem;
             padding-top: 0.75rem;
-            border-top: 1px solid #e1e1e1; /* Move border here */
+            border-top: 1px solid #e1e1e1;
         }
 
         .comment-count {
@@ -289,19 +295,19 @@
         }
 
         #vote-container img {
-            width: 16px;  /* Reduced from 24px */
-            height: 16px;  /* Reduced from 24px */
+            width: 16px;
+            height: 16px;
             display: block;
             object-fit: contain;
         }
 
         #vote-container p {
             margin: 0;
-            min-width: 1.5rem;  /* Reduced from 2rem */
+            min-width: 1.5rem;
             text-align: center;
             font-weight: 500;
             color: #666;
-            font-size: 0.9rem;  /* Reduced from 1rem */
+            font-size: 0.9rem;
         }
 
         .username-link {
@@ -351,7 +357,7 @@
     <nav class="navbar">
         <a href="/home" class="brand">Social Media</a>
         <div class="nav-links">
-            <a href="/home" class="nav-link">Home</a>
+            <a href="/home" class="nav-link active">Home</a>
             <a href="/groups" class="nav-link">Groups</a>
             <a href="/user/{{ Auth::id() }}" class="nav-link">Profile</a>
             <form action="/logout" method="POST" style="margin: 0">

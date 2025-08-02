@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Container\Attributes\DB;
+use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
@@ -64,9 +67,6 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Overview
-            $perPage = 15;
-            $currentPage = request('page', 1);
-
             $overviewPosts = Post::where([
                 'deleted_at' => NULL,
                 'user_id' => $user->id
@@ -86,7 +86,13 @@ class UserController extends Controller
                 'user_id' => $user->id
             ])->latest()
                 ->withcount(['votes'])
-                ->with(['post', 'post.user'])
+                ->with([
+                    'post' => function($query){
+                        $query->withTrashed();
+                    }, 
+                    'post.user', 
+                    'user',
+                ])
                 ->get();
 
             $overviewComments->transform(function($comment){
@@ -95,14 +101,42 @@ class UserController extends Controller
                 $comment->type = 'comment';
                 return $comment;
             });
+
+            $overviewReplies = Reply::where([
+                'deleted_at' => NULL,
+                'user_id' => $user->id
+            ])->latest()
+                ->withCount(['votes'])
+                ->with([
+                    'comment' => function($query){
+                        $query->withTrashed();
+                    },
+                    'comment.user',
+                    'comment.post' => function($query){
+                        $query->withTrashed();
+                    },
+                    'comment.post.user',
+                ])
+                ->get();
+
+            $overviewReplies->transform(function($reply){
+                $reply->votes = $reply->getVoteCountAttribute();
+                $reply->userVote = $reply->getUserVoteAttribute();
+                $reply->type = 'reply';
+                return $reply;
+            });
+
+            $perPage = 15;
+            $currentPage = request('page', 1);
             
-            $overviewAll = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
+            $overviewAll = $overviewPosts->concat($overviewComments)->concat($overviewReplies)->sortByDesc('created_at');
             $overviewCount = $overviewAll->count();
             $offset = ($currentPage - 1) * $perPage;
             $overviewItems = $overviewAll->slice($offset, $perPage)->values();
-
+            
             $postCount = $overviewPosts->count();
             $commentCount = $overviewComments->count();
+            $replyCount = $overviewReplies->count();
             $likeCount = $overviewAll->sum('votes');
 
             $overview = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -127,20 +161,70 @@ class UserController extends Controller
                 return $post;
             });
 
-        // Comments
+        // Comments & Replies
             $comments = Comment::where([
                 'deleted_at' => NULL,
                 'user_id' => $user->id
             ])->latest()
                 ->withCount(['votes'])
-                ->with(['post', 'post.user'])
+                ->with([
+                    'post' => function($query){
+                        $query->withTrashed();
+                    }, 
+                    'post.user',
+                    'user',
+                ])
                 ->paginate(15);
 
             $comments->getCollection()->transform(function($comment) {
                 $comment->votes = $comment->getVoteCountAttribute();
                 $comment->userVote = $comment->getUserVoteAttribute();
+                $comment->replyCount = $comment->getReplyCountAttribute();
+                $comment->type = 'comment';
                 return $comment;
             });
+
+            $replies = Reply::where([
+                'deleted_at' => NULL,
+                'user_id' => $user->id
+            ])->latest()
+                ->withCount(['votes'])
+                ->with([
+                        'comment' => function($query){
+                            $query->withTrashed();
+                        }, 
+                        'comment.user', 
+                        'comment.post' => function($query){
+                            $query->withTrashed();
+                        }, 
+                        'comment.post.user'
+                ])
+                ->paginate(15);
+
+            $replies->getCollection()->transform(function($reply){
+                $reply->votes = $reply->getVoteCountAttribute();
+                $reply->userVote = $reply->getUserVoteAttribute();
+                $reply->type = 'reply';
+                return $reply;
+            });
+
+            $repliesCount = $replies->count();
+
+            $commentsPerPage = 15;
+            $commentsCurrentPage = request('page', 1);
+
+            $commentsAndReplies = $comments->concat($replies)->sortByDesc('created_at');
+            $commentsAndRepliesCount = $commentsAndReplies->count();
+            $commentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
+            $commentsItems = $commentsAndReplies->slice($commentsOffset, $commentsPerPage)->values();
+
+            $comments = new \Illuminate\Pagination\LengthAwarePaginator(
+                $commentsItems,
+                $commentsAndRepliesCount,
+                $commentsPerPage,
+                $commentsCurrentPage,
+                ['path' => request()->url()]
+            );
         
         // Deleted Posts
             $deletedPosts = Post::onlyTrashed()
@@ -179,6 +263,7 @@ class UserController extends Controller
                     'user',
                     'postCount',
                     'commentCount',
+                    'replyCount',
                     'likeCount',
                     'overview',
                     'posts',
@@ -192,6 +277,7 @@ class UserController extends Controller
                     'user',
                     'postCount',
                     'commentCount',
+                    'replyCount',
                     'likeCount',
                     'overview',
                     'posts',
@@ -244,11 +330,35 @@ class UserController extends Controller
             return $comment;
         });
 
-        $overviewAll = $overviewPosts->concat($overviewComments)->sortByDesc('created_at');
+        $overviewReplies = Reply::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.post.user',
+            ])
+            ->get();
+
+        $overviewReplies->transform(function($reply){
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
+
+        $overviewAll = $overviewPosts->concat($overviewComments)->concat($overviewReplies)->sortByDesc('created_at');
         $overviewCount = $overviewAll->count();
         $offset = ($currentPage - 1) * $perPage;
         $overviewItems = $overviewAll->slice($offset, $perPage)->values();
-
+        
         $overview = new \Illuminate\Pagination\LengthAwarePaginator(
             $overviewItems,
             $overviewCount,
@@ -262,8 +372,10 @@ class UserController extends Controller
             foreach($overview as $item){
                 if($item->type === 'post'){
                     $html .= view('components.post', ['post' => $item])->render();
-                } else {
+                } else if($item->type === 'comment') {
                     $html .= view('components.profile-comment', ['comment' => $item])->render();
+                } else {
+                    $html .= view('components.profile-reply', ['reply' => $item])->render();
                 }
             }
 
@@ -274,5 +386,48 @@ class UserController extends Controller
         }
 
         return view('profile', compact('user', 'overview'));
+    }
+
+    public function getUserCommentsAndReplies($id){
+        $perPage = 15;
+        $currentPage = request('page', 1);
+
+       $commentController = new CommentController();
+        $comments = $commentController->getUserCommentsData($id);
+
+        $replyController = new ReplyController();
+        $replies = $replyController->getUserRepliesData($id);
+
+        $combined = $comments->concat($replies)->sortByDesc('created_at');
+        $combinedCount = $combined->count();
+
+        $offset = ($currentPage - 1) * $perPage;
+        $combinedItems = $combined->slice($offset, $perPage)->values();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $combinedItems,
+            $combinedCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        if(request()->ajax()){
+            $html = '';
+            foreach($combinedItems as $item){
+                if($item->type === 'comment'){
+                    $html .= view('components.profile-comment', ['comment' => $item])->render();
+                } elseif($item->type === 'reply') {
+                    $html .= view('components.profile-reply', ['reply' => $item])->render();
+                }
+            }
+
+            return response()->json([
+                'html' => $html,
+                'next_page' => $paginator->hasMorePages() ? $paginator->currentPage()+1 : NULL,
+            ]);
+        }
+        
+        return response()->json(['error' => 'Invalid request']);
     }
 }

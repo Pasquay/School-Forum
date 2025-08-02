@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media | {{ '@' . $user->name }}</title>
+    <title>Social Media | Profile</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
     /* MAIN */
@@ -60,6 +60,14 @@
 
         .nav-link:hover {
             color: #4a90e2;
+        }
+
+        #profile-nav-link {
+            color: #4a90e2;
+        }
+
+        #profile-nav-link:hover {
+            color: #357abd;
         }
 
         .logout-btn {
@@ -132,6 +140,57 @@
         }
 
         .left-side .nav button.active:hover {
+            color: #666;
+            background-color: #e9eef3;
+        }
+    /* LEFT SUB NAV */
+        .left-side .nav.deleted {
+            background-color: white;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 1rem;
+            display: flex;
+            transition: transform 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .left-side .nav.deleted button.first {
+            margin-left: 0;
+        }
+
+        .left-side .nav.deleted button {
+            border: 0;
+            cursor: pointer;
+            color: #666;
+            background-color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            padding: 0.4rem 0.8rem;
+            margin: 0 0.6rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .left-side .nav.deleted button:hover {
+            color: #4a90e2;
+        }
+
+        .left-side .nav.deleted button.active {
+            border: 0;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: #4a90e2;
+            background-color: #eaf4fb;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .left-side .nav.deleted button.active:hover {
             color: #666;
             background-color: #e9eef3;
         }
@@ -234,7 +293,7 @@
         }
 
         /* Vote container styles */
-        #vote-container {
+        .vote-container {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -243,11 +302,11 @@
             border-top: none;
         }
 
-        #vote-container form {
+        .vote-container form {
             margin: 0;
         }
 
-        #vote-container button {
+        .vote-container button {
             background: none;
             border: none;
             padding: 0;
@@ -255,18 +314,18 @@
             transition: transform 0.2s ease;
         }
 
-        #vote-container button:hover {
+        .vote-container button:hover {
             transform: scale(1.1);
         }
 
-        #vote-container img {
+        .vote-container img {
             width: 16px;
             height: 16px;
             display: block;
             object-fit: contain;
         }
 
-        #vote-container p {
+        .vote-container p {
             margin: 0;
             min-width: 1.5rem;
             text-align: center;
@@ -343,10 +402,6 @@
             transition: background 0.2s;
         }
     /* COMMENTS */
-        .original-post-details {
-            margin-top: 1.5rem;
-        }
-
         .original-post-link {
             color: #111;
             text-decoration: none;
@@ -357,6 +412,12 @@
         .original-post-link:hover {
             color: #357abd;
             text-decoration: underline;
+        }
+
+        .original-post-link.deleted {
+            text-decoration: none;
+            pointer-events: none;
+            cursor: default;
         }
 
         .comments-column {
@@ -448,6 +509,53 @@
             font-size: 0.9rem;
         }
 
+        .profile-comment .reply-image {
+            width: 18px;  
+            height: 18px; 
+            margin-right: 2px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+ 
+        .profile-comment .reply-count-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 0.25rem;
+            border-radius: 4px;
+            margin: 0;
+        }
+
+        .profile-comment .reply-count-container:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-comment .reply-count-container:active {
+            transform: scale(0.95);
+        }
+
+        .profile-comment .reply-image {
+            width: 18px;  
+            height: 18px; 
+            margin-right: 2px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .profile-comment .reply-count {
+            margin: 0 !important;
+            padding: 0;
+            line-height: 1;
+            color: #333;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
         .profile-comment-share-button {
             font-size: 0.9rem;
             background-color: white;
@@ -477,6 +585,217 @@
             letter-spacing: 0.02em;
             line-height: 1.5;
             transition: background 0.2s;
+        }
+    /* REPLIES */
+        .profile-reply {
+            display: flex;
+            flex-direction: column;
+            align-self: flex-end;
+            cursor: pointer;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 1.5rem 0.5rem 1.5rem;
+            transition: transform 0.2s ease;
+            margin-right: 0;
+            width: 90%;
+            border-left: 3px solid #dee2e6;
+        }
+        
+        .profile-reply:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .profile-reply small {
+            color: #666;
+            display: block;
+            margin-top: 0.2rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .profile-reply p {
+            color: #444;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            margin-top: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .original-comment-content {
+            background-color: #f8f9fa;
+            border-left: 3px solid #dee2e6;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            margin: 0.75rem 0 0.5rem 0;
+            font-style: italic;
+            color: #666;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            text-decoration: none;
+            display: block;
+        }
+
+        .original-comment-content:hover {
+            text-decoration: underline;
+        }
+
+        .original-comment-content-p {
+            width: 100%;
+        }
+
+        .original-comment-content::before {
+            content: '"';
+            color: #999;
+        }
+
+        .original-comment-content::after {
+            content: '"';
+            color: #999;
+        }
+
+        .reply-content {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            white-space: pre-wrap;
+            font-weight: normal;
+        }
+
+        
+        .profile-reply p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .profile-reply-bottom {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e1e1e1;
+        }
+        
+        .profile-reply .vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-reply .vote-container form {
+            margin: 0;
+        }
+        
+        .profile-reply .vote-container button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .profile-reply .vote-container button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply .vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+        
+        .profile-reply .vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .profile-reply-share-button {
+            font-size: 0.85rem;
+            background-color: white;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .profile-reply-share-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply-share-button:active {
+            transform: scale(1.0);
+        }
+        
+        .original-comment-link {
+            color: #111;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .original-comment-link:hover {
+            color: #357abd;
+            text-decoration: underline;
+        }  
+
+        .profile-reply .reply-vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .profile-reply .reply-vote-container form {
+            margin: 0;
+        }
+        
+        .profile-reply .reply-vote-container button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .profile-reply .reply-vote-container button:hover {
+            transform: scale(1.1);
+        }
+        
+        .profile-reply .reply-vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+        
+        .profile-reply .reply-vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .profile-reply.deleted .reply-vote-container button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .profile-reply.deleted .reply-vote-container button:disabled img {
+            filter: grayscale(100%);
         }
     /* USER */
         .right-side {
@@ -628,6 +947,45 @@
             display: flex;
             flex-direction: row;
         }
+
+        .user-info-row-5 {
+            display: flex;
+            width: 100%;
+            flex-direction: row;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e1e1;
+        }
+
+        .user-info-row-5 p {
+            color: #666;
+        }
+
+        .user-info-row-6 {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .user-info-row-6 p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-info-row-6 button {
+            min-width: 5rem;
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .user-info-row-6 button:hover {
+            background-color: #357abd;
+        }
         
         .user-bottom {
             display: block;
@@ -646,7 +1004,7 @@
     @include('components.error-header')
     <main>
         <div class="left-side">
-            <div class="nav">
+            <div class="nav" id='nav-1'>
                 <form action="#" method='GET' id='overview-form'>
                     @csrf
                     <button type="submit" class='active first'>Overview</button>
@@ -666,6 +1024,8 @@
                         @include('components.post', ['post' => $item])
                     @elseif($item->type === 'comment')
                         @include('components.profile-comment', ['comment' => $item])
+                    @elseif($item->type === 'reply')
+                        @include('components.profile-reply', ['reply' => $item])
                     @endif
                 @endforeach
                 <div class="loader" id='overview-loader'
@@ -698,7 +1058,11 @@
             </div>
             <div class="comments-column" id='comments-column' style='display:none;'>
                 @foreach($comments as $comment)
-                    @include('components.profile-comment', ['comment' => $comment])
+                    @if($comment->type === 'comment')
+                        @include('components.profile-comment', ['comment' => $comment])
+                    @elseif($comment->type === 'reply')
+                        @include('components.profile-reply', ['reply' => $comment])
+                    @endif
                 @endforeach
                 <div class="loader" id='comment-loader'
                     style=
@@ -725,7 +1089,7 @@
                 </div>
                 <div class="user-info-row-3">
                     <div class="contributionContainer">
-                        <p><span>Contributions:</span><br>{{ $postCount + $commentCount }}</p>
+                        <p><span>Contributions:</span><br>{{ $postCount + $commentCount + $replyCount }}</p>
                     </div>
                     <div class="reputationContainer">
                         <p><span>Reputation:</span><br>{{ $likeCount }}</p>
@@ -735,33 +1099,35 @@
                     <p><span>Joined:</span><br>{{ $user->created_at->format('F j, Y') }}</p>
                 </div>
             </div>
-            <div class="user-settings">
-                <!--  -->
-            </div>
         </div>
     </main>
 </body>
 <script>
-    const userID = document.body.dataset.userId;
-    const posts = document.querySelectorAll('#posts-column .post');
-    const postContainer = document.querySelector('#posts-column');
-    const postLoader = document.querySelector('#post-loader');
-    
-    const comments = document.querySelectorAll('#comments-column .profile-comment');
-    const commentContainer = document.querySelector('#comments-column');
-    const commentLoader = document.querySelector('#comment-loader');
+    // VARIABLES
+        const userID = document.body.dataset.userId;
+        
+        const posts = document.querySelectorAll('#posts-column .post');
+        const postContainer = document.querySelector('#posts-column');
+        const postLoader = document.querySelector('#post-loader');
+        
+        const comments = document.querySelectorAll('#comments-column .profile-comment');
+        const commentContainer = document.querySelector('#comments-column');
+        const commentLoader = document.querySelector('#comment-loader');
 
-    const overviewContainer = document.querySelector('#overview-column');
-    const overviewLoader = document.querySelector('#overview-loader');
+        const overviewContainer = document.querySelector('#overview-column');
+        const overviewLoader = document.querySelector('#overview-loader');
 
-    const userInfoContainer = document.querySelector('.user-info');
+        const repliesContainer = document.querySelector('#replies-column');
+        const repliesLoader = document.querySelector('#replies-loader');
+
+        const userInfoContainer = document.querySelector('.user-info');
 
     // RIGHT SIDE   
         // Profile Share Button
             const profileShareButton = userInfoContainer.querySelector('#profile-share-button');
             profileShareButton.addEventListener('click', (e) => {
                 e.stopPropagation();
-                profileUrl = `${window.location.origin}/user/{{ $user->id }}`;
+                profileUrl = `${window.location.origin}/user/${userID}`;
                 navigator.clipboard.writeText(profileUrl)
                 .then(() => {
                     profileShareButton.textContent = 'Copied!';
@@ -771,412 +1137,555 @@
                 })
             })
     // LEFT SIDE
-        const leftnav = document.querySelector('.left-side .nav');
-        
-        const overviewForm = leftnav.querySelector('#overview-form');
-        const postsForm = leftnav.querySelector('#posts-form');
-        const commentsForm = leftnav.querySelector('#comments-form');
-        
-        const overviewBtn = leftnav.querySelector('#overview-form button');
-        const postsBtn = leftnav.querySelector('#posts-form button');
-        const commentsBtn = leftnav.querySelector('#comments-form button');
-
-        const overviewCol = document.querySelector('.left-side .overview-column');
-        const postsCol = document.querySelector('.left-side .posts-column');
-        const commentsCol = document.querySelector('.left-side .comments-column');
-
-        // Overview - UNDER CONSTRUCTION
-            overviewForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if(!overviewBtn.classList.contains('active')){
-                    overviewBtn.classList.add('active');
-                    overviewCol.style.display = 'flex';
-                }
-                if(postsBtn.classList.contains('active')){
-                    postsBtn.classList.remove('active');
-                    postsCol.style.display = 'none';
-                }
-                if(commentsBtn.classList.contains('active')){
-                    commentsBtn.classList.remove('active');
-                    commentsCol.style.display = 'none';
-                }
-            });
-        // Posts
-            postsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if(overviewBtn.classList.contains('active')){
-                    overviewBtn.classList.remove('active');
-                    overviewCol.style.display = 'none';
-                }
-                if(!postsBtn.classList.contains('active')){
-                    postsBtn.classList.add('active');
-                    postsCol.style.display = 'flex';
-                }
-                if(commentsBtn.classList.contains('active')){
-                    commentsBtn.classList.remove('active');
-                    commentsCol.style.display = 'none';
-                }
-            });
-        // Comments
-            commentsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if(overviewBtn.classList.contains('active')){
-                    overviewBtn.classList.remove('active');
-                    overviewCol.style.display = 'none';
-                }
-                if(postsBtn.classList.contains('active')){
-                    postsBtn.classList.remove('active');
-                    postsCol.style.display = 'none';
-                }
-                if(!commentsBtn.classList.contains('active')){
-                    commentsBtn.classList.add('active');
-                    commentsCol.style.display = 'flex';
-                }
-            });
-
-    // Scrolling
-        // Variables
-            // Overview
-                let overviewNextPage = 2;
-                let overviewLoading = false;
-            // Posts
-                let postNextPage = 2;
-                let postLoading = false;
-            // Comments
-                let commentNextPage = 2;
-                let commentLoading = false;
-            // Deleted Posts - Under Construction
-            // Deleted Comments - Under Construction 
-        document.addEventListener('scroll', () => {
-            if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
-                // Overview
-                    if(overviewBtn.classList.contains('active') && !overviewLoading && overviewNextPage){
-                        overviewLoading = true;
-                        overviewLoader.style.display = 'block';
-                        fetch(`/user/${userID}/overview?page=${overviewNextPage}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            overviewLoader.insertAdjacentHTML('beforebegin', data.html);
-                            overviewNextPage = data.next_page;
-                            overviewLoading = false;
-                            overviewLoader.style.display = 'none';
-
-                            attachOverviewEventListeners();
-
-                            if(!overviewNextPage){
-                                document.getElementById('overview-column-bottom').style.display = 'block';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error: ', error);
-                            overviewLoading = false;
-                            overviewLoader.style.display = 'none';
-                        });
-
-                    };
-                // Posts
-                    if(postsBtn.classList.contains('active') && !postLoading && postNextPage){
-                        postLoading = true;
-                        postLoader.style.display = 'block';
-                        fetch(`/user/${userID}/posts?page=${postNextPage}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            postLoader.insertAdjacentHTML('beforebegin', data.html);
-                            postNextPage = data.next_page;
-                            postLoading = false;
-                            postLoader.style.display = 'none';
-
-                            attachPostEventListeners('#posts-column');
-
-                            if(!postNextPage){
-                                document.getElementById('post-column-bottom').style.display = 'block';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error: ', error);
-                            postLoading = false;
-                            postLoader.style.display = 'none';
-                        });
-                    }
-                // Comments
-                    if(commentsBtn.classList.contains('active') && !commentLoading && commentNextPage){
-                        commentLoading = true;
-                        commentLoader.style.display = 'block';
-                        fetch(`/user/${userID}/comments?page=${commentNextPage}`, {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            commentLoader.insertAdjacentHTML('beforebegin', data.html);
-                            commentNextPage = data.next_page;
-                            commentLoading = false;
-                            commentLoader.style.display = 'none';
-
-                            attachCommentEventListeners('#comments-column');
-
-                            if(!commentNextPage){
-                                document.querySelector('#comment-column-bottom').style.display = 'block';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error: ', error);
-                            commentLoading = false;
-                            commentLoader.style.display = 'none';
-                        });
-                    }
-                // Deleted Posts - Under Construction
-                // Deleted Comments - Under Construction 
-            }
-        })
-    // Scroll Event Listeners
-        // Overview
-        // Posts
-            function attachPostEventListeners(column = '#posts-column'){
-                const posts = document.querySelectorAll(`${column} .post`);
-
-                posts.forEach(post => {
-                    if(!post.dataset.listenersAttached){
-                        post.dataset.listenersAttached = 'true';
-                // Post cards link to post pages
-                        post.addEventListener('click', () => {
-                            window.location.href = `/post/${post.id}`;
-                        });
-                    // Post share buttons
-                        const shareButton = post.querySelector('.post-share-button');
-                        shareButton.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            postUrl = `${window.location.origin}/post/${post.id}`;
-                            navigator.clipboard.writeText(postUrl)
-                            .then(() => {
-                                shareButton.textContent = 'Copied!';
-                                setTimeout(() => {
-                                    shareButton.textContent = 'Share';
-                                }, 1200);
-                            })
-                        })
-                // Upvote and downvote logic
-                        const voteContainer = post.querySelector('#vote-container');
-                        const upvoteForm = voteContainer.querySelector('form:first-child');
-                        const downvoteForm = voteContainer.querySelector('form:last-child');
-                        const voteCount = voteContainer.querySelector('form:first-child + p');
-
-                        const postID = post.id;
-                        upvoteForm.action = `/post/upvote/${postID}`;
-                        downvoteForm.action = `/post/downvote/${postID}`;
+        // Navbar
+            // Variables
+                const leftnav = document.querySelector('.left-side .nav');
+                const leftsubnav = document.querySelector('.left-side #nav-2');
                 
-                        voteContainer.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                        });
-                // UPVOTE
-                        upvoteForm.addEventListener('submit', async(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                const overviewForm = leftnav.querySelector('#overview-form');
+                const overviewBtn = leftnav.querySelector('#overview-form button');
+                const overviewCol = document.querySelector('.left-side .overview-column');
+                
+                const postsForm = leftnav.querySelector('#posts-form');
+                const postsBtn = leftnav.querySelector('#posts-form button');
+                const postsCol = document.querySelector('.left-side .posts-column');
 
-                            try {
-                                const response = await fetch(upvoteForm.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    credentials: 'same-origin',
-                                    body: new URLSearchParams({
-                                        _token: document.querySelector('meta[name="csrf-token"]').content
-                                    })
-                                });
+                const commentsForm = leftnav.querySelector('#comments-form');
+                const commentsBtn = leftnav.querySelector('#comments-form button');
+                const commentsCol = document.querySelector('.left-side .comments-column');
 
-                                if(response.ok){
-                                    const data = await response.json();
-                                    
-                                    voteCount.textContent = data.voteCount;
-
-                                    const upArrow = upvoteForm.querySelector('img');
-                                    upArrow.src = data.voteValue == 1 ?
-                                        "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                                        "{{ asset('storage/icons/up-arrow.png') }}" ;
-                                    
-                                    const downArrow = downvoteForm.querySelector('img');
-                                    if (data.voteValue == 1){
-                                        downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('Error:', error);
-                            }
-                        });
-                // DOWNVOTE
-                        downvoteForm.addEventListener('submit', async(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            try {
-                                const response = await fetch(downvoteForm.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    credentials: 'same-origin',
-                                    body: new URLSearchParams({
-                                        _token: document.querySelector('meta[name="csrf-token"]').content
-                                    })
-                                });
-                        
-                                if(response.ok){
-                                    const data = await response.json();
-                        
-                                    voteCount.textContent = data.voteCount;
-                                    
-                                    const downArrow = downvoteForm.querySelector('img');
-                                    downArrow.src = data.voteValue == -1 ?
-                                        "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                                        "{{ asset('storage/icons/down-arrow.png') }}" ;
-                        
-                                    const upArrow = upvoteForm.querySelector('img');
-                                    if(data.voteValue == -1){
-                                        upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
-                                    }
-                                }
-                            } catch(error){
-                                console.error('Error:', error);
-                            }
-                        })        
+            // Overview
+                overviewForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if(!overviewBtn.classList.contains('active')){
+                        overviewBtn.classList.add('active');
+                        overviewCol.style.display = 'flex';
+                    }
+                    if(postsBtn.classList.contains('active')){
+                        postsBtn.classList.remove('active');
+                        postsCol.style.display = 'none';
+                    }
+                    if(commentsBtn.classList.contains('active')){
+                        commentsBtn.classList.remove('active');
+                        commentsCol.style.display = 'none';
                     }
                 });
-            };
-        // Profile-comments
-            function attachCommentEventListeners(column = '#comments-column'){
-                const comments = document.querySelectorAll(`${column} .profile-comment`);
+            // Posts
+                postsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if(overviewBtn.classList.contains('active')){
+                        overviewBtn.classList.remove('active');
+                        overviewCol.style.display = 'none';
+                    }
+                    if(!postsBtn.classList.contains('active')){
+                        postsBtn.classList.add('active');
+                        postsCol.style.display = 'flex';
+                    }
+                    if(commentsBtn.classList.contains('active')){
+                        commentsBtn.classList.remove('active');
+                        commentsCol.style.display = 'none';
+                    }
+                });
+            // Comments
+                commentsForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if(overviewBtn.classList.contains('active')){
+                        overviewBtn.classList.remove('active');
+                        overviewCol.style.display = 'none';
+                    }
+                    if(postsBtn.classList.contains('active')){
+                        postsBtn.classList.remove('active');
+                        postsCol.style.display = 'none';
+                    }
+                    if(!commentsBtn.classList.contains('active')){
+                        commentsBtn.classList.add('active');
+                        commentsCol.style.display = 'flex';
+                    }
+                });
+        // Scrolling
+            // Variables
+                // Overview
+                    let overviewNextPage = 2;
+                    let overviewLoading = false;
+                // Posts
+                    let postNextPage = 2;
+                    let postLoading = false;
+                // Comments
+                    let commentNextPage = 2;
+                    let commentLoading = false;
+            document.addEventListener('scroll', () => {
+                if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
+                    // Overview
+                        if(overviewBtn.classList.contains('active') && !overviewLoading && overviewNextPage){
+                            overviewLoading = true;
+                            overviewLoader.style.display = 'block';
+                            fetch(`/user/${userID}/overview?page=${overviewNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                overviewLoader.insertAdjacentHTML('beforebegin', data.html);
+                                overviewNextPage = data.next_page;
+                                overviewLoading = false;
+                                overviewLoader.style.display = 'none';
 
-                comments.forEach(comment => {
-                    if(!comment.dataset.listenersAttached){
-                        comment.dataset.listenersAttached = 'true';
-                // Profile-comment cards linking to comment pages
-                        const originalPostLink = comment.querySelector('.original-post-link').href;
-                        const originalPostID = originalPostLink.split('/').pop();
+                                attachOverviewEventListeners();
 
-                        const commentID = comment.id.split('-').pop();
-                        comment.addEventListener('click', () => {
-                            window.location.href = `/post/${originalPostID}#comment-${commentID}`;
-                        });
+                                if(!overviewNextPage){
+                                    document.getElementById('overview-column-bottom').style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                overviewLoading = false;
+                                overviewLoader.style.display = 'none';
+                            });
 
-                        const shareButton = comment.querySelector('.profile-comment-share-button');
-                        shareButton.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            commentUrl = `${window.location.origin}/post/${originalPostID}#comment-${commentID}`;
-                            navigator.clipboard.writeText(commentUrl)
+                        };
+                    // Posts
+                        if(postsBtn.classList.contains('active') && !postLoading && postNextPage){
+                            postLoading = true;
+                            postLoader.style.display = 'block';
+                            fetch(`/user/${userID}/posts?page=${postNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                postLoader.insertAdjacentHTML('beforebegin', data.html);
+                                postNextPage = data.next_page;
+                                postLoading = false;
+                                postLoader.style.display = 'none';
+
+                                attachPostEventListeners('#posts-column');
+
+                                if(!postNextPage){
+                                    document.getElementById('post-column-bottom').style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                postLoading = false;
+                                postLoader.style.display = 'none';
+                            });
+                        }
+                    // Comments
+                        if(commentsBtn.classList.contains('active') && !commentLoading && commentNextPage){
+                            commentLoading = true;
+                            commentLoader.style.display = 'block';
+                            fetch(`/user/${userID}/comments-and-replies?page=${commentNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                commentLoader.insertAdjacentHTML('beforebegin', data.html);
+                                commentNextPage = data.next_page;
+                                commentLoading = false;
+                                commentLoader.style.display = 'none';
+
+                                attachCommentEventListeners('#comments-column');
+                                attachReplyEventListeners('#comments-column');
+
+                                if(!commentNextPage){
+                                    document.querySelector('#comment-column-bottom').style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                commentLoading = false;
+                                commentLoader.style.display = 'none';
+                            });
+                        }
+                }
+            });
+        // Scroll Event Listeners
+            // Overview
+                function attachOverviewEventListeners(){
+                    attachPostEventListeners('#overview-column');
+                    attachCommentEventListeners('#overview-column');
+                    attachReplyEventListeners('#overview-column');
+                }
+            // Posts
+                function attachPostEventListeners(column = '#posts-column'){
+                    const posts = document.querySelectorAll(`${column} .post`);
+
+                    posts.forEach(post => {
+                        if(!post.dataset.listenersAttached){
+                            post.dataset.listenersAttached = 'true';
+                    // Post cards link to post pages
+                            post.addEventListener('click', () => {
+                                window.location.href = `/post/${post.id}`;
+                            });
+                    // Post share buttons
+                            const shareButton = post.querySelector('.post-share-button');
+                            shareButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                postUrl = `${window.location.origin}/post/${post.id}`;
+                                navigator.clipboard.writeText(postUrl)
                                 .then(() => {
                                     shareButton.textContent = 'Copied!';
                                     setTimeout(() => {
                                         shareButton.textContent = 'Share';
-                                    }, 1200)
-                                });
-                        });
-                // Upvote and downvote logic
-                        const voteContainer = comment.querySelector('#vote-container');
-                        const upvoteForm = voteContainer.querySelector('form:first-child');
-                        const downvoteForm = voteContainer.querySelector('form:last-child');
-                        const voteCount = voteContainer.querySelector('form:first-child + p');
+                                    }, 1200);
+                                })
+                            })
+                    // Upvote and downvote logic
+                            const voteContainer = post.querySelector('.vote-container');
+                            const upvoteForm = voteContainer.querySelector('form:first-child');
+                            const downvoteForm = voteContainer.querySelector('form:last-child');
+                            const voteCount = voteContainer.querySelector('form:first-child + p');
 
-                        voteContainer.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                        });
-                // UPVOTE
-                        upvoteForm.addEventListener('submit', async(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                            const postID = post.id;
+                            upvoteForm.action = `/post/upvote/${postID}`;
+                            downvoteForm.action = `/post/downvote/${postID}`;
+                    
+                            voteContainer.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                    // UPVOTE
+                            upvoteForm.addEventListener('submit', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
 
-                            try {
-                                const response = await fetch(upvoteForm.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                    },
-                                    credentials: 'same-origin',
-                                    body: new URLSearchParams({
-                                        _token: document.querySelector('meta[name="csrf-token"]').content
-                                    })
-                                });
+                                try {
+                                    const response = await fetch(upvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
 
-                                if(response.ok){
-                                    const data = await response.json();
+                                    if(response.ok){
+                                        const data = await response.json();
+                                        
+                                        voteCount.textContent = data.voteCount;
 
-                                    voteCount.textContent = data.voteCount;
-                                    const upArrow = upvoteForm.querySelector('img');
-                                    upArrow.src = data.voteValue == 1 ?
-                                        "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                                        "{{ asset('storage/icons/up-arrow.png') }}" ;
-
-                                    if(data.voteValue == 1){
-                                        const downArrow = downvoteForm.querySelector('img');
-                                        downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
-                                    }
-                                }
-                            } catch(error) {
-                                console.error('Error: ', error);
-                            }
-                        })
-                // DOWNVOTE
-                        downvoteForm.addEventListener('submit', async(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            try{
-                                const response = await fetch(downvoteForm.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                    },
-                                    credentials: 'same-origin',
-                                    body: new URLSearchParams({
-                                        _token: document.querySelector('meta[name="csrf-token"]').content,
-                                    })
-                                });
-
-                                if(response.ok){
-                                    const data = await response.json();
-
-                                    voteCount.textContent = data.voteCount;
-                                    const downArrow = downvoteForm.querySelector('img');
-                                    downArrow.src = data.voteValue == -1 ?
-                                        "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                                        "{{ asset('storage/icons/down-arrow.png') }}" ;
-                                    
-                                    if(data.voteValue == -1){
                                         const upArrow = upvoteForm.querySelector('img');
-                                        upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                        upArrow.src = data.voteValue == 1 ?
+                                            "{{ asset('storage/icons/up-arrow-alt.png') }}" :
+                                            "{{ asset('storage/icons/up-arrow.png') }}" ;
+                                        
+                                        const downArrow = downvoteForm.querySelector('img');
+                                        if (data.voteValue == 1){
+                                            downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                        }
                                     }
+                                } catch (error) {
+                                    console.error('Error:', error);
                                 }
-                            } catch(error) {
-                                console.error('Error: ', error);
+                            });
+                    // DOWNVOTE
+                            downvoteForm.addEventListener('submit', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                try {
+                                    const response = await fetch(downvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
+                            
+                                    if(response.ok){
+                                        const data = await response.json();
+                            
+                                        voteCount.textContent = data.voteCount;
+                                        
+                                        const downArrow = downvoteForm.querySelector('img');
+                                        downArrow.src = data.voteValue == -1 ?
+                                            "{{ asset('storage/icons/down-arrow-alt.png') }}" :
+                                            "{{ asset('storage/icons/down-arrow.png') }}" ;
+                            
+                                        const upArrow = upvoteForm.querySelector('img');
+                                        if(data.voteValue == -1){
+                                            upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                        }
+                                    }
+                                } catch(error){
+                                    console.error('Error:', error);
+                                }
+                            })        
+                        }
+                    });
+                };
+            // Profile-comments
+                function attachCommentEventListeners(column = '#comments-column'){
+                    const comments = document.querySelectorAll(`${column} .profile-comment:not(.profile-reply)`);
+                        comments.forEach(comment => {
+                            if(!comment.dataset.listenersAttached){
+                                comment.dataset.listenersAttached = 'true';
+                        // Profile-comment cards linking to comment pages
+                                const originalPostLinkElement = comment.querySelector('.original-post-link');
+                                if (!originalPostLinkElement) {
+                                    return; // Skip this comment if no original post link found
+                                }
+                                
+                                const isPostDeleted = originalPostLinkElement.classList.contains('deleted');
+                                
+                                // Only add click listener if post is NOT deleted
+                                if (!isPostDeleted) {
+                                    const originalPostLink = originalPostLinkElement.href;
+                                    const originalPostID = originalPostLink.split('/').pop();
+                                    const commentID = comment.id.split('-').pop();
+                                    
+                                    comment.addEventListener('click', () => {
+                                        window.location.href = `/post/${originalPostID}#comment-${commentID}`;
+                                    });
+                                }
+
+                                const shareButton = comment.querySelector('.profile-comment-share-button');
+                                if (shareButton) {
+                                    shareButton.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        if (!isPostDeleted) {
+                                            const originalPostLink = originalPostLinkElement.href;
+                                            const originalPostID = originalPostLink.split('/').pop();
+                                            const commentID = comment.id.split('-').pop();
+                                            commentUrl = `${window.location.origin}/post/${originalPostID}#comment-${commentID}`;
+                                            navigator.clipboard.writeText(commentUrl)
+                                                .then(() => {
+                                                    shareButton.textContent = 'Copied!';
+                                                    setTimeout(() => {
+                                                        shareButton.textContent = 'Share';
+                                                    }, 1200)
+                                                });
+                                        }
+                                    });
+                                }
+                        // Upvote and downvote logic
+                                const voteContainer = comment.querySelector('.vote-container');
+                                const upvoteForm = voteContainer.querySelector('form:first-child');
+                                const downvoteForm = voteContainer.querySelector('form:last-child');
+                                const voteCount = voteContainer.querySelector('form:first-child + p');
+
+                                voteContainer.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                });
+                        // UPVOTE
+                                upvoteForm.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    try {
+                                        const response = await fetch(upvoteForm.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded',
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content
+                                            })
+                                        });
+
+                                        if(response.ok){
+                                            const data = await response.json();
+
+                                            voteCount.textContent = data.voteCount;
+                                            const upArrow = upvoteForm.querySelector('img');
+                                            upArrow.src = data.voteValue == 1 ?
+                                                "{{ asset('storage/icons/up-arrow-alt.png') }}" :
+                                                "{{ asset('storage/icons/up-arrow.png') }}" ;
+
+                                            if(data.voteValue == 1){
+                                                const downArrow = downvoteForm.querySelector('img');
+                                                downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                            }
+                                        }
+                                    } catch(error) {
+                                        console.error('Error: ', error);
+                                    }
+                                })
+                        // DOWNVOTE
+                                downvoteForm.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                    try{
+                                        const response = await fetch(downvoteForm.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded',
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content,
+                                            })
+                                        });
+
+                                        if(response.ok){
+                                            const data = await response.json();
+
+                                            voteCount.textContent = data.voteCount;
+                                            const downArrow = downvoteForm.querySelector('img');
+                                            downArrow.src = data.voteValue == -1 ?
+                                                "{{ asset('storage/icons/down-arrow-alt.png') }}" :
+                                                "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                            
+                                            if(data.voteValue == -1){
+                                                const upArrow = upvoteForm.querySelector('img');
+                                                upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                            }
+                                        }
+                                    } catch(error) {
+                                        console.error('Error: ', error);
+                                    }
+                                });
                             }
                         });
-                    }
-                });
-            };
-    // First page event Listeners
-        attachPostEventListeners('#posts-column'); // POST
-        attachCommentEventListeners('#comments-column'); // COMMENTS
-        function attachOverviewEventListeners(){
-            attachPostEventListeners('#overview-column');
-            attachCommentEventListeners('#overview-column');
-        }
-        attachOverviewEventListeners(); // OVERVIEW
+                    };
+            // Profile-replies
+                function attachReplyEventListeners(column = '#comments-column'){
+                    const replies = document.querySelectorAll(`${column} .profile-reply:not(.profile-comment)`);
+                    
+                    replies.forEach(reply => {
+                        if(!reply.dataset.listenersAttached){
+                            reply.dataset.listenersAttached = 'true';
+                    // Profile-reply cards linking to reply pages
+                            const originalPostLinkElement = reply.querySelector('.original-post-link');
+                            if(!originalPostLinkElement) return;
+
+                            const isCommentDeleted = reply.querySelector('.original-comment-content em') !== null;
+
+                            if(!isCommentDeleted){
+                                const originalPostLink = originalPostLinkElement.href;
+                                const originalPostID = originalPostLink.split('/').pop();
+                                const commentID = reply.querySelector('.original-comment-content').href.split('-').pop();
+                                const replyID = reply.id.split('-').pop();
+
+                                reply.addEventListener('click', () => {
+                                    window.location.href = `/post/${originalPostID}#reply-${replyID}`;
+                                });
+                    // Share Button
+                            const shareButton = reply.querySelector('.profile-reply-share-button');
+                            if(shareButton){
+                                shareButton.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    if(originalPostLinkElement){
+                                        const replyUrl = `${window.location.origin}/post/${originalPostID}#reply-${replyID}`;
+                                        navigator.clipboard.writeText(replyUrl)
+                                        .then(() => {
+                                            shareButton.textContent = 'Copied!';
+                                            setTimeout(() => {
+                                                shareButton.textContent = 'Share';
+                                            }, 1200);
+                                        });
+                                    }
+                                });
+                            }
+                            }
+                    // Upvote and downvote
+                            const voteContainer = reply.querySelector('.reply-vote-container');
+                            const upvoteForm = voteContainer.querySelector('form:first-child');
+                            const downvoteForm = voteContainer.querySelector('form:last-child');
+                            const voteCount = voteContainer.querySelector('form:first-child + p');
+
+                            voteContainer.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                    // UPVOTE
+                            upvoteForm.addEventListener('submit', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                try {
+                                    const response = await fetch(upvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                                        })
+                                    });
+
+                                    if(response.ok){
+                                        const data = await response.json();
+
+                                        voteCount.textContent = data.voteCount;
+                                        const upArrow = upvoteForm.querySelector('img');
+                                        upArrow.src = data.voteValue == 1 ?
+                                            "{{ asset('storage/icons/up-arrow-alt.png') }}" :
+                                            "{{ asset('storage/icons/up-arrow.png') }}" ;
+
+                                        if(data.voteValue == 1){
+                                            const downArrow = downvoteForm.querySelector('img');
+                                            downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                        }
+                                    }
+                                } catch(error){
+                                    console.error('Error: ', error);
+                                }
+                            });
+                    // DOWNVOTE
+                            downvoteForm.addEventListener('submit', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                try {
+                                    const response = await fetch(downvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                                        }),
+                                    });
+
+                                    if(response.ok){
+                                        const data = await response.json();
+
+                                        voteCount.textContent = data.voteCount;
+                                        const downArrow = downvoteForm.querySelector('img');
+                                        downArrow.src = data.voteValue == -1 ?
+                                            "{{ asset('storage/icons/down-arrow-alt.png') }}" :
+                                            "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                        
+                                        if(data.voteValue == -1){
+                                            const upArrow = upvoteForm.querySelector('img');
+                                            upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                        }
+                                    }
+                                } catch(error){
+                                    console.error('Error: ', error);
+                                }
+                            })
+                        }
+                    });
+                }
+            // First Page Event Listeners
+            attachOverviewEventListeners(); // OVERVIEW
+            attachPostEventListeners('#posts-column'); // POST
+            attachCommentEventListeners('#comments-column'); // COMMENTS
+            attachReplyEventListeners('#comments-column'); // REPLIES
 </script>
 </html>
