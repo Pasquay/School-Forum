@@ -65,25 +65,15 @@ class CommentController extends Controller
         });
     }
 
-
     public function getUserComment($userId, Request $request){
         $comments = $this->getUserCommentsData($userId);
 
         return response()->json([
             'comments' => $comments
         ]);
-
-        // $html = '';
-        // foreach($comments as $comment){
-        //     $html .= view('components.profile-comment', compact('comment'))->render();
-        // }
-        // return response()->json([
-        //     'html' => $html,
-        //     'next_page' => $comments->currentPage() < $comments->lastPage() ? $comments->currentPage()+1 : NULL,
-        // ]);
     }
 
-    public function getUserDeletedComments(Request $request, $userId){
+    public function getUserDeletedCommentsData($userId){
         $deletedComments = Comment::onlyTrashed()
             ->where(['user_id' => $userId])
             ->latest()
@@ -92,20 +82,20 @@ class CommentController extends Controller
                 $query->withTrashed();
             }, 'post.user'])
             ->paginate(15);
-
-        $deletedComments->getCollection()->transform(function ($comment) {
+    
+        return $deletedComments->getCollection()->transform(function($comment){
             $comment->votes = $comment->getVoteCountAttribute();
             $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->type = 'comment';
             return $comment;
         });
+    }
 
-        $html = '';
-        foreach($deletedComments as $deletedComment){
-            $html .= view('components.profile-comment', ['comment' => $deletedComment])->render();
-        }
+    public function getUserDeletedComments(Request $request, $userId){
+        $deletedComments = $this->getUserDeletedCommentsData($userId);
+
         return response()->json([
-            'html' => $html,
-            'next_page' => $deletedComments->currentPage() < $deletedComments->lastPage() ? $deletedComments->currentPage()+1 : NULL,
+            'deletedComments' => $deletedComments
         ]);
     }
 
@@ -115,6 +105,7 @@ class CommentController extends Controller
                 $query->withTrashed();
             }])
             ->findOrFail($id);
+            
         if($comment->user_id === Auth::id() && $comment->deleted_at && !$comment->post->deleted_at){
             $comment->restore();
             return redirect('/post/' . $comment->post->id . '#comment-' . $comment->id)->with('success', 'Comment restored successfully');

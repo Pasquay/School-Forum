@@ -248,14 +248,52 @@ class UserController extends Controller
                     $query->withTrashed();
                 }, 'post.user'])
                 ->paginate(15);
-                Log::info($deletedComments->total());
-                Log::info($deletedComments->pluck('id')->toArray());
 
             $deletedComments->getCollection()->transform(function ($comment) {
                 $comment->votes = $comment->getVoteCountAttribute();
                 $comment->userVote = $comment->getUserVoteAttribute();
+                $comment->type = 'comment';
                 return $comment;
             });
+
+            $deletedReplies = Reply::onlyTrashed()
+                ->where(['user_id' => $user->id])
+                ->latest()
+                ->withCount(['votes'])
+                ->with([
+                    'comment' => function($query){
+                        $query->withTrashed();
+                    },
+                    'comment.user',
+                    'comment.post' => function($query){
+                        $query->withTrashed();
+                    },
+                    'comment.post.user',
+                ])
+                ->paginate(15);
+
+            $deletedReplies->getCollection()->transform(function($reply){
+                $reply->votes = $reply->getVoteCountAttribute();
+                $reply->userVote = $reply->getUserVoteAttribute();
+                $reply->type = 'reply';
+                return $reply;
+            });
+                
+            $deletedCommentsPerPage = 15;
+            $deletedCommentsCurrentPage = request('page', 1);
+
+            $deletedCommentsAndReplies = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
+            $deletedCommentsAndRepliesCount = $deletedCommentsAndReplies->count();
+            $deletedCommentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
+            $deletedCommentsItems = $deletedCommentsAndReplies->slice($deletedCommentsOffset, $deletedCommentsPerPage)->values();
+
+            $deletedCommentsAndReplies = new \Illuminate\Pagination\LengthAwarePaginator(
+                $deletedCommentsItems,
+                $deletedCommentsAndRepliesCount,
+                $deletedCommentsPerPage,
+                $deletedCommentsCurrentPage,
+                ['path' => request()->url()]
+            );
 
         // Response
             if($user->id == Auth::id()){
@@ -269,7 +307,7 @@ class UserController extends Controller
                     'posts',
                     'comments',
                     'deletedPosts',
-                    'deletedComments',
+                    'deletedCommentsAndReplies',
                 ));
             }
             else{
@@ -392,7 +430,7 @@ class UserController extends Controller
         $perPage = 15;
         $currentPage = request('page', 1);
 
-       $commentController = new CommentController();
+        $commentController = new CommentController();
         $comments = $commentController->getUserCommentsData($id);
 
         $replyController = new ReplyController();
@@ -428,6 +466,49 @@ class UserController extends Controller
             ]);
         }
         
+        return response()->json(['error' => 'Invalid request']);
+    }
+
+    public function getUserDeletedCommentsAndReplies($id){
+        $perPage = 15;
+        $currentPage = request('page', 1);
+
+        $commentController = new CommentController();
+        $deletedComments = $commentController->getUserDeletedCommentsData($id);
+
+        $replyController = new ReplyController();
+        $deletedReplies = $replyController->getUserDeletedRepliesData($id);
+
+        $combined = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
+        $combinedCount = $combined->count();
+
+        $offset = ($currentPage - 1) * $perPage;
+        $combinedItems = $combined->slice($offset, $perPage)->values();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $combinedItems,
+            $combinedCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        if(request()->ajax()){
+            $html = '';
+            foreach($combinedItems as $item){
+                if($item->type === 'comment'){
+                    $html .= view('componennts.profile-comment', ['comment' => $item])->render();
+                } elseif($item->type === 'reply'){
+                    $html .= view('components.profile-reply', ['reply' => $item])->render();
+                }
+            }
+
+            return response()->json([
+                'html' => $html,
+                'next_page' => $paginator->hasMorePages() ? $paginator->currentPage()+1 : NULL,
+            ]);
+        }
+
         return response()->json(['error' => 'Invalid request']);
     }
 }

@@ -1192,7 +1192,7 @@
             </div>
             <div id="delete-post-form" style='display:none;'>
                 <h2>{{ $post->title }}</h2>
-                <p>{{ $post->content }}</p>
+                <p style='white-space:pre-wrap'>{{ $post->content }}</p>
                 <form action="/delete-post/{{ $post->id }}" method='POST'>
                     @csrf
                     <div class="delete-form-buttons">
@@ -1279,7 +1279,7 @@
                         </form>
                     </div>
                     <div class="comment-delete-form" style='display:none;'>
-                        <p>{{ $comment->content }}</p><br>
+                        <p style='white-space:pre-wrap'>{{ $comment->content }}</p><br>
                         <div class="delete-form-buttons">
                             <form action="{{ $post->id }}/delete-comment/{{ $comment->id }}" method='POST' class='delete-buttons-container'>
                                 @csrf
@@ -1353,7 +1353,7 @@
                     </form>
                 </div>
                 <div class="reply-delete-form" style='display:none;'>
-                    <p>Reply Content</p>
+                    <p style='white-space:pre-wrap'>Reply Content</p>
                     <div class="delete-form-buttons">
                         <form action="" method='POST' class='delete-buttons-container'>
                             @csrf

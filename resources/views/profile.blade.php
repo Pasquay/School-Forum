@@ -797,16 +797,46 @@
         .profile-reply.deleted .reply-vote-container button:disabled img {
             filter: grayscale(100%);
         }
-    /* DELETED POSTS */
-        .deleted-posts-column {
-            max-width: 800px;
+    /* DELETED CONTAINER */
+        .deleted-overview-column {
+            width: 100%;
             margin: 1.5rem 0 1.5rem 0;
             padding: 0 0.7rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
         }
-
+        
+        .deleted-posts-column {
+            width: 100%;
+            margin: 1.5rem 0 1.5rem 0;
+            padding: 0 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .deleted-comments-column {
+            width: 100%;
+            margin: 1.5rem 0 1.5rem 0;
+            padding: 0 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .deleted-overview-column-bottom,
+        .deleted-post-column-bottom,
+        .deleted-comment-column-bottom {
+            display: block;
+            text-align: center;
+            margin: 3rem auto 2rem auto;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            line-height: 1.5;
+            transition: background 0.2s;
+        }
+    /* DELETED POSTS */
         .deleted-post-column-bottom {
             display: block;
             text-align: center;
@@ -853,15 +883,6 @@
             color: #218838;
         }
     /* DELETED COMMENTS */
-        .deleted-comments-column {
-            max-width: 800px;
-            margin: 1.5rem 0 1.5rem 0;
-            padding: 0 0.7rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
         .profile-comment.deleted {
             cursor: default;
         }
@@ -903,6 +924,62 @@
         }
 
         .disabled-comment-restore-button {
+            font-size: 0.9rem;
+            background-color: white;
+            color: #28a745;
+            filter: grayscale(100%);
+            margin-top: 40px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: default;
+            transition: transform 0.2s;
+        }
+    /* DELETED REPLIES */
+        .profile-reply.deleted {
+            cursor: default;
+        }
+
+        .deleted-original-comment-content {
+            background-color: #f8f9fa;
+            border-left: 3px solid #dee2e6;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            margin: 0.75rem 0 0.5rem 0;
+            font-style: italic;
+            color: #666;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            text-decoration: none;
+            display: block;
+        }
+
+        .reply-restore-button {
+            font-size: 0.9rem;
+            background-color: white;
+            color: #28a745;
+            margin-top: 40px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .reply-restore-button:hover {
+            transform: scale(1.1);
+        }
+
+        .reply-restore-button:active {
+            transform: scale(1.0);
+            color: #218838;
+        }
+
+        .disabled-reply-restore-button {
             font-size: 0.9rem;
             background-color: white;
             color: #28a745;
@@ -1233,8 +1310,12 @@
                     </div>
                 </div>
                 <div class="deleted-comments-column" id='deleted-comments-column' style='display:none;'>
-                    @foreach($deletedComments as $deletedComment)
-                        @include('components.profile-comment', ['comment' => $deletedComment])
+                    @foreach($deletedCommentsAndReplies as $item)
+                        @if($item->type === 'comment')
+                            @include('components.profile-comment', ['comment' => $item])
+                        @elseif($item->type === 'reply')
+                            @include('components.profile-reply', ['reply' => $item])
+                        @endif
                     @endforeach
                     <div class="loader" id='deleted-comment-loader'
                         style=
@@ -1371,6 +1452,7 @@
                     if(!overviewBtn.classList.contains('active')){
                         overviewBtn.classList.add('active');
                         overviewCol.style.display = 'flex';
+                        attachOverviewEventListeners();
                     }
                     if(postsBtn.classList.contains('active')){
                         postsBtn.classList.remove('active');
@@ -1396,6 +1478,7 @@
                     if(!postsBtn.classList.contains('active')){
                         postsBtn.classList.add('active');
                         postsCol.style.display = 'flex';
+                        attachPostEventListeners('#posts-column'); // POST
                     }
                     if(commentsBtn.classList.contains('active')){
                         commentsBtn.classList.remove('active');
@@ -1421,6 +1504,8 @@
                     if(!commentsBtn.classList.contains('active')){
                         commentsBtn.classList.add('active');
                         commentsCol.style.display = 'flex';
+                        attachCommentEventListeners('#comments-column'); // COMMENTS
+                        attachReplyEventListeners('#comments-column'); // REPLIES
                     }
                     if(deletedBtn.classList.contains('active')){
                         deletedBtn.classList.remove('active');
@@ -1630,11 +1715,11 @@
                                 deletedPostsLoader.style.display = 'none';
                             });
                         }
-                    // Deleted Comments - Under Construction 
+                    // Deleted Comments And Replies
                         if(deletedCommentsBtn.classList.contains('active') && !deletedCommentsLoading && deletedCommentsNextPage){
                             deletedCommentsLoading = true;
                             deletedCommentsLoader.style.display = 'block';
-                            fetch(`/user/${userID}/deleted-comments?page=${deletedCommentsNextPage}`, {
+                            fetch(`/user/${userID}/deleted-comments-replies?page=${deletedCommentsNextPage}`, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1645,6 +1730,8 @@
                                 deletedCommentsNextPage = data.next_page;
                                 deletedCommentsLoading = false;
                                 deletedCommentsLoader.style.display = 'none';
+
+                                // attach deleted reply event listeners
 
                                 if(!deletedCommentsNextPage){
                                     document.querySelector('deleted-comment-column-bottom').style.display = 'block';
@@ -2038,29 +2125,11 @@
                     });
                 }
             // Deleted Posts
-                function attachDeletedPostEventListeners(column = '#deleted-posts-column'){
-                    const deletedPosts = document.querySelectorAll(`${column} .post.deleted`);
-
-                    deletedPosts.forEach(deletedPost => {
-                        if(!deletedPost.dataset.listenersAttached){
-                            deletedPost.dataset.listenersAttached = 'true';
-                    // Post restore buttons
-                            const restoreButton = deletedPost.querySelector('.post-restore-button');
-                            restoreButton.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                restoreButton.closest('form').submit();
-                            });
-                        }
-                    })
-                }
-            // Deleted Comments
-                // Didnt need to add an event listener
-                // First page event Listeners
-            // First Page Event Listeners
-            attachOverviewEventListeners(); // OVERVIEW
-            attachPostEventListeners('#posts-column'); // POST
-            attachCommentEventListeners('#comments-column'); // COMMENTS
-            attachReplyEventListeners('#comments-column'); // REPLIES
-            attachDeletedPostEventListeners(); // DELETED POSTS
-</script>
+        
+        // First Page Event Listeners
+            attachOverviewEventListeners();
+            // attachPostEventListeners('#posts-column'); // POST
+            // attachCommentEventListeners('#comments-column'); // COMMENTS
+            // attachReplyEventListeners('#comments-column'); // REPLIES
+            // attachDeletedPostEventListeners('#deleted-posts-column'); // DELETED POSTS</script>
 </html>

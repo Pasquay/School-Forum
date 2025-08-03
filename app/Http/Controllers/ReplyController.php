@@ -93,4 +93,63 @@ class ReplyController extends Controller
             'replies' => $replies
         ]);
     }
+
+    public function getUserDeletedRepliesData($userId){
+        $deletedReplies = Reply::onlyTrashed()
+            ->where(['user_id' => $userId])
+            ->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.post.user',
+            ])
+            ->paginate(15);
+
+        return $deletedReplies->getCollection()->transform(function($reply){
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
+    }
+
+    public function getUserDeletedReplies(Request $request, $userId){
+        $deletedReplies = $this->getUserDeletedRepliesData($userId);
+
+        return response()->json([
+            'deletedReplies' => $deletedReplies
+        ]);
+    }
+
+    public function restore($id){
+        $reply = Reply::onlyTrashed()
+            ->with([
+                'comment' => function($query){
+                    $query->withTrashed();
+                },
+                'comment.post' => function($query){
+                    $query->withTrashed();
+                }
+            ])
+            ->findOrFail($id);
+
+        if($reply->user_id === Auth::id() && $reply->deleted_at && !$reply->comment->deleted_at && !$reply->comment->post->deleted_at){
+            $reply->restore();
+            return redirect('/post/' . $reply->comment->post->id . '#reply-' . $reply->id)->with('success', 'Comment restored successfully');
+        } else if($reply->user_id != Auth::id()){
+            return redirect('/user/' . Auth::id())->with('error', 'Invalid Credentials');
+        } else if ($reply->comment->deleted_at){
+            return redirect('/user/' . Auth::id())->with('error', 'Cannot restore to a deleted comment');
+        } else if ($reply->comment->post->deleted_at){
+            return redirect('/user/' . Auth::id())->with('error', 'Cannto restore to a deleted post');
+        } else {
+            return redirect('/user/' . Auth::id())->with('error', 'Comment must be deleted to be restored');
+        }
+    }
 }
