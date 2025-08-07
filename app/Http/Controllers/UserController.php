@@ -470,45 +470,66 @@ class UserController extends Controller
     }
 
     public function getUserDeletedCommentsAndReplies($id){
-        $perPage = 15;
-        $currentPage = request('page', 1);
+        try {
+            $user = User::findOrFail($id);
+            $perPage = 15;
+            $currentPage = request('page', 1);
 
-        $commentController = new CommentController();
-        $deletedComments = $commentController->getUserDeletedCommentsData($id);
+            Log::info("Getting deleted content for user {$id}, page {$currentPage}");
 
-        $replyController = new ReplyController();
-        $deletedReplies = $replyController->getUserDeletedRepliesData($id);
+            $commentController = new CommentController();
+            $deletedComments = $commentController->getUserDeletedCommentsData($user->id);
+            Log::info("Got " . $deletedComments->count() . " deleted comments");
 
-        $combined = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
-        $combinedCount = $combined->count();
+            $replyController = new ReplyController();
+            $deletedReplies = $replyController->getUserDeletedRepliesData($user->id);
+            Log::info("Got " . $deletedReplies->count() . " deleted replies");
 
-        $offset = ($currentPage - 1) * $perPage;
-        $combinedItems = $combined->slice($offset, $perPage)->values();
+            $combined = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
+            $combinedCount = $combined->count();
+            Log::info("Combined count: {$combinedCount}");
 
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $combinedItems,
-            $combinedCount,
-            $perPage,
-            $currentPage,
-            ['path' => request()->url()]
-        );
+            $offset = ($currentPage - 1) * $perPage;
+            $combinedItems = $combined->slice($offset, $perPage)->values();
+            Log::info("Items for page {$currentPage}: " . $combinedItems->count());
 
-        if(request()->ajax()){
-            $html = '';
-            foreach($combinedItems as $item){
-                if($item->type === 'comment'){
-                    $html .= view('componennts.profile-comment', ['comment' => $item])->render();
-                } elseif($item->type === 'reply'){
-                    $html .= view('components.profile-reply', ['reply' => $item])->render();
+            $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                $combinedItems,
+                $combinedCount,
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
+
+            if(request()->ajax()){
+                $html = '';
+                foreach($combinedItems as $index => $item){
+                    try {
+                        Log::info("Rendering item {$index}, type: {$item->type}, id: {$item->id}");
+                        
+                        if($item->type === 'comment'){
+                            $html .= view('components.profile-comment', ['comment' => $item])->render();
+                        } elseif($item->type === 'reply'){
+                            $html .= view('components.profile-reply', ['reply' => $item])->render();
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("Error rendering item {$index} (type: {$item->type}, id: {$item->id}): " . $e->getMessage());
+                        // Skip this item and continue
+                        continue;
+                    }
                 }
+
+                return response()->json([
+                    'html' => $html,
+                    'next_page' => $paginator->hasMorePages() ? $paginator->currentPage()+1 : NULL,
+                ]);
             }
 
-            return response()->json([
-                'html' => $html,
-                'next_page' => $paginator->hasMorePages() ? $paginator->currentPage()+1 : NULL,
-            ]);
+            return response()->json(['error' => 'Invalid request']);
+        } catch (\Exception $e) {
+            Log::error("Error in getUserDeletedCommentsAndReplies: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
+            return response()->json(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         }
-
-        return response()->json(['error' => 'Invalid request']);
     }
 }

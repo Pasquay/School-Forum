@@ -109,9 +109,9 @@ class ReplyController extends Controller
                 },
                 'comment.post.user',
             ])
-            ->paginate(15);
+            ->get();
 
-        return $deletedReplies->getCollection()->transform(function($reply){
+        return $deletedReplies->transform(function($reply){
             $reply->votes = $reply->getVoteCountAttribute();
             $reply->userVote = $reply->getUserVoteAttribute();
             $reply->type = 'reply';
@@ -119,7 +119,7 @@ class ReplyController extends Controller
         });
     }
 
-    public function getUserDeletedReplies(Request $request, $userId){
+    public function getUserDeletedReplies($userId){
         $deletedReplies = $this->getUserDeletedRepliesData($userId);
 
         return response()->json([

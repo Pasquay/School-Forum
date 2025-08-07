@@ -78,12 +78,15 @@ class CommentController extends Controller
             ->where(['user_id' => $userId])
             ->latest()
             ->withCount(['votes'])
-            ->with(['post' => function($query){
-                $query->withTrashed();
-            }, 'post.user'])
-            ->paginate(15);
+            ->with([
+                'post' => function($query){
+                    $query->withTrashed();
+                }, 
+                'post.user'
+            ])
+            ->get();
     
-        return $deletedComments->getCollection()->transform(function($comment){
+        return $deletedComments->transform(function($comment){
             $comment->votes = $comment->getVoteCountAttribute();
             $comment->userVote = $comment->getUserVoteAttribute();
             $comment->type = 'comment';
@@ -91,7 +94,7 @@ class CommentController extends Controller
         });
     }
 
-    public function getUserDeletedComments(Request $request, $userId){
+    public function getUserDeletedComments($userId){
         $deletedComments = $this->getUserDeletedCommentsData($userId);
 
         return response()->json([

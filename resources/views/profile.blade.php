@@ -1683,7 +1683,7 @@
                         if(deletedCommentsBtn.classList.contains('active') && !deletedCommentsLoading && deletedCommentsNextPage){
                             deletedCommentsLoading = true;
                             deletedCommentsLoader.style.display = 'block';
-                            fetch(`/user/${userID}/deleted-comments-replies?page=${deletedCommentsNextPage}`, {
+                            fetch(`/user/${userID}/deleted-comments-and-replies?page=${deletedCommentsNextPage}`, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1698,7 +1698,7 @@
                                 // attach deleted reply event listeners
 
                                 if(!deletedCommentsNextPage){
-                                    document.querySelector('deleted-comment-column-bottom').style.display = 'block';
+                                    document.querySelector('#deleted-comment-column-bottom').style.display = 'block';
                                 }
                             })
                             .catch(error => {
