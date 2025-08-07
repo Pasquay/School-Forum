@@ -1667,10 +1667,8 @@
                                 deletedPostsLoading = false;
                                 deletedPostsLoader.style.display = 'none';
 
-                                attachDeletedPostEventListeners();
-
                                 if(!deletedPostsNextPage){
-                                    document.getElementById('deleted-post-column-bottom').style.display = 'block';
+                                    document.querySelector('#deleted-post-column-bottom').style.display = 'block';
                                 }
                             })
                             .catch(error => {
@@ -1694,8 +1692,6 @@
                                 deletedCommentsNextPage = data.next_page;
                                 deletedCommentsLoading = false;
                                 deletedCommentsLoader.style.display = 'none';
-
-                                // attach deleted reply event listeners
 
                                 if(!deletedCommentsNextPage){
                                     document.querySelector('#deleted-comment-column-bottom').style.display = 'block';
@@ -2088,7 +2084,6 @@
                         }
                     });
                 }
-            // Deleted Posts
         
         // First Page Event Listeners
             attachOverviewEventListeners();
