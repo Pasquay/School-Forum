@@ -17,7 +17,7 @@
         @if(!$reply->comment->deleted_at)
             <p class='original-comment-content-p'><a href='/post/{{ $reply->comment->post->id }}#comment-{{ $reply->comment->id }}' class='original-comment-content' style='white-space:pre-wrap;'>{{ $reply->comment->content }}</a></p>
         @else
-            <p class='deleted-original-comment-content' style='white-space:pre-wrap;'><em>DELETED COMMENT</em></p>
+            <p><a href='#' class='original-comment-content deleted' style='white-space:pre-wrap;'><em>DELETED COMMENT</em></a></p>
         @endif
         <p class='reply-content' style='white-space:pre-wrap;'>{{ $reply->content }}</p>
         <div class="profile-reply-bottom">

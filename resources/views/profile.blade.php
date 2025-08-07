@@ -941,7 +941,7 @@
             cursor: default;
         }
 
-        .deleted-original-comment-content {
+        .original-comment-content.deleted {
             background-color: #f8f9fa;
             border-left: 3px solid #dee2e6;
             width: 100%;
@@ -1454,80 +1454,56 @@
                         overviewCol.style.display = 'flex';
                         attachOverviewEventListeners();
                     }
-                    if(postsBtn.classList.contains('active')){
-                        postsBtn.classList.remove('active');
-                        postsCol.style.display = 'none';
-                    }
-                    if(commentsBtn.classList.contains('active')){
-                        commentsBtn.classList.remove('active');
-                        commentsCol.style.display = 'none';
-                    }
-                    if(deletedBtn.classList.contains('active')){
-                        deletedBtn.classList.remove('active');
-                        deletedContainer.style.display = 'none';
-                        leftsubnav.style.display = 'none';
-                    }
+                    postsBtn.classList.remove('active');
+                    postsCol.style.display = 'none';
+                    commentsBtn.classList.remove('active');
+                    commentsCol.style.display = 'none';
+                    deletedBtn.classList.remove('active');
+                    deletedContainer.style.display = 'none';
+                    leftsubnav.style.display = 'none';
                 });
             // Posts
                 postsForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if(overviewBtn.classList.contains('active')){
-                        overviewBtn.classList.remove('active');
-                        overviewCol.style.display = 'none';
-                    }
+                    overviewBtn.classList.remove('active');
+                    overviewCol.style.display = 'none';
                     if(!postsBtn.classList.contains('active')){
                         postsBtn.classList.add('active');
                         postsCol.style.display = 'flex';
                         attachPostEventListeners('#posts-column'); // POST
                     }
-                    if(commentsBtn.classList.contains('active')){
-                        commentsBtn.classList.remove('active');
-                        commentsCol.style.display = 'none';
-                    }
-                    if(deletedBtn.classList.contains('active')){
-                        deletedBtn.classList.remove('active');
-                        deletedContainer.style.display = 'none';
-                        leftsubnav.style.display = 'none';
-                    }
+                    commentsBtn.classList.remove('active');
+                    commentsCol.style.display = 'none';
+                    deletedBtn.classList.remove('active');
+                    deletedContainer.style.display = 'none';
+                    leftsubnav.style.display = 'none';
                 });
             // Comments
                 commentsForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if(overviewBtn.classList.contains('active')){
-                        overviewBtn.classList.remove('active');
-                        overviewCol.style.display = 'none';
-                    }
-                    if(postsBtn.classList.contains('active')){
-                        postsBtn.classList.remove('active');
-                        postsCol.style.display = 'none';
-                    }
+                    overviewBtn.classList.remove('active');
+                    overviewCol.style.display = 'none';
+                    postsBtn.classList.remove('active');
+                    postsCol.style.display = 'none';
                     if(!commentsBtn.classList.contains('active')){
                         commentsBtn.classList.add('active');
                         commentsCol.style.display = 'flex';
                         attachCommentEventListeners('#comments-column'); // COMMENTS
                         attachReplyEventListeners('#comments-column'); // REPLIES
                     }
-                    if(deletedBtn.classList.contains('active')){
-                        deletedBtn.classList.remove('active');
-                        deletedContainer.style.display = 'none';
-                        leftsubnav.style.display = 'none';
-                    }
+                    deletedBtn.classList.remove('active');
+                    deletedContainer.style.display = 'none';
+                    leftsubnav.style.display = 'none';
                 });
             // Deleted
                 deletedForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if(overviewBtn.classList.contains('active')){
-                        overviewBtn.classList.remove('active');
-                        overviewCol.style.display = 'none';
-                    }
-                    if(postsBtn.classList.contains('active')){
-                        postsBtn.classList.remove('active');
-                        postsCol.style.display = 'none';
-                    }
-                    if(commentsBtn.classList.contains('active')){
-                        commentsBtn.classList.remove('active');
-                        commentsCol.style.display = 'none';
-                    }
+                    overviewBtn.classList.remove('active');
+                    overviewCol.style.display = 'none';
+                    postsBtn.classList.remove('active');
+                    postsCol.style.display = 'none';
+                    commentsBtn.classList.remove('active');
+                    commentsCol.style.display = 'none';
                     if(!deletedBtn.classList.contains('active')){
                         deletedBtn.classList.add('active');
                         deletedContainer.style.display = 'flex';
@@ -1541,42 +1517,30 @@
                                 deletedOverviewBtn.classList.add('active');
                                 deletedOverviewCol.style.display = 'flex';
                             }
-                            if(deletedPostsBtn.classList.contains('active')){
-                                deletedPostsBtn.classList.remove('active');
-                                deletedPostsCol.style.display = 'none';
-                            }
-                            if(deletedCommentsBtn.classList.contains('active')){
-                                deletedCommentsBtn.classList.remove('active');
-                                deletedCommentsCol.style.display = 'none';
-                            }
+                            deletedPostsBtn.classList.remove('active');
+                            deletedPostsCol.style.display = 'none';
+                            deletedCommentsBtn.classList.remove('active');
+                            deletedCommentsCol.style.display = 'none';
                         });
                 // Deleted Posts
                     deletedPostsForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        if(deletedOverviewBtn.classList.contains('active')){
-                            deletedOverviewBtn.classList.remove('active');
-                            deletedOverviewCol.style.display = 'none';
-                        }
+                        deletedOverviewBtn.classList.remove('active');
+                        deletedOverviewCol.style.display = 'none';
                         if(!deletedPostsBtn.classList.contains('active')){
                             deletedPostsBtn.classList.add('active');
                             deletedPostsCol.style.display = 'flex';
                         }
-                        if(deletedCommentsBtn.classList.contains('active')){
-                            deletedCommentsBtn.classList.remove('active');
-                            deletedCommentsCol.style.display = 'none';
-                        }
+                        deletedCommentsBtn.classList.remove('active');
+                        deletedCommentsCol.style.display = 'none';
                     })
                 // Deleted Comments
                     deletedCommentsForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        if(deletedOverviewBtn.classList.contains('active')){
-                            deletedOverviewBtn.classList.remove('active');
-                            deletedOverviewCol.style.display = 'none';
-                        }
-                        if(deletedPostsBtn.classList.contains('active')){
-                            deletedPostsBtn.classList.remove('active');
-                            deletedPostsCol.style.display = 'none';
-                        }
+                        deletedOverviewBtn.classList.remove('active');
+                        deletedOverviewCol.style.display = 'none';
+                        deletedPostsBtn.classList.remove('active');
+                        deletedPostsCol.style.display = 'none';
                         if(!deletedCommentsBtn.classList.contains('active')){
                             deletedCommentsBtn.classList.add('active');
                             deletedCommentsCol.style.display = 'flex';
@@ -2000,7 +1964,7 @@
                     };
             // Profile-replies
                 function attachReplyEventListeners(column = '#comments-column'){
-                    const replies = document.querySelectorAll(`${column} .profile-reply:not(.profile-comment)`);
+                    const replies = document.querySelectorAll(`${column} .profile-reply`);
                     
                     replies.forEach(reply => {
                         if(!reply.dataset.listenersAttached){
@@ -2120,7 +2084,7 @@
                                 } catch(error){
                                     console.error('Error: ', error);
                                 }
-                            })
+                            });
                         }
                     });
                 }
