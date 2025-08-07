@@ -18,6 +18,7 @@ Route::controller(UserController::class)->group(function() {
     Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth'); // load user settings
     Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
+    Route::get('/user/{id}/deleted-overview', 'getUserDeletedOverview')->middleware('auth'); // load page 2+ deleted user overview
     Route::get('/user/{id}/deleted-comments-and-replies', 'getUserDeletedCommentsAndReplies')->middleware('auth'); // load page 2+ deleted user comments and replies
 });
 

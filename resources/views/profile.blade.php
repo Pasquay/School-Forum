@@ -1404,6 +1404,9 @@
         const repliesContainer = document.querySelector('#replies-column');
         const repliesLoader = document.querySelector('#replies-loader');
 
+        const deletedOverviewContainer = document.querySelector('#deleted-overview-column');
+        const deletedOverviewLoader = document.querySelector('#deleted-overview-loader');
+
         const deletedPostsContainer = document.querySelector('#deleted-posts-column');
         const deletedPostsLoader = document.querySelector('#deleted-post-loader');
 
@@ -1576,6 +1579,9 @@
                 // Comments
                     let commentNextPage = 2;
                     let commentLoading = false;
+                // Deleted Overview
+                    let deletedOverviewNextPage = 2;
+                    let deletedOverviewLoading = false;
                 // Deleted Posts
                     let deletedPostsNextPage = 2;
                     let deletedPostsLoading = false;
@@ -1671,7 +1677,36 @@
                             });
                         }
                     // Deleted Overview
-                    
+                        if(
+                            deletedOverviewBtn.classList.contains('active') 
+                            && deletedOverviewCol.style.display === 'flex'
+                            && !deletedOverviewLoading 
+                            && deletedOverviewNextPage
+                        ){
+                            deletedOverviewLoading = true;
+                            deletedOverviewLoader.style.display = 'block';
+                            fetch(`/user/${userID}/deleted-overview?page=${deletedOverviewNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                deletedOverviewLoader.insertAdjacentHTML('beforebegin', data.html);
+                                deletedOverviewNextPage = data.next_page;
+                                deletedOverviewLoading = false;
+                                deletedOverviewLoader.style.display = 'none';
+
+                                if(!deletedOverviewNextPage){
+                                    document.querySelector('#deleted-overview-column-bottom').style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                deletedOverviewLoading = false;
+                                deletedOverviewLoader.style.display = 'none';
+                            });
+                        }
                     // Deleted Posts
                         if(deletedPostsBtn.classList.contains('active') && !deletedPostsLoading && deletedPostsNextPage){
                             deletedPostsLoading = true;
@@ -1722,7 +1757,7 @@
                                 console.error('Error: ', error);
                                 deletedCommentsLoading = false;
                                 deletedCommentsLoader.style.display = 'none';
-                            })
+                            });
                         }
                 }
             });

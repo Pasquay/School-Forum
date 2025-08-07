@@ -46,8 +46,8 @@
                     <button type="submit" class='reply-restore-button' id='reply-restore-button-{{ $reply->id }}'>Restore</button>
                 </form>
             @else
-                <button type="button" class='disabled-comment-restore-button' 
-                        id='disabled-comment-restore-button-{{ $comment->id }}'
+                <button type="button" class='disabled-reply-restore-button' 
+                        id='disabled-reply-restore-button-{{ $reply->id }}'
                         title='Restore unavailable due to original post and/or comment being deleted'>
                     Restore Unavailable
                 </button>

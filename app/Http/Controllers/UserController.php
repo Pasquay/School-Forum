@@ -346,7 +346,10 @@ class UserController extends Controller
             'deleted_at' => NULL,
             'user_id' => $user->id
         ])->latest()
-            ->withcount(['votes', 'comments'])
+            ->withcount([
+                'votes', 
+                'comments'
+            ])
             ->get();
 
         $overviewPosts->transform(function($post){
@@ -361,7 +364,13 @@ class UserController extends Controller
             'user_id' => $user->id
         ])->latest()
             ->withcount(['votes'])
-            ->with(['post', 'post.user'])
+            ->with([
+                'post' => function($query){
+                    $query->withTrashed();
+                }, 
+                'post.user',
+                'user',
+            ])
             ->get();
 
         $overviewComments->transform(function($comment){
