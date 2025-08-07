@@ -1291,7 +1291,26 @@
             </div>
             <div class='deleted-container' style='display:none;'>
                 <div class="deleted-overview-column" id='deleted-overview-column'>
-                    deleted overview
+                    @foreach($deletedOverview as $item)
+                        @if($item->type === 'post')
+                            @include('components.post', ['post' => $item])
+                        @elseif($item->type === 'comment')
+                            @include('components.profile-comment', ['comment' => $item])
+                        @elseif($item->type === 'reply')
+                            @include('components.profile-reply', ['reply' => $item])
+                        @endif
+                    @endforeach
+                    <div class="loader" id='deleted-overview-loader'
+                        style=
+                            'display:none;
+                            margin:3rem;
+                            text-align:center'
+                    >
+                        Loading...
+                    </div>
+                    <div class="deleted-overview-column-bottom" id='deleted-overview-column-bottom' style='display:none;'>
+                        You're all caught up!
+                    </div>
                 </div>
                 <div class="deleted-posts-column" id='deleted-posts-column' style='display:none;'>
                     @foreach($deletedPosts as $deletedPost)
@@ -1651,6 +1670,8 @@
                                 commentLoader.style.display = 'none';
                             });
                         }
+                    // Deleted Overview
+                    
                     // Deleted Posts
                         if(deletedPostsBtn.classList.contains('active') && !deletedPostsLoading && deletedPostsNextPage){
                             deletedPostsLoading = true;

@@ -226,6 +226,8 @@ class UserController extends Controller
                 ['path' => request()->url()]
             );
         
+        // Deleted Overview
+            $deletedOverview = $this->getUserDeletedOverview($user->id);
         // Deleted Posts
             $deletedPosts = Post::onlyTrashed()
                 ->where(['user_id' => $user->id])
@@ -306,6 +308,7 @@ class UserController extends Controller
                     'overview',
                     'posts',
                     'comments',
+                    'deletedOverview',
                     'deletedPosts',
                     'deletedCommentsAndReplies',
                 ));
@@ -469,29 +472,77 @@ class UserController extends Controller
         return response()->json(['error' => 'Invalid request']);
     }
 
+    public function getUserDeletedOverview($id){
+        $user = User::findOrFail($id);
+        $perPage = 15;
+        $currentPage = request('page', 1);
+
+        $postController = new PostController();
+        $deletedPosts = $postController->getUserDeletedPostsData($user->id);
+
+        $commentController = new CommentController();
+        $deletedComments = $commentController->getUserDeletedCommentsData($user->id);
+
+        $replyController = new ReplyController();
+        $deletedReplies = $replyController->getUserDeletedRepliesData($user->id);
+
+        $combined = $deletedPosts->concat($deletedComments)->concat($deletedReplies)->sortByDesc('created_at');
+        $combinedCount = $combined->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $combinedItems = $combined->slice($offset, $perPage)->values();
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $combinedItems,
+            $combinedCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        if(request()->ajax()){
+            $html = '';
+            foreach($combinedItems as $index => $item){
+                if($item->type === 'post'){
+                    $html .= view('components.post', ['post' => $item])->render();
+                } elseif($item->type === 'comment'){
+                    $html .= view('components.profile-comment', ['comment' => $item])->render();
+                } elseif($item->type === 'reply'){
+                    $html .= view('components.profile-reply', ['reply' => $item])->render();
+                }
+            }
+
+            return response()->json([
+                'html' => $html,
+                'next_page' => $paginator->hasMorePages() ? $paginator->currentPage()+1 : NULL,
+            ]);
+        } else {
+            return $paginator;
+        }
+    }
+
     public function getUserDeletedCommentsAndReplies($id){
-        try {
+        // try {
             $user = User::findOrFail($id);
             $perPage = 15;
             $currentPage = request('page', 1);
 
-            Log::info("Getting deleted content for user {$id}, page {$currentPage}");
+            // Log::info("Getting deleted content for user {$id}, page {$currentPage}");
 
             $commentController = new CommentController();
             $deletedComments = $commentController->getUserDeletedCommentsData($user->id);
-            Log::info("Got " . $deletedComments->count() . " deleted comments");
+            // Log::info("Got " . $deletedComments->count() . " deleted comments");
 
             $replyController = new ReplyController();
             $deletedReplies = $replyController->getUserDeletedRepliesData($user->id);
-            Log::info("Got " . $deletedReplies->count() . " deleted replies");
+            // Log::info("Got " . $deletedReplies->count() . " deleted replies");
 
             $combined = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
             $combinedCount = $combined->count();
-            Log::info("Combined count: {$combinedCount}");
+            // Log::info("Combined count: {$combinedCount}");
 
             $offset = ($currentPage - 1) * $perPage;
             $combinedItems = $combined->slice($offset, $perPage)->values();
-            Log::info("Items for page {$currentPage}: " . $combinedItems->count());
+            // Log::info("Items for page {$currentPage}: " . $combinedItems->count());
 
             $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
                 $combinedItems,
@@ -505,7 +556,7 @@ class UserController extends Controller
                 $html = '';
                 foreach($combinedItems as $index => $item){
                     try {
-                        Log::info("Rendering item {$index}, type: {$item->type}, id: {$item->id}");
+                        // Log::info("Rendering item {$index}, type: {$item->type}, id: {$item->id}");
                         
                         if($item->type === 'comment'){
                             $html .= view('components.profile-comment', ['comment' => $item])->render();
@@ -513,7 +564,7 @@ class UserController extends Controller
                             $html .= view('components.profile-reply', ['reply' => $item])->render();
                         }
                     } catch (\Exception $e) {
-                        Log::error("Error rendering item {$index} (type: {$item->type}, id: {$item->id}): " . $e->getMessage());
+                        // Log::error("Error rendering item {$index} (type: {$item->type}, id: {$item->id}): " . $e->getMessage());
                         // Skip this item and continue
                         continue;
                     }
@@ -526,10 +577,10 @@ class UserController extends Controller
             }
 
             return response()->json(['error' => 'Invalid request']);
-        } catch (\Exception $e) {
-            Log::error("Error in getUserDeletedCommentsAndReplies: " . $e->getMessage());
-            Log::error("Stack trace: " . $e->getTraceAsString());
-            return response()->json(['error' => 'Internal server error: ' . $e->getMessage()], 500);
-        }
+        // } catch (\Exception $e) {
+        //     Log::error("Error in getUserDeletedCommentsAndReplies: " . $e->getMessage());
+        //     Log::error("Stack trace: " . $e->getTraceAsString());
+        //     return response()->json(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        // }
     }
 }

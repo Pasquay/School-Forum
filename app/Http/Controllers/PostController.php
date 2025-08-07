@@ -60,6 +60,21 @@ class PostController extends Controller
         ]);
     }
 
+    public function getUserDeletedPostsData($userId){
+        $deletedPosts = Post::onlyTrashed()
+            ->where(['user_id' => $userId])
+            ->latest()
+            ->withCount(['votes'])
+            ->get();
+
+        return $deletedPosts->transform(function($post){
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->type = 'post';
+            return $post;
+        });
+    }
+
     public function getUserDeletedPosts(Request $request, $userId){
         $deletedPosts = Post::onlyTrashed()
             ->where(['user_id' => $userId])
