@@ -1365,6 +1365,7 @@
             </div>
         </template>
     </div>
+    @include('components.back-to-top-button')
 </body>
 <script>
 window.currentUserId = {{ Auth::id() ?? 'null' }};

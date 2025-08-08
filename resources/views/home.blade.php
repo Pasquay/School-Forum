@@ -410,6 +410,7 @@
             @include('components.post', ['post' => $post])
         @endforeach
     </div>
+    @include('components.back-to-top-button')
     <div class="loader" id='loader' 
         style='
             text-align:center;
@@ -597,7 +598,7 @@
                 })
         })
     });
-// Upvote and downvote logic
+    // Upvote and downvote logic
         Array.from(posts).forEach(post => {
             const voteContainer = post.querySelector('#vote-container');
             const upvoteForm = voteContainer.querySelector('form:first-child');

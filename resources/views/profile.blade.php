@@ -1385,6 +1385,7 @@
             </div>
         </div>
     </main>
+    @include('components.back-to-top-button')
 </body>
 <script>
     // VARIABLES

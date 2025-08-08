@@ -255,21 +255,38 @@
             <div class="account-column" id='account-column'>
                 <h2>Account Settings</h2>
                 <div class="settings-placeholder">
-                    Account settings will be implemented here
+                    Features:<br>
+                        Account (system security and acc details)<br>
+                            -change email<br>
+                            -change password<br>
+                            -link account<br>
+                                -google<br>
+                                -facebook<br>
+                            -delete account
                 </div>
             </div>
 
             <div class="profile-column" id='profile-column' style='display:none;'>
                 <h2>Profile Settings</h2>
                 <div class="settings-placeholder">
-                    Profile settings will be implemented here
+                    Features:<br>
+                        Profile (Whats publicly displayed in your page)<br>
+                            -change username<br>
+                            -change bio<br>
+                            -change birthday<br>
+                            -manage social links<br>
+                            -show what groups you follow?
                 </div>
             </div>
 
             <div class="preferences-column" id='preferences-column' style='display:none;'>
                 <h2>Preferences</h2>
                 <div class="settings-placeholder">
-                    User preferences will be implemented here
+                    Features:<br>
+                        Preferences (Default startup page on login)<br>
+                            -startup page (home/profile/chosen group)<br>
+                            -muted communities<br>
+                            -followed communities
                 </div>
             </div>
         </div>
