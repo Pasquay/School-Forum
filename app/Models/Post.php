@@ -19,20 +19,30 @@ class Post extends Model
         'content',
         'user_id'
     ];
-
-    public function scopeLatest($query){
-        return $query->orderBy('created_at', 'desc');
-    }
     
-    // USERS
+    /**
+     * Relations
+     */
+
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
     }
 
-    // VOTES
     public function votes(){
         return $this->hasMany(Vote::class);
     }
+
+    public function comments(){
+        return $this->hasMany(Comment::class);
+    }
+
+    public function group(){
+        return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * Helper Functions
+     */
 
     public function getVoteCountAttribute(){
         $upvotes = $this->votes()->where('vote', 1)->count();
@@ -46,9 +56,8 @@ class Post extends Model
             'user_id' => Auth::id()
         ])->value('vote');
     }
-
-    // COMMENTS
-    public function comments(){
-        return $this->hasMany(Comment::class);
+    
+    public function scopeLatest($query){
+        return $query->orderBy('created_at', 'desc');
     }
 }

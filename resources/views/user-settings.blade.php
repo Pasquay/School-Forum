@@ -286,7 +286,8 @@
                         Preferences (Default startup page on login)<br>
                             -startup page (home/profile/chosen group)<br>
                             -muted communities<br>
-                            -followed communities
+                            -followed communities<br>
+                            -starred communities
                 </div>
             </div>
         </div>

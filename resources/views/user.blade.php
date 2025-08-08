@@ -62,10 +62,6 @@
             color: #4a90e2;
         }
 
-        #profile-nav-link {
-            color: #4a90e2;
-        }
-
         #profile-nav-link:hover {
             color: #357abd;
         }
