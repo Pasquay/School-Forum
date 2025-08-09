@@ -12,23 +12,31 @@ class GroupController extends Controller
 {
     public function showGroups(){
         $user = User::findOrFail(Auth::id());
+
+        $groups = Group::orderBy('name', 'asc')
+                       ->orderBy('created_at', 'desc')
+                       ->get();
         
         $createdGroups = $user->groups()
                               ->wherePivot('role', 'owner')
-                              ->latest()
+                              ->orderBy('is_starred', 'desc')
+                              ->orderBy('name', 'asc')
                               ->get();
 
         $moderatedGroups = $user->groups()
                                 ->wherePivot('role', 'moderator')
-                                ->latest()
+                                ->orderBy('is_starred', 'desc')
+                                ->orderBy('name', 'asc')
                                 ->get();
 
         $joinedGroups = $user->groups()
                              ->wherePivot('role', 'member')
-                             ->latest()
+                             ->orderBy('is_starred', 'desc')
+                             ->orderBy('name', 'asc')
                              ->get();
 
         return view('groups', compact(
+            'groups',
             'createdGroups',
             'moderatedGroups',
             'joinedGroups',

@@ -5,7 +5,7 @@
     data-groupid='{{ $group->id }}'
 >
     @if($group->photo)
-        <img src="" alt="Photo">
+        <img src="" alt="Group photo">
     @else
         <div class="group-default-photo">
             {{ strtoupper(substr($group->name, 0, 1)) }}

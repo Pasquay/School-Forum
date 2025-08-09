@@ -414,12 +414,10 @@
     @include('components.error-header')
     <main>
         <div class="left-side">
-            <!-- SEARCH BAR -->
             <div class="search-section">
                 <input type="text" placeholder="Search groups..." id="group-search">
             </div>
 
-            <!-- SORT NAVIGATION -->
             <div class="nav">
                 <button type="button" class="active first">Most Members</button>
                 <button type="button">Most Active</button>
@@ -433,59 +431,14 @@
                 </select>
             </div>
 
-            <!-- GROUPS LIST -->
             <div class="groups-list">
-                <!-- Example Group Cards - Replace with actual data -->
-                <div class="group-card">
-                    <div class="group-card-header">
-                        <div class="group-icon">L</div>
-                        <div class="group-info">
-                            <h3>Laravel Developers</h3>
-                            <p>A community for Laravel developers to share knowledge and collaborate on projects. Learn best practices, share tips, and get help with your Laravel applications.</p>
-                        </div>
-                    </div>
-                    <div class="group-stats">
-                        <span>1,234 members</span>
-                        <span>56 online</span>
-                    </div>
-                    <div class="group-actions">
-                        <button class="join-btn">Join</button>
-                    </div>
-                </div>
-
-                <div class="group-card">
-                    <div class="group-card-header">
-                        <div class="group-icon">P</div>
-                        <div class="group-info">
-                            <h3>PHP Masters</h3>
-                            <p>Advanced PHP discussions and code reviews for experienced developers. Share complex solutions and learn modern PHP techniques.</p>
-                        </div>
-                    </div>
-                    <div class="group-stats">
-                        <span>892 members</span>
-                        <span>23 online</span>
-                    </div>
-                    <div class="group-actions">
-                        <button class="leave-btn">Leave</button>
-                    </div>
-                </div>
-
-                <div class="group-card">
-                    <div class="group-card-header">
-                        <div class="group-icon">J</div>
-                        <div class="group-info">
-                            <h3>JavaScript Hub</h3>
-                            <p>Everything JavaScript - from vanilla JS to modern frameworks like React, Vue, and Angular. Discuss ES6+, Node.js, and web development trends.</p>
-                        </div>
-                    </div>
-                    <div class="group-stats">
-                        <span>2,156 members</span>
-                        <span>78 online</span>
-                    </div>
-                    <div class="group-actions">
-                        <button class="join-btn">Join</button>
-                    </div>
-                </div>
+                @if($groups->count() > 0)
+                    @foreach($groups as $group)
+                        @include('components.group-info', ['group' => $group])
+                    @endforeach
+                @else
+                    <p class="empty">No groups yet...</p>
+                @endif
             </div>
         </div>
 
