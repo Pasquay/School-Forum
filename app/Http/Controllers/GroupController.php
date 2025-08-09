@@ -2,65 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Group;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 
 class GroupController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    public function showGroups(){
+        $user = User::findOrFail(Auth::id());
+        
+        $createdGroups = $user->groups()
+                              ->wherePivot('role', 'owner')
+                              ->latest()
+                              ->get();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $moderatedGroups = $user->groups()
+                                ->wherePivot('role', 'moderator')
+                                ->latest()
+                                ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreGroupRequest $request)
-    {
-        //
-    }
+        $joinedGroups = $user->groups()
+                             ->wherePivot('role', 'member')
+                             ->latest()
+                             ->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Group $group)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Group $group)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateGroupRequest $request, Group $group)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Group $group)
-    {
-        //
+        return view('groups', compact(
+            'createdGroups',
+            'moderatedGroups',
+            'joinedGroups',
+        ));
     }
 }

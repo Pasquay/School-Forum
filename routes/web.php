@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoteController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReplyVoteController;
@@ -69,4 +70,8 @@ Route::controller(ReplyController::class)->group(function() {
 Route::controller(ReplyVoteController::class)->group(function() {
     Route::post('/reply/upvote/{id}', 'toggleReplyUpvote')->middleware('auth'); // upvote comment
     Route::post('/reply/downvote/{id}', 'toggleReplyDownvote')->middleware('auth'); // downvote comment
+});
+
+Route::controller(GroupController::class)->group(function() {
+    Route::get('/groups', 'showGroups')->middleware('auth'); // show groups page
 });
