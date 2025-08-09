@@ -494,7 +494,7 @@
                 <div class="groups-created">
                     <div class="section-header">
                         <p>Groups Created</p>
-                        <button class="create-group-btn">Create Group</button>
+                        <button class="create-group-button">Create Group</button>
                     </div>
                     @if($createdGroups->count() > 0)
                         @foreach($createdGroups as $group)
@@ -534,6 +534,67 @@
     @include('components.back-to-top-button')
 </body>
 <script>
+    // Right Side
+        // Variables
+            const rightGroups = document.querySelectorAll('.group-info-minimal');
+        // Events
+            rightGroups.forEach(group => {
+            // Create Group button
+                const createGroupBtn = document.querySelector('.create-group-button');
+                createGroupBtn.addEventListener('click', () => {
+                    window.location.href = `/groups/create`;
+                })
+            // Onclick go to group page
+                const groupid = group.dataset.groupid;
+                group.addEventListener('click', () => {
+                    window.location.href = `/group/${groupid}`;
+                })
+            // Star and unstar
+                const starForm = group.querySelector('form');
+                const starBtn = starForm.querySelector('.star')
+                if(starBtn){
+                    let starImg = starBtn.querySelector('img');
+                    
+                    starBtn.addEventListener('click', async(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
 
+                        starBtn.disabled = true;
+                        starBtn.style.opacity = '0.5';
+                        starBtn.style.cursor = 'default';
+
+                        setTimeout(() => {
+                            starBtn.disabled = false;
+                            starBtn.style.opacity = '1';
+                            starBtn.style.cursor = 'pointer';
+                        }, 400);
+
+                        try {
+                            const response = await fetch(starForm.action, {
+                                method: 'POST', 
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                credentials: 'same-origin',
+                                body: new URLSearchParams({
+                                    _token: document.querySelector('meta[name="csrf-token"]').content,
+                                })
+                            });
+
+                            if(response.ok){
+                                const data = await response.json();
+
+                                starImg.src = data.starValue ?
+                                    '{{ asset("storage/icons/star.png") }}' :
+                                    '{{ asset("storage/icons/star-alt.png") }}' ;
+                            }
+                        } catch (error){
+                            console.error('Error: ', error);
+                        }
+                    })
+                }
+            })
 </script>
 </html>

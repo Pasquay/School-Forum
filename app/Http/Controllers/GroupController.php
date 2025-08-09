@@ -34,4 +34,32 @@ class GroupController extends Controller
             'joinedGroups',
         ));
     }
+
+    public function showCreateGroup(){
+        return view('create-group');
+    }
+
+    public function showGroup($id){
+        $group = Group::findOrFail($id);
+
+        return view('group', ['group' => $group]);
+    }
+
+    public function toggleStar($id){
+        $user = User::findOrFail(Auth::id());
+        $group = $user->groups()->where('group_id', $id)->first();
+        
+        if(!$group) return back()->with('error', 'You are not a member of that group');
+
+        $starState = $group->pivot->is_starred;
+        
+        $newStarState = $starState ? 0 : 1; 
+
+        $user->groups()->updateExistingPivot($id, ['is_starred' => $newStarState]);
+
+        return response()->json([
+            'success' => true,
+            'starValue' => $newStarState,
+        ]);
+    }
 }

@@ -1,4 +1,9 @@
-<div class="group-info-minimal" id="group-info-minimal-{{ $group->id }}">
+<div 
+    class="group-info-minimal" 
+    id="group-info-minimal-{{ $group->id }}"
+    data-type='{{ $group->pivot->role }}'
+    data-groupid='{{ $group->id }}'
+>
     @if($group->photo)
         <img src="" alt="Photo">
     @else
@@ -7,19 +12,25 @@
         </div>
     @endif
     <p>{{ $group->name }}</p>
-    <button class="star">
-        <img 
-            src="
-                @if($group->pivot->is_starred === 1)
-                    {{ asset('storage/icons/star.png') }}
-                @else
-                    {{ asset('storage/icons/star-alt.png') }}
-                @endif
-            " 
-            alt="star" 
-            class="star"
-        >
-    </button>
+    <form 
+        action="/group/toggleStar/{{ $group->id }}"
+        method="post"
+    >
+        @csrf
+        <button class="star">
+            <img 
+                src="
+                    @if($group->pivot->is_starred === 1)
+                        {{ asset('storage/icons/star.png') }}
+                    @else
+                        {{ asset('storage/icons/star-alt.png') }}
+                    @endif
+                " 
+                alt="star" 
+                class="star"
+            >
+        </button>
+    </form>
 </div>
 
 <style>
@@ -66,6 +77,10 @@
             object-fit: cover;
         }
     /* Star */
+        .group-info-minimal form {
+            margin-left: auto;
+        }
+
         .group-info-minimal .star {
             background: none;
             border: none;
