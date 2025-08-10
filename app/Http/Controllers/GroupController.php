@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Group;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 
@@ -45,6 +46,10 @@ class GroupController extends Controller
 
     public function showCreateGroup(){
         return view('create-group');
+    }
+
+    public function createGroup(Request $request){
+        return $request;
     }
 
     public function showGroup($id){

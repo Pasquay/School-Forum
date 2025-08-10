@@ -130,6 +130,8 @@
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 6px;
+            width: 68px;
+            text-align: center;
             border: none;
             cursor: pointer;
             font-weight: 500;
