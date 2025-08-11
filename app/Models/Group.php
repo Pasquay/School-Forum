@@ -39,7 +39,7 @@ class Group extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
+    } 
 
     public function members(): BelongsToMany
     {

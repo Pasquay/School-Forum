@@ -4,4 +4,21 @@
             {{ session('success') }}
         </div>
     </div>
+    <style>
+        .error-message {
+            background-color: #f8d7da; 
+            color: #721c24; 
+            margin-top: -1rem;
+            text-align: center;
+        }
+        
+        .error-message ul {
+            margin: 0; 
+            padding-left: 1rem;
+        }
+        
+        .error-message p {
+            margin: 0;
+        }
+    </style>
 @endif

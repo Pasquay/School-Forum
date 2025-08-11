@@ -6,4 +6,12 @@
             @endforeach
         </ul>
     </div>
-@endif
+    <style>
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            margin-top: -0.5rem;
+            text-align: center;
+        }    
+    </style>
+@endif 

@@ -98,10 +98,7 @@
             .success-message {
                 background-color: #d4edda;
                 color: #155724;
-                padding: 1rem; 
-                border-radius: 8px; 
                 margin-top: -0.5rem;
-                margin-bottom: 1rem; 
                 text-align: center;
             }
 
@@ -109,10 +106,7 @@
             .error-message {
                 background-color: #f8d7da; 
                 color: #721c24; 
-                padding: 1rem; 
-                border-radius: 8px; 
                 margin-top: -0.5rem;
-                margin-bottom: 1rem;
                 text-align: center;
             }
             

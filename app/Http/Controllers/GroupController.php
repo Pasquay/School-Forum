@@ -49,7 +49,47 @@ class GroupController extends Controller
     }
 
     public function createGroup(Request $request){
-        return $request;
+        try {
+            $groupData = $request->validate([
+                'name' => ['required', 'string', 'min:3', 'max:50'],
+                'description' => ['required', 'string', 'min:10', 'max:500'],
+                // pic
+                // banner
+                'is_private' => ['nullable'],
+                'rules' => ['required', 'array', 'min:1'],
+                'rules.*.title' => ['required', 'string', 'max:60'],
+                'rules.*.description' => ['required', 'string', 'max:500'],
+                'resources' => ['nullable', 'array'],
+                'resources.*.title' => ['required_with:resources', 'string', 'max:60'],
+                'resources.*.description' => ['required_with:resources', 'string', 'max:500'],
+            ]);
+
+            $group = Group::create([
+                'name' => $groupData['name'],
+                'description' => $groupData['description'],
+                // pic
+                // banner
+                'is_private' => isset($groupData['is_private']) && $groupData['is_private'] === '1',
+                'rules' => $groupData['rules'],
+                'resources' => $groupData['resources'] ?? [],
+                'owner_id' => Auth::id(),
+                'member_count' => 1,
+            ]);
+
+            $user = User::findOrFail(Auth::id());
+            $user->groups()->attach($group->id, [
+                'role' => 'owner',
+                'is_starred' => false,
+                'is_muted' => false,
+            ]);
+
+            // later change this to redirect to that group's page
+            return redirect('/groups')->with('success', 'Group created successfully');
+        } catch(\Illuminate\Validation\ValidationException $error){
+            return redirect()->back()->withErrors($error->errors())->withInput();
+        } catch (\Exception $error){
+            return redirect()->back()->with('error', $error->getMessage())->withInput();
+        }
     }
 
     public function showGroup($id){

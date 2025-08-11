@@ -90,10 +90,7 @@
                 .success-message {
                     background-color: #d4edda;
                     color: #155724;
-                    padding: 1rem; 
-                    border-radius: 8px; 
                     margin-top: -0.5rem;
-                    margin-bottom: 1rem; 
                     text-align: center;
                 }
 
@@ -101,10 +98,7 @@
                 .error-message {
                     background-color: #f8d7da; 
                     color: #721c24; 
-                    padding: 1rem; 
-                    border-radius: 8px; 
-                    margin-top: -0.5rem;
-                    margin-bottom: 1rem;
+                    margin-top: -1rem;
                     text-align: center;
                 }
                 
@@ -530,12 +524,128 @@
                 background-color: white;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.10);
-                padding: 2rem 1.5rem;
+                padding: 1.5rem;
                 margin-bottom: 2rem;
                 display: flex;
                 flex-direction: column;
-                align-items: start;
+                align-items: flex-start;
                 gap: 1rem;
+                width: 100%;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .group-preview:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Preview Name */
+            .name-preview {
+                margin: 0;
+                color: #333;
+                font-size: 1.2rem;
+                font-weight: 600;
+                line-height: 1.3;
+            }
+
+            /* Preview Description */
+            .description-preview {
+                margin: 0;
+                color: #666;
+                font-size: 0.9rem;
+                line-height: 1.4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 100%;
+            }
+
+            /* Preview Rules */
+            .preview-rules {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .preview-rule-item {
+                background-color: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 6px;
+                padding: 0.75rem;
+            }
+
+            .rules-title-preview {
+                margin: 0 0 0.25rem 0;
+                color: #333;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+
+            .rules-description-preview {
+                margin: 0;
+                color: #666;
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+
+            /* Preview Resources */
+            .preview-resources {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .preview-resource-item {
+                background-color: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 6px;
+                padding: 0.75rem;
+            }
+
+            .resource-title-preview {
+                margin: 0 0 0.25rem 0;
+                color: #333;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+
+            .resource-description-preview {
+                margin: 0;
+                color: #666;
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+
+            /* Preview Join Button */
+            .group-preview button {
+                background-color: #4a90e2;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                width: 100%;
+                text-align: center;
+                border: none;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.2s;
+                align-self: flex-end;
+                margin-top: auto;
+            }
+
+            .group-preview button:hover {
+                background-color: #357abd;
+            }
+
+            /* Section Headers */
+            .preview-section-header {
+                margin: 1rem 0 0.5rem 0;
+                color: #333;
+                font-size: 1rem;
+                font-weight: 600;
+                border-bottom: 1px solid #e9ecef;
+                padding-bottom: 0.25rem;
                 width: 100%;
             }
     </style>
@@ -615,7 +725,23 @@
 
         <div class="right-side">
             <div class="group-preview">
-                Preview
+                <p class="name-preview">Group Name</p>
+                <p class="description-preview">Group description will appear here...</p>
+                
+                <p class="preview-section-header">Rules</p>
+                <div class="preview-rules">
+                    <div class="preview-rule-item">
+                        <p class="rules-title-preview"><strong>Rule Title</strong></p>
+                        <p class="rules-description-preview">Rule description...</p>
+                    </div>
+                </div>
+                
+                <p class="preview-section-header">Resources</p>
+                <div class="preview-resources">
+                    <p style="color: #666; font-style: italic;">No resources added</p>
+                </div>
+                
+                <button type="button">Join</button>
             </div>
         </div>
     </main>
@@ -626,121 +752,218 @@
     let resourceIndex = 0; // Changed from 1 to 0
 
     // Add Rule Button
-    document.querySelector('.add-rule-button').addEventListener('click', function() {
-        const rulesContainer = document.querySelector('.rules-container');
-        const newRule = document.createElement('div');
-        newRule.classList.add('rule-item');
-        newRule.innerHTML = `
-            <p>Rule #${ruleIndex + 1}</p>
-            <input type="text" class="rule-title" name="rules[${ruleIndex}][title]" id="rules[${ruleIndex}][title]" placeholder="Title">
-            <textarea class="rule-description" name="rules[${ruleIndex}][description]" id="rules[${ruleIndex}][description]" placeholder="Description"></textarea>
-            <button type="button" class="remove-rule-button">Remove</button>
-        `;
-        rulesContainer.appendChild(newRule);
-        ruleIndex++;
-        updateRuleNumbers();
-        updateRemoveButtons();
-    });
+        document.querySelector('.add-rule-button').addEventListener('click', function() {
+            const rulesContainer = document.querySelector('.rules-container');
+            const newRule = document.createElement('div');
+            newRule.classList.add('rule-item');
+            newRule.innerHTML = `
+                <p>Rule #${ruleIndex + 1}</p>
+                <input type="text" class="rule-title" name="rules[${ruleIndex}][title]" id="rules[${ruleIndex}][title]" placeholder="Title">
+                <textarea class="rule-description" name="rules[${ruleIndex}][description]" id="rules[${ruleIndex}][description]" placeholder="Description"></textarea>
+                <button type="button" class="remove-rule-button">Remove</button>
+            `;
+            rulesContainer.appendChild(newRule);
+            ruleIndex++;
+            updateRuleNumbers();
+            updateRemoveButtons();
+        });
 
     // Add Resource Button
-    document.querySelector('.add-resource-button').addEventListener('click', function() {
-        const resourcesContainer = document.querySelector('.resources-container');
-        const addButton = document.querySelector('.add-resource-button');
-        
-        const newResource = document.createElement('div');
-        newResource.classList.add('resource-item');
-        newResource.innerHTML = `
-            <p>Resource #${resourceIndex + 1}</p>
-            <input type="text" class="resource-title" name="resources[${resourceIndex}][title]" id="resources[${resourceIndex}][title]" placeholder="Title">
-            <textarea class="resource-description" name="resources[${resourceIndex}][description]" id="resources[${resourceIndex}][description]" placeholder="Description"></textarea>
-            <button type="button" class="remove-resource-button">Remove</button>
-        `;
-        
-        resourcesContainer.insertBefore(newResource, addButton);
-        resourceIndex++;
-        updateResourceNumbers();
-    });
+        document.querySelector('.add-resource-button').addEventListener('click', function() {
+            const resourcesContainer = document.querySelector('.resources-container');
+            const addButton = document.querySelector('.add-resource-button');
+            
+            const newResource = document.createElement('div');
+            newResource.classList.add('resource-item');
+            newResource.innerHTML = `
+                <p>Resource #${resourceIndex + 1}</p>
+                <input type="text" class="resource-title" name="resources[${resourceIndex}][title]" id="resources[${resourceIndex}][title]" placeholder="Title">
+                <textarea class="resource-description" name="resources[${resourceIndex}][description]" id="resources[${resourceIndex}][description]" placeholder="Description"></textarea>
+                <button type="button" class="remove-resource-button">Remove</button>
+            `;
+            
+            resourcesContainer.insertBefore(newResource, addButton);
+            resourceIndex++;
+            updateResourceNumbers();
+        });
 
     // Remove Rule Button (Event Delegation)
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-rule-button')) {
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-rule-button')) {
+                const ruleItems = document.querySelectorAll('.rule-item');
+                
+                // Prevent removal if only 1 rule exists
+                if (ruleItems.length <= 1) {
+                    alert('You must have at least one rule.');
+                    return;
+                }
+                
+                const ruleItem = e.target.closest('.rule-item');
+                ruleItem.remove();
+                updateRuleNumbers();
+                updateRemoveButtons();
+                updateRulesPreview(); // Add this line
+            }
+        });
+
+    // Remove Resource Button (Event Delegation)
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-resource-button')) {
+                const resourceItem = e.target.closest('.resource-item');
+                resourceItem.remove();
+                updateResourceNumbers();
+                updateResourcesPreview(); // Add this line
+            }
+        });
+
+    // Update Rule Numbers
+        function updateRuleNumbers() {
+            const ruleItems = document.querySelectorAll('.rule-item');
+            ruleItems.forEach((item, index) => {
+                const numberParagraph = item.querySelector('p');
+                numberParagraph.textContent = `Rule #${index + 1}`;
+                
+                const titleInput = item.querySelector('.rule-title');
+                const descriptionTextarea = item.querySelector('.rule-description');
+                
+                titleInput.name = `rules[${index}][title]`;
+                titleInput.id = `rules[${index}][title]`;
+                descriptionTextarea.name = `rules[${index}][description]`;
+                descriptionTextarea.id = `rules[${index}][description]`;
+            });
+        }
+
+    // Update Resource Numbers
+        function updateResourceNumbers() {
+            const resourceItems = document.querySelectorAll('.resource-item');
+            resourceItems.forEach((item, index) => {
+                const numberParagraph = item.querySelector('p');
+                numberParagraph.textContent = `Resource #${index + 1}`;
+                
+                const titleInput = item.querySelector('.resource-title');
+                const descriptionTextarea = item.querySelector('.resource-description');
+                
+                titleInput.name = `resources[${index}][title]`;
+                titleInput.id = `resources[${index}][title]`;
+                descriptionTextarea.name = `resources[${index}][description]`;
+                descriptionTextarea.id = `resources[${index}][description]`;
+            });
+        }
+
+    // Update Remove Button States
+        function updateRemoveButtons() {
+            const ruleItems = document.querySelectorAll('.rule-item');
+            const removeButtons = document.querySelectorAll('.remove-rule-button');
+            
+            removeButtons.forEach(button => {
+                if (ruleItems.length <= 1) {
+                    button.disabled = true;
+                    button.style.opacity = '0.5';
+                    button.style.cursor = 'not-allowed';
+                } else {
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                    button.style.cursor = 'pointer';
+                }
+            });
+        }
+
+    // Initialize button states on page load
+        updateRemoveButtons();
+    // Preview Update
+        function updatePreview() {
+            updateNamePreview();
+            updateDescriptionPreview();
+            updateRulesPreview();
+            updateResourcesPreview();
+            updatePrivacyPreview();
+        }
+
+        function updateNamePreview() {
+            const name = document.getElementById('name').value || 'Group Name';
+            document.querySelector('.name-preview').textContent = name;
+        }
+
+        function updateDescriptionPreview() {
+            const description = document.getElementById('description').value || 'Group description will appear here...';
+            document.querySelector('.description-preview').textContent = description;
+        }
+
+        function updateRulesPreview() {
+            const previewRules = document.querySelector('.preview-rules');
             const ruleItems = document.querySelectorAll('.rule-item');
             
-            // Prevent removal if only 1 rule exists
-            if (ruleItems.length <= 1) {
-                alert('You must have at least one rule.');
+            // Clear existing preview rules
+            previewRules.innerHTML = '';
+            
+            ruleItems.forEach((item, index) => {
+                const title = item.querySelector('.rule-title').value || `Rule ${index + 1}`;
+                const description = item.querySelector('.rule-description').value || 'Rule description...';
+                
+                const previewRuleItem = document.createElement('div');
+                previewRuleItem.classList.add('preview-rule-item');
+                previewRuleItem.innerHTML = `
+                    <p class="rules-title-preview"><strong>${title}</strong></p>
+                    <p class="rules-description-preview">${description}</p>
+                `;
+                previewRules.appendChild(previewRuleItem);
+            });
+        }
+
+        function updateResourcesPreview() {
+            const previewResources = document.querySelector('.preview-resources');
+            const resourceItems = document.querySelectorAll('.resource-item');
+            
+            // Clear existing preview resources
+            previewResources.innerHTML = '';
+            
+            if (resourceItems.length === 0) {
+                previewResources.innerHTML = '<p style="color: #666; font-style: italic;">No resources added</p>';
                 return;
             }
             
-            const ruleItem = e.target.closest('.rule-item');
-            ruleItem.remove();
-            updateRuleNumbers();
-            updateRemoveButtons();
+            resourceItems.forEach((item, index) => {
+                const title = item.querySelector('.resource-title').value || `Resource ${index + 1}`;
+                const description = item.querySelector('.resource-description').value || 'Resource description...';
+                
+                const previewResourceItem = document.createElement('div');
+                previewResourceItem.classList.add('preview-resource-item');
+                previewResourceItem.innerHTML = `
+                    <p class="resource-title-preview"><strong>${title}</strong></p>
+                    <p class="resource-description-preview">${description}</p>
+                `;
+                previewResources.appendChild(previewResourceItem);
+            });
         }
-    });
 
-    // Remove Resource Button (Event Delegation)
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-resource-button')) {
-            const resourceItem = e.target.closest('.resource-item');
-            resourceItem.remove();
-            updateResourceNumbers();
-        }
-    });
-
-    // Update Rule Numbers
-    function updateRuleNumbers() {
-        const ruleItems = document.querySelectorAll('.rule-item');
-        ruleItems.forEach((item, index) => {
-            const numberParagraph = item.querySelector('p');
-            numberParagraph.textContent = `Rule #${index + 1}`;
+        function updatePrivacyPreview() {
+            const isPrivate = document.getElementById('is_private').checked;
+            const joinButton = document.querySelector('.group-preview button');
             
-            const titleInput = item.querySelector('.rule-title');
-            const descriptionTextarea = item.querySelector('.rule-description');
-            
-            titleInput.name = `rules[${index}][title]`;
-            titleInput.id = `rules[${index}][title]`;
-            descriptionTextarea.name = `rules[${index}][description]`;
-            descriptionTextarea.id = `rules[${index}][description]`;
-        });
-    }
-
-    // Update Resource Numbers
-    function updateResourceNumbers() {
-        const resourceItems = document.querySelectorAll('.resource-item');
-        resourceItems.forEach((item, index) => {
-            const numberParagraph = item.querySelector('p');
-            numberParagraph.textContent = `Resource #${index + 1}`;
-            
-            const titleInput = item.querySelector('.resource-title');
-            const descriptionTextarea = item.querySelector('.resource-description');
-            
-            titleInput.name = `resources[${index}][title]`;
-            titleInput.id = `resources[${index}][title]`;
-            descriptionTextarea.name = `resources[${index}][description]`;
-            descriptionTextarea.id = `resources[${index}][description]`;
-        });
-    }
-
-    // Update Remove Button States
-    function updateRemoveButtons() {
-        const ruleItems = document.querySelectorAll('.rule-item');
-        const removeButtons = document.querySelectorAll('.remove-rule-button');
-        
-        removeButtons.forEach(button => {
-            if (ruleItems.length <= 1) {
-                button.disabled = true;
-                button.style.opacity = '0.5';
-                button.style.cursor = 'not-allowed';
+            if (isPrivate) {
+                joinButton.textContent = 'Request to Join';
+                joinButton.style.backgroundColor = '#6c757d';
+                joinButton.style.cursor = 'not-allowed';
             } else {
-                button.disabled = false;
-                button.style.opacity = '1';
-                button.style.cursor = 'pointer';
+                joinButton.textContent = 'Join';
+                joinButton.style.backgroundColor = '#4a90e2';
+                joinButton.style.cursor = 'pointer';
+            }
+        }
+
+        // Event Listeners for Real-time Updates
+        document.getElementById('name').addEventListener('input', updateNamePreview);
+        document.getElementById('description').addEventListener('input', updateDescriptionPreview);
+        document.getElementById('is_private').addEventListener('change', updatePrivacyPreview);
+
+        // Event delegation for dynamically added rule/resource inputs
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('rule-title') || e.target.classList.contains('rule-description')) {
+                updateRulesPreview();
+            }
+            if (e.target.classList.contains('resource-title') || e.target.classList.contains('resource-description')) {
+                updateResourcesPreview();
             }
         });
-    }
-
-    // Initialize button states on page load
-    updateRemoveButtons();
 </script>
 </html>
