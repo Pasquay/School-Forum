@@ -53,8 +53,8 @@ class GroupController extends Controller
             $groupData = $request->validate([
                 'name' => ['required', 'string', 'min:3', 'max:50'],
                 'description' => ['required', 'string', 'min:10', 'max:500'],
-                // pic
-                // banner
+                'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+                'banner' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
                 'is_private' => ['nullable'],
                 'rules' => ['required', 'array', 'min:1'],
                 'rules.*.title' => ['required', 'string', 'max:60'],
@@ -67,14 +67,30 @@ class GroupController extends Controller
             $group = Group::create([
                 'name' => $groupData['name'],
                 'description' => $groupData['description'],
-                // pic
-                // banner
                 'is_private' => isset($groupData['is_private']) && $groupData['is_private'] === '1',
                 'rules' => $groupData['rules'],
                 'resources' => $groupData['resources'] ?? [],
                 'owner_id' => Auth::id(),
                 'member_count' => 1,
             ]);
+
+            if($request->hasFile('photo')){
+                $photoPath = $request->file('photo')->storeAs(
+                    'groups/photos',
+                    'group-' . $group->id . '-photo.' . $request->file('photo')->extension(),
+                    'public',
+                );
+                $group->update(['photo' => $photoPath]);
+            }
+
+            if($request->hasFile('banner')){
+                $bannerPath = $request->file('banner')->storeAs(
+                    'groups/banners',
+                    'group-' . $group->id . '-banner.' . $request->file('banner')->extension(),
+                    'public',
+                );
+                $group->update(['banner' => $bannerPath]);
+            }
 
             $user = User::findOrFail(Auth::id());
             $user->groups()->attach($group->id, [

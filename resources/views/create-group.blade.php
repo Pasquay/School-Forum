@@ -177,6 +177,78 @@
                     content: " *";
                     color: #dc3545;
                 }
+
+                .file-input-wrapper {
+                    position: relative;
+                    display: inline-block;
+                    width: 100%;
+                }
+
+                .file-input-wrapper input[type="file"] {
+                    position: absolute;
+                    opacity: 0;
+                    width: 100%;
+                    height: 100%;
+                    cursor: pointer;
+                }
+
+                .file-input-label {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    padding: 0.75rem;
+                    border: 2px dashed #ddd;
+                    border-radius: 6px;
+                    background-color: #f8f9fa;
+                    color: #666;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    font-size: 0.9rem;
+                    min-height: 50px;
+                }
+
+                .file-input-label:hover {
+                    border-color: #4a90e2;
+                    background-color: #f0f7ff;
+                    color: #4a90e2;
+                }
+
+                .file-input-label.has-file {
+                    border-color: #28a745;
+                    background-color: #f0fff4;
+                    color: #28a745;
+                    border-style: solid;
+                }
+
+                .file-input-icon {
+                    font-size: 1.2rem;
+                }
+
+                .file-name {
+                    font-weight: 500;
+                    max-width: 200px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .file-size {
+                    font-size: 0.8rem;
+                    opacity: 0.7;
+                }
+
+                /* Row 3 specific styling */
+                .row-3 {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 1rem;
+                }
+
+                .row-3 .form-field {
+                    flex: 1;
+                    margin-bottom: 0;
+                }
                 
                 .row-4 .form-field p {
                     margin-bottom: 0.3rem;
@@ -415,6 +487,10 @@
                     line-height: 1.5;
                 }
 
+                .row-3.form-row {
+                    margin-top: 1.5rem;
+                }
+
                 .row-4,
                 .row-5 {
                     display: flex;
@@ -541,7 +617,7 @@
 
             /* Preview Name */
             .name-preview {
-                margin: 0;
+                margin: 0 0 0.25rem 0;
                 color: #333;
                 font-size: 1.2rem;
                 font-weight: 600;
@@ -554,10 +630,98 @@
                 color: #666;
                 font-size: 0.9rem;
                 line-height: 1.4;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
                 width: 100%;
+                margin-bottom: 0;
+            }
+
+            /* Preview Image */
+            .preview-image {
+                width: 80px;
+                height: 80px;
+                background-color: #f8f9fa;
+                border: 2px dashed #ddd;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                position: absolute;
+                flex-shrink: 0;
+                left: 0.5rem;
+                top: -60px; /* Moved up more to overlap banner more */
+                z-index: 2;
+            }
+            
+            .preview-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+            
+            .preview-image .placeholder-text {
+                color: #666;
+                font-size: 0.7rem;
+                text-align: center;
+                font-style: italic;
+                padding: 0.2rem;
+            }
+            
+            .preview-image.has-image {
+                border: none;
+                background-color: transparent;
+            }
+
+            /* Preview Banner */
+            .preview-banner {
+                width: 100%;
+                height: 80px;
+                background-color: #f8f9fa;
+                border: 2px dashed #ddd;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 0;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .preview-banner img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+
+            .preview-banner .placeholder-text {
+                color: #666;
+                font-size: 0.8rem;
+                text-align: center;
+                font-style: italic;
+            }
+
+            .preview-banner.has-image {
+                border: none;
+                background-color: transparent;
+            }
+
+            .preview-top {
+                display: flex;
+                align-items: flex-start;
+                gap: 1rem;
+                width: 100%;
+                position: relative;
+                margin-top: 0.5rem; /* Add space after banner */
+            }
+
+            .preview-name-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start; /* Changed from center */
+                margin-left: 100px;
+                margin-top: -8px;
             }
 
             /* Preview Rules */
@@ -565,6 +729,7 @@
                 width: 100%;
                 display: flex;
                 flex-direction: column;
+                margin-top: 0;
                 gap: 0.75rem;
             }
 
@@ -587,6 +752,9 @@
                 color: #666;
                 font-size: 0.8rem;
                 line-height: 1.3;
+                word-wrap: break-word;        /* Add this */
+                word-break: break-all;        /* Add this */
+                overflow-wrap: break-word;    /* Add this */
             }
 
             /* Preview Resources */
@@ -616,6 +784,9 @@
                 color: #666;
                 font-size: 0.8rem;
                 line-height: 1.3;
+                word-wrap: break-word;        /* Add this */
+                word-break: break-all;        /* Add this */
+                overflow-wrap: break-word;    /* Add this */
             }
 
             /* Preview Join Button */
@@ -640,7 +811,6 @@
 
             /* Section Headers */
             .preview-section-header {
-                margin: 1rem 0 0.5rem 0;
                 color: #333;
                 font-size: 1rem;
                 font-weight: 600;
@@ -648,6 +818,24 @@
                 padding-bottom: 0.25rem;
                 width: 100%;
             }
+
+            /* Also add to the form input fields for consistency */
+                .rule-item .rule-description,
+                .resource-item .resource-description {
+                    padding: 0.75rem;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    font-size: 0.9rem;
+                    transition: border-color 0.2s, box-shadow 0.2s;
+                    background-color: white;
+                    width: 100%;
+                    min-height: 80px;
+                    resize: vertical;
+                    font-family: inherit;
+                    word-wrap: break-word;        /* Add this */
+                    word-break: break-all;        /* Add this */
+                    overflow-wrap: break-word;    /* Add this */
+                }
     </style>
 </head>
 <body>
@@ -674,8 +862,24 @@
                     </div>
 
                     <div class="row-3 form-row">
-                        <!-- img ----------------------------- banner -->
-                        <!-- MAKE TS WORK PLEASE -->
+                        <div class="form-field">
+                            <label for="photo">Group Photo:</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" name="photo" id="photo" accept="image/*">
+                                <label for="photo" class="file-input-label" id="photo-label">
+                                    <span class="file-text">Choose photo or drag here</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="banner">Group Banner:</label>
+                            <div class="file-input-wrapper">
+                                <input type="file" name="banner" id="banner" accept="image/*">
+                                <label for="banner" class="file-input-label" id="banner-label">
+                                    <span class="file-text">Choose banner or drag here</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row-6 form-row">
@@ -725,7 +929,17 @@
 
         <div class="right-side">
             <div class="group-preview">
-                <p class="name-preview">Group Name</p>
+                <div class="preview-banner">
+                    <p class="placeholder-text">Banner</p>
+                </div>
+                <div class="preview-top">
+                    <div class="preview-image">
+                        <p class="placeholder-text">Photo</p>
+                    </div>
+                    <div class="preview-name-container">
+                        <p class="name-preview">Group Name</p>
+                    </div>
+                </div>
                 <p class="description-preview">Group description will appear here...</p>
                 
                 <p class="preview-section-header">Rules</p>
@@ -750,6 +964,38 @@
 <script>
     let ruleIndex = 1;
     let resourceIndex = 0; // Changed from 1 to 0
+
+    // File input handling
+        document.getElementById('photo').addEventListener('change', function(e) {
+            handleFileInput(e, 'photo-label');
+            updatePhotoPreview(e);
+        });
+        
+        document.getElementById('banner').addEventListener('change', function(e) {
+            handleFileInput(e, 'banner-label');
+            updateBannerPreview(e);
+        });
+        
+        function handleFileInput(event, labelId) {
+            const file = event.target.files[0];
+            const label = document.getElementById(labelId);
+            const fileText = label.querySelector('.file-text');
+            
+            if (file) {
+                const fileName = file.name;
+                const fileSize = (file.size / 1024 / 1024).toFixed(1); // Size in MB
+                
+                label.classList.add('has-file');
+                fileText.innerHTML = `
+                    <span class="file-name">${fileName}</span>
+                    <span class="file-size">(${fileSize} MB)</span>
+                `;
+            } else {
+                label.classList.remove('has-file');
+                const isPhoto = labelId.includes('photo');
+                fileText.textContent = isPhoto ? 'Choose photo or drag here' : 'Choose banner or drag here';
+            }
+        }
 
     // Add Rule Button
         document.querySelector('.add-rule-button').addEventListener('click', function() {
@@ -877,6 +1123,7 @@
             updateRulesPreview();
             updateResourcesPreview();
             updatePrivacyPreview();
+            // Remove updateImagePreview() call since we handle images separately now
         }
 
         function updateNamePreview() {
@@ -965,5 +1212,53 @@
                 updateResourcesPreview();
             }
         });
+    // Preview Image Update
+        document.getElementById('photo').addEventListener('change', function(e) {
+            handleFileInput(e, 'photo-label');
+            updatePhotoPreview(e);
+        });
+        
+        document.getElementById('banner').addEventListener('change', function(e) {
+            handleFileInput(e, 'banner-label');
+            updateBannerPreview(e);
+        });
+        
+        function updatePhotoPreview(event) {
+            const file = event.target.files[0];
+            const previewImage = document.querySelector('.preview-image');
+            
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.innerHTML = `<img src="${e.target.result}" alt="Group photo preview">`;
+                    previewImage.classList.add('has-image');
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                previewImage.innerHTML = '<p class="placeholder-text">Photo</p>';
+                previewImage.classList.remove('has-image');
+            }
+        }
+
+        function updateBannerPreview(event) {
+            const file = event.target.files[0];
+            const previewBanner = document.querySelector('.preview-banner');
+            
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewBanner.innerHTML = `<img src="${e.target.result}" alt="Group banner preview">`;
+                    previewBanner.classList.add('has-image');
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                previewBanner.innerHTML = '<p class="placeholder-text">Banner preview will appear here</p>';
+                previewBanner.classList.remove('has-image');
+            }
+        }
 </script>
 </html>
