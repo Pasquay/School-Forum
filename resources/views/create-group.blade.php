@@ -845,7 +845,7 @@
     <main>
         <div class="left-side">
             <div class="create-group-form">
-                <form action="/groups/create-submit" method="post">
+                <form action="/groups/create-submit" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="row-1 form-row">
                         <div class="form-field">
@@ -865,7 +865,7 @@
                         <div class="form-field">
                             <label for="photo">Group Photo:</label>
                             <div class="file-input-wrapper">
-                                <input type="file" name="photo" id="photo" accept="image/*">
+                                <input type="file" name="photo" id="photo" accept=".jpeg,.jpg,.png,.webp">
                                 <label for="photo" class="file-input-label" id="photo-label">
                                     <span class="file-text">Choose photo or drag here</span>
                                 </label>
@@ -874,7 +874,7 @@
                         <div class="form-field">
                             <label for="banner">Group Banner:</label>
                             <div class="file-input-wrapper">
-                                <input type="file" name="banner" id="banner" accept="image/*">
+                                <input type="file" name="banner" id="banner" accept=".jpeg,.jpg,.png,.webp">
                                 <label for="banner" class="file-input-label" id="banner-label">
                                     <span class="file-text">Choose banner or drag here</span>
                                 </label>

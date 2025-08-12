@@ -8,7 +8,7 @@
 >
     <div class="group-photo">
         @if($group->photo)
-            <img src="" alt="Group photo">
+            <img src="{{ asset('storage/' . $group->photo) }}" alt="Group photo">
         @else
             <div class="group-default-photo">
                 {{ strtoupper(substr($group->name, 0, 1)) }}
@@ -32,7 +32,9 @@
                                 ->where('user_id', Auth::id())
                                 ->exists();
         @endphp
-        @if($userMembership)
+        @if($group->owner_id === Auth::id())
+            <button type="button" class="manage-button">Manage</button>
+        @elseif($userMembership)
             <button type="button" class="leave-button">Leave</button>
         @else
             <button type="button" class="join-button">Join</button>
@@ -117,7 +119,7 @@
             margin: 0;
         }
 
-    /* Join/Leave Button */
+    /* Join/Leave/Manage Button */
         .group-info .join-leave {
             flex-shrink: 0;
             display: flex;
@@ -138,8 +140,21 @@
             transition: background-color 0.2s;
         }
 
+        .group-info .join-button {
+            background-color: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            width: 68px;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
         .group-info .join-button:hover {
-            background-color: #357abd;
+            background-color: #218838;
         }
 
         .group-info .leave-button {
@@ -148,5 +163,25 @@
 
         .group-info .leave-button:hover {
             background-color: #c82333;
+        }
+
+        .group-info .manage-button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            width: 68px;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+        }
+
+        .group-info .manage-button:hover {
+            background-color: #357abd;
         }
 </style>

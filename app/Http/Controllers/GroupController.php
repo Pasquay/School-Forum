@@ -11,12 +11,46 @@ use App\Http\Requests\UpdateGroupRequest;
 
 class GroupController extends Controller
 {
-    public function showGroups(){
+    public function showGroups(Request $request){
+        $sortBy = $request->get('sort', 'members');
+        $timeFrame = $request->get('time', 'all');
+        $showJoined = $request->get('show_joined', '1');
+
         $user = User::findOrFail(Auth::id());
 
-        $groups = Group::orderBy('name', 'asc')
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+        $groups = Group::query();
+
+        if($sortBy === 'active' && $timeFrame !== 'all'){
+            $date = match($timeFrame){
+                'today' => now()->startOfDay(),
+                'week' => now()->startOfWeek(),
+                'month' => now()->startOfMonth(),
+                'year' => now()->startOfYear(),
+                default => null,
+            };
+            if($date){
+                $groups->where('updated_at', '>=', $date);
+            }
+        }
+
+        switch($sortBy){
+            case 'new':
+                $groups->orderBy('created_at', 'desc');
+                break;
+            case 'active':
+                // implement this fr not this fake shit, count the number of posts in the timeframe
+            case 'members':
+            default:
+                $groups->orderBy('member_count', 'desc');
+        }
+
+        $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
+
+        if($showJoined === '0'){
+            $groups->whereNotIn('id', $joinedGroupIds);
+        }
+
+        $groups = $groups->get();
         
         $createdGroups = $user->groups()
                               ->wherePivot('role', 'owner')
@@ -35,6 +69,16 @@ class GroupController extends Controller
                              ->orderBy('is_starred', 'desc')
                              ->orderBy('name', 'asc')
                              ->get();
+
+        if($request->ajax()){
+            $html = '';
+            foreach($groups as $group){
+                $html .= view('components.group-info', ['group' => $group])->render();
+            }
+            return response()->json([
+                'html' => $html,
+            ]);
+        }    
 
         return view('groups', compact(
             'groups',

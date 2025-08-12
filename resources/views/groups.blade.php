@@ -201,6 +201,99 @@
             background-color: #e9eef3;
         }
 
+        .sort-dropdown {
+            border: 0;
+            cursor: pointer;
+            color: #666;
+            background-color: white;
+            font-weight: 500;
+            font-size: medium;
+            padding: 0.5rem 1rem;
+            margin: 0 0.6rem;
+            border-radius: 6px;
+            transition: color 0.2s, background-color 0.2s;
+            display: none; /* Initially hidden */
+            min-width: 120px;
+        }
+
+        .sort-dropdown:hover {
+            color: #4a90e2;
+            background-color: #f8f9fa;
+        }
+
+        .sort-dropdown:focus {
+            outline: none;
+            color: #4a90e2;
+            background-color: #eaf4fb;
+        }
+
+        .sort-dropdown option {
+            background-color: white;
+            color: #333;
+            padding: 0.5rem;
+        }
+
+        .sort-dropdown option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-toggle {
+            border: 0;
+            cursor: pointer;
+            color: #666;
+            background-color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: medium;
+            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            margin: 0 0.6rem;
+            border-radius: 0.5rem;
+        }
+        
+        .dropdown-toggle.active,
+        .dropdown-toggle:focus {
+            color: #4a90e2;
+            background-color: #eaf4fb;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: 110%;
+            min-width: 160px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            z-index: 10;
+            flex-direction: column;
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-menu button {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #333;
+            text-align: left;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        .dropdown-menu button:hover,
+        .dropdown-menu button.active {
+            background-color: #eaf4fb;
+            color: #4a90e2;
+        }
+
     /* GROUPS LIST */
         .groups-list {
             max-width: 800px;
@@ -413,19 +506,33 @@
             </div>
 
             <div class="nav">
-                <button type="button" class="active first">Most Members</button>
-                <button type="button">Most Active</button>
-                <button type="button">New</button>
-                <select class="sort-dropdown">
-                    <option>Today</option>
-                    <option>This Week</option>
-                    <option>This Month</option>
-                    <option>This Year</option>
-                    <option>All Time</option>
-                </select>
+                <button type="button" class="active first" data-sort='members' id='most-members-btn'>Most Members</button>
+                <button type="button" data-sort='new' id='new-btn'>New</button>
+                <div class="dropdown-wrapper">
+                    <button type="button" class="dropdown-toggle" data-sort="active" id="most-active-btn">
+                        Most Active
+                        <span style="margin-left: 0.5em;">▼</span>
+                    </button>
+                    <div class="dropdown-menu" id="active-dropdown">
+                        <button type="button" data-time="today">Today</button>
+                        <button type="button" data-time="week">This Week</button>
+                        <button type="button" data-time="month">This Month</button>
+                        <button type="button" data-time="year">This Year</button>
+                        <button type="button" data-time="all">All Time</button>
+                    </div>
+                </div>
+                <div style="margin-left:auto;">
+                    <x-toggle-switch
+                        name='show_joined'
+                        id='show_joined'
+                        value='1'
+                        :checked='true'
+                        label='Show Joined'
+                    />
+                </div>
             </div>
 
-            <div class="groups-list">
+            <div class="groups-list" id=''>
                 @if($groups->count() > 0)
                     @foreach($groups as $group)
                         @include('components.group-info', ['group' => $group])
@@ -481,6 +588,98 @@
     @include('components.back-to-top-button')
 </body>
 <script>
+    // Left Side
+        // Navbar dropdown functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const navMostMembers = document.querySelector('#most-members-btn');
+                const navNew = document.querySelector('#new-btn');
+                const dropdownToggle = document.getElementById('most-active-btn');
+                const dropdownMenu = document.getElementById('active-dropdown');
+                const navShowJoined = document.querySelector('#show_joined');
+                let selectedTime = 'all';
+
+                const groupsListContainer = document.querySelector('.groups-list');
+
+                function setActiveNav(button){
+                    document.querySelectorAll('.left-side .nav button, .dropdown-toggle').forEach(button => {
+                        button.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                    dropdownMenu.style.display = 'none';
+                }
+
+                function fetchGroups(sort, time = 'all'){
+                    groupsListContainer.innerHTML = 
+                        '<p class="empty">Loading...</p>';
+
+                    const showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                    fetch(`/groups?sort=${sort}&time=${time}&show_joined=${showJoined}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        groupsListContainer.innerHTML = data.html;
+                    })
+                    .catch((error) => {
+                        groupsListContainer.innerHTML = 
+                        `<p class="empty">Error: ${error}</p>`;
+                    });
+                }
+
+                // Most Members
+                navMostMembers.addEventListener('click', function() {
+                    setActiveNav(this);
+                    fetchGroups('members')
+                })
+                
+                // New
+                navNew.addEventListener('click', function() {
+                    setActiveNav(this);
+                    fetchGroups('new');
+                })
+
+                // Most Active Dropdown
+                dropdownToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    setActiveNav(this);
+                    dropdownMenu.style.display = 
+                        dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                });
+                
+                // Most Active Options
+                dropdownMenu.querySelectorAll('button').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        dropdownMenu.querySelectorAll('button').forEach(btn => {
+                            btn.classList.remove('active');
+                        })
+                        this.classList.add('active');
+                        selectedTime = this.getAttribute('data-time');
+                        dropdownMenu.style.display = 'none';
+                        fetchGroups('active', selectedTime);
+                    });
+                });
+            
+                // Hide dropdown if clicking outside
+                document.addEventListener('click', function() {
+                    dropdownMenu.style.display = 'none';
+                });
+
+                // Show Joined Toggle
+                navShowJoined.addEventListener('click', function(){
+                    const activeSort = document.querySelector('.left-side .nav button.active, .dropdown-toggle.active').getAttribute('data-sort');
+                    if (activeSort === 'active'){
+                        activeTime = document.querySelector('#active-dropdown button.active').getAttribute('data-time');
+                        fetchGroups(activeSort, activeTime);
+                    }
+                    fetchGroups(activeSort);
+                });
+            });
+        // Pagination
+
     // Right Side
         // Variables
             const rightGroups = document.querySelectorAll('.group-info-minimal');
