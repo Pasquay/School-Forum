@@ -50,7 +50,25 @@ class GroupController extends Controller
             $groups->whereNotIn('id', $joinedGroupIds);
         }
 
+        // Pagination
+        
+        $perPage = 10;
+        $currentPage = request('page', 1);
+        
         $groups = $groups->get();
+        $groupsCount = $groups->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $groupsItems = $groups->slice($offset, $perPage)->values();
+
+        $groups = new \Illuminate\Pagination\LengthAwarePaginator(
+            $groupsItems,
+            $groupsCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        // Right Side Groups
         
         $createdGroups = $user->groups()
                               ->wherePivot('role', 'owner')
@@ -75,6 +93,8 @@ class GroupController extends Controller
             foreach($groups as $group){
                 $html .= view('components.group-info', ['group' => $group])->render();
             }
+            $html .= '<p class="empty"></p>';
+
             return response()->json([
                 'html' => $html,
             ]);
@@ -86,6 +106,64 @@ class GroupController extends Controller
             'moderatedGroups',
             'joinedGroups',
         ));
+    }
+
+    public function showGroupsPaginated($page, Request $request){
+        $sortBy = $request->get('sort', 'members');
+        $timeFrame = $request->get('time', 'all');
+        $showJoined = $request->get('show_joined', '1');
+
+        $user = User::findOrFail(Auth::id());
+
+        $groups = Group::query();
+
+        if($sortBy === 'active' && $timeFrame !== 'all'){
+            $date = match($timeFrame){
+                'today' => now()->startOfDay(),
+                'week' => now()->startOfWeek(),
+                'month' => now()->startOfMonth(),
+                'year' => now()->startOfYear(),
+                default => null,
+            };
+            if($date){
+                $groups->where('updated_at', '>=', $date);
+            }
+        }
+
+        switch($sortBy){
+            case 'new':
+                $groups->orderBy('created_at', 'desc');
+                break;
+            case 'active':
+                // implement this fr not this fake shit, count the number of posts in the timeframe
+            case 'members':
+            default:
+                $groups->orderBy('member_count', 'desc');
+        }
+
+        $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
+
+        if($showJoined === '0'){
+            $groups->whereNotIn('id', $joinedGroupIds);
+        }
+
+        // Pagination
+        
+        $perPage = 10;
+        $currentPage = $page;
+
+        $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
+
+        $html = '';
+        foreach($groups as $group){
+            $html .= view('components.group-info', ['group' => $group])->render();
+        }
+
+        // $html .= '<p class="empty">test</p>';
+        return response()->json([
+            'html' => $html,
+            'next_page' => $groups->hasMorePages() ? $groups->currentPage()+1 : NULL
+        ]);
     }
 
     public function showCreateGroup(){

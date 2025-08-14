@@ -304,6 +304,10 @@
             gap: 1.5rem;
         }
 
+        .groups-list .empty {
+            text-align: center;
+        }
+
         .group-card {
             cursor: pointer;
             background-color: white;
@@ -537,9 +541,8 @@
                     @foreach($groups as $group)
                         @include('components.group-info', ['group' => $group])
                     @endforeach
-                @else
-                    <p class="empty">No groups yet...</p>
                 @endif
+                <p class="empty">No groups yet...</p>
             </div>
         </div>
 
@@ -630,43 +633,43 @@
                 }
 
                 // Most Members
-                navMostMembers.addEventListener('click', function() {
-                    setActiveNav(this);
-                    fetchGroups('members')
-                })
+                    navMostMembers.addEventListener('click', function() {
+                        setActiveNav(this);
+                        fetchGroups('members')
+                    })
                 
                 // New
-                navNew.addEventListener('click', function() {
-                    setActiveNav(this);
-                    fetchGroups('new');
-                })
+                    navNew.addEventListener('click', function() {
+                        setActiveNav(this);
+                        fetchGroups('new');
+                    })
 
                 // Most Active Dropdown
-                dropdownToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    setActiveNav(this);
-                    dropdownMenu.style.display = 
-                        dropdownMenu.style.display === 'none' ? 'block' : 'none';
-                });
+                    dropdownToggle.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        setActiveNav(this);
+                        dropdownMenu.style.display = 
+                            dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                    });
                 
                 // Most Active Options
-                dropdownMenu.querySelectorAll('button').forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        dropdownMenu.querySelectorAll('button').forEach(btn => {
-                            btn.classList.remove('active');
-                        })
-                        this.classList.add('active');
-                        selectedTime = this.getAttribute('data-time');
-                        dropdownMenu.style.display = 'none';
-                        fetchGroups('active', selectedTime);
+                    dropdownMenu.querySelectorAll('button').forEach(button => {
+                        button.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            dropdownMenu.querySelectorAll('button').forEach(btn => {
+                                btn.classList.remove('active');
+                            })
+                            this.classList.add('active');
+                            selectedTime = this.getAttribute('data-time');
+                            dropdownMenu.style.display = 'none';
+                            fetchGroups('active', selectedTime);
+                        });
                     });
-                });
             
                 // Hide dropdown if clicking outside
-                document.addEventListener('click', function() {
-                    dropdownMenu.style.display = 'none';
-                });
+                    document.addEventListener('click', function() {
+                        dropdownMenu.style.display = 'none';
+                    });
 
                 // Show Joined Toggle
                 navShowJoined.addEventListener('click', function(){
@@ -679,6 +682,143 @@
                 });
             });
         // Pagination
+            // Variables
+                let membersNextPage = 2;
+                let membersLoading = false;
+                const navMostMembers = document.querySelector('#most-members-btn');
+
+                let newNextPage = 2;
+                let newLoading = false;
+                const navNew = document.querySelector('#new-btn');
+
+                const navMostActive = document.querySelector('#active-dropdown button');
+
+                let activeTodayNextPage = 2;
+                let activeTodayLoading = false;
+                const navActiveToday = document.querySelector('#active-dropdown button[data-time="today"]');
+
+                let activeWeekNextPage = 2;
+                let activeWeekLoading = false;
+                const navActiveWeek = document.querySelector('#active-dropdown button[data-time="week"]');
+                
+                let activeMonthNextPage = 2;
+                let activeMonthLoading = false;
+                const navActivemonth = document.querySelector('#active-dropdown button[data-time="month"]');
+
+                let activeYearNextPage = 2;
+                let activeYearLoading = false
+                const navActiveYear = document.querySelector('#active-dropdown button[data-time="year"]');
+
+                let activeAllNextPage = 2;
+                let activeAllLoading = false;
+                const navActiveAll = document.querySelector('#active-dropdown button[data-time="all"]');
+
+                const groupsListContainer = document.querySelector('.groups-list');
+
+                const loader = document.querySelector('.groups-list p.empty');
+            document.addEventListener('scroll', () => {
+                if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
+                    // Most Members
+                        if(
+                            navMostMembers.classList.contains('active')
+                            && !membersLoading
+                            && membersNextPage
+                        ) {
+                            // membersNextPage = 2;
+                            newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            activeAllNextPage = 2;
+
+                            membersLoading = true;
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            fetch(`/groups/${membersNextPage}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                loader.insertAdjacentHTML('beforebegin', data.html);
+                                membersNextPage = data.next_page;
+                                membersLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!membersNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                membersLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
+                    // New
+                        if(
+                            navNew.classList.contains('active')
+                            && !newLoading
+                            && newNextPage
+                        ) {
+                            membersNextPage = 2;
+                            // newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            activeAllNextPage = 2;
+
+                            newLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${newNextPage}?sort=new&time=all&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                newNextPage = data.next_page;
+                                newLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!newNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                newLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
+                    // Most Active - Today
+
+                    // Most Active - Week
+
+                    // Most Active - Month
+
+                    // Most Active - Year
+
+                    // Most Active - All
+                }
+            })
 
     // Right Side
         // Variables
