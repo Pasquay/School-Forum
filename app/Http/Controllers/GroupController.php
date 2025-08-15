@@ -37,10 +37,12 @@ class GroupController extends Controller
                     if($date){
                         $groups->withCount(['posts' => function($query) use ($date){
                             $query->where('created_at', '>=', $date);
-                        }])->orderBy('posts_count', 'desc');
+                        }])->having('posts_count', '>', 0)
+                           ->orderBy('posts_count', 'desc');
                     }
                 } else {
                     $groups->withCount('posts')
+                           ->having('posts_count', '>', 0)
                            ->orderBy('posts_count', 'desc');
                 }
                 break;
@@ -73,8 +75,7 @@ class GroupController extends Controller
             ['path' => request()->url()]
         );
 
-        // Right Side Groups
-        
+        // Right Side Groups    
         $createdGroups = $user->groups()
                               ->wherePivot('role', 'owner')
                               ->orderBy('is_starred', 'desc')
@@ -139,11 +140,13 @@ class GroupController extends Controller
                     if($date){
                         $groups->withCount(['posts' => function($query) use ($date){
                                 $query->where('created_at', '>=', $date);
-                            }])->orderBy('posts_count', 'desc')
+                            }])->having('posts_count', '>', 0)
+                               ->orderBy('posts_count', 'desc')
                                ->orderBy('name', 'asc'); 
                     }
                 } else {
                     $groups->withCount('posts')
+                           ->having('posts_count', '>', 0)
                            ->orderBy('posts_count', 'desc')
                            ->orderBy('name', 'asc');
                 }
