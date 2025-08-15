@@ -625,6 +625,7 @@
                     .then(response => response.json())
                     .then(data => {
                         groupsListContainer.innerHTML = data.html;
+                        addGroupEventListeners();
                     })
                     .catch((error) => {
                         groupsListContainer.innerHTML = 
@@ -635,13 +636,13 @@
                 // Most Members
                     navMostMembers.addEventListener('click', function() {
                         setActiveNav(this);
-                        fetchGroups('members')
+                        fetchGroups('members');
                     })
                 
                 // New
                     navNew.addEventListener('click', function() {
                         setActiveNav(this);
-                        fetchGroups('new');
+                        fetchGroups('new')
                     })
 
                 // Most Active Dropdown
@@ -681,6 +682,30 @@
                     fetchGroups(activeSort);
                 });
             });
+        // Event Listeners
+            function addGroupEventListeners(){
+                const groups = document.querySelectorAll('.groups-list .group-info');
+                groups.forEach(group => {
+                    if(group.getAttribute('data-listeners-attached') !== '1'){
+                    // Onclick lead to Group Page
+                        const groupid = group.dataset.groupid;
+                        group.addEventListener('click', () => {
+                            console.log('test');
+                            window.location.href = `/group/${groupid}`;
+                        })
+                    // Join Button
+                        
+                    // Leave Button
+                        
+                    // Manage Button
+
+                    // Mark Listener
+                        group.setAttribute('data-listeners-attached', '1');
+                    }
+                })
+            }
+
+            addGroupEventListeners();
         // Pagination
             // Variables
                 let membersNextPage = 2;
@@ -749,6 +774,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!membersNextPage){
                                     loader.textContent = 'No more groups';
@@ -796,6 +822,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!newNextPage){
                                     loader.textContent = 'No more groups';
@@ -843,6 +870,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!activeTodayNextPage){
                                     loader.textContent = 'No more groups';
@@ -890,6 +918,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!activeWeekNextPage){
                                     loader.textContent = 'No more groups';
@@ -937,6 +966,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!activeMonthNextPage){
                                     loader.textContent = 'No more groups';
@@ -984,6 +1014,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!activeYearNextPage){
                                     loader.textContent = 'No more groups';
@@ -1031,6 +1062,7 @@
                                 loader.style.display = 'none';
 
                                 // attach event listeners
+                                addGroupEventListeners();
 
                                 if(!activeAllNextPage){
                                     loader.textContent = 'No more groups';
