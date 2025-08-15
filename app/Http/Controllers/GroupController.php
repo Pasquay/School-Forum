@@ -16,10 +16,16 @@ class GroupController extends Controller
         $sortBy = $request->get('sort', 'members');
         $timeFrame = $request->get('time', 'all');
         $showJoined = $request->get('show_joined', '1');
+        $search = $request->get('search', '');
 
         $user = User::findOrFail(Auth::id());
 
         $groups = Group::query();
+
+        if($search){
+            $groups->where('name', 'like', '%' . $search . '%')
+                   ->orWhere('description', 'like', '%' . $search . '%');
+        }
 
         switch($sortBy){
             case 'new':

@@ -592,6 +592,46 @@
 </body>
 <script>
     // Left Side
+        // Search Bar
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.querySelector('#group-search');
+                const groupsListContainer = document.querySelector('.groups-list');
+                let searchTimeout = null;
+
+                searchInput.addEventListener('input', function(){
+                    console.log(this.value);
+                    clearTimeout(searchTimeout);
+                    const query = (this.value || '').trim();
+
+                    searchTimeout = setTimeout(() => {
+                        groupsListContainer.innerHTML = '<p class="empty">Searching...</p>';
+
+                        const sortButton = document.querySelector('.left-side .nav button.active, .dropdown-toggle.active');
+                        const sort = sortButton ? sortButton.getAttribute('data-sort') : 'members';
+                        let time = 'all';
+                        if(sort === 'active'){
+                            const timeButton = document.querySelector('.dropdown-menu button.active');
+                            time = timeButton ? timeButton.getAttribute('data-time') : 'all';
+                        }
+                        const showJoined = document.querySelector('#show_joined');
+
+                        fetch(`groups?search=${encodeURIComponent(query)}&sort=${sort}&time=${time}&show_joined=${showJoined}`,{
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            groupsListContainer.innerHTML = data.html;
+                            addGroupEventListeners();
+                        })
+                        .catch((error) => {
+                            groupsListContainer.innerHTML = `<p class="empty">Error: ${error}</p>`;
+                        });
+                    }, 200);
+                })
+            })            
         // Navbar dropdown functionality
             document.addEventListener('DOMContentLoaded', function() {
                 const navMostMembers = document.querySelector('#most-members-btn');
