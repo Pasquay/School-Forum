@@ -1618,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
     });
     
-    // UPVOTE
+    // UPVOTE 
         postUpvoteForm.addEventListener('submit', async(e) => {
             e.preventDefault();
             e.stopPropagation();

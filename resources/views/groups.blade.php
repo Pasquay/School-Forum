@@ -683,6 +683,96 @@
                 });
             });
         // Event Listeners
+            function addJoinLeaveEventListeners(){
+                const groups = document.querySelectorAll('.groups-list .group-info');
+                    groups.forEach(group => {
+                        const groupid = group.dataset.groupid;
+                        const form = group.querySelector('form');
+                        const button = group.querySelector('.join-leave button');
+                        if (!form || !button) return;
+
+                        // Remove previous event listeners by replacing the form node
+                        const newForm = form.cloneNode(true);
+                        form.parentNode.replaceChild(newForm, form);
+
+                        // Join Button
+                        if (button.classList.contains('join-button')) {
+                            newForm.action = `/group/${groupid}/join`;
+                            newForm.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(newForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
+
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        if (data.membership === 1) {
+                                            newForm.innerHTML =
+                                                `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                                <button type="submit" class="leave-button">Leave</button>`;
+                                            addJoinLeaveEventListeners();
+                                            const groupsJoinedContainer = document.querySelector('.user-info .groups-joined');
+                                            groupsJoinedContainer.innerHTML = data.joinedGroupsHTML;
+                                            addRightGroupEventListeners();
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error: ', error);
+                                }
+                            });
+                        }
+
+                        // Leave Button
+                        if (button.classList.contains('leave-button')) {
+                            newForm.action = `/group/${groupid}/leave`;
+                            newForm.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(newForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
+
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        if (data.membership === 0) {
+                                            newForm.innerHTML =
+                                                `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                                <button type="submit" class="join-button">Join</button>`;
+                                            addJoinLeaveEventListeners();
+                                            const groupsJoinedContainer = document.querySelector('.user-info .groups-joined');
+                                            groupsJoinedContainer.innerHTML = data.joinedGroupsHTML;
+                                            addRightGroupEventListeners();
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error: ', error);
+                                }
+                            });
+                        }
+                    });
+            }
+
             function addGroupEventListeners(){
                 const groups = document.querySelectorAll('.groups-list .group-info');
                 groups.forEach(group => {
@@ -690,15 +780,104 @@
                     // Onclick lead to Group Page
                         const groupid = group.dataset.groupid;
                         group.addEventListener('click', () => {
-                            console.log('test');
+                            if(
+                                e.target.tagName === 'BUTTON' ||
+                                e.target.tagName === 'FORM' ||
+                                e.target.closest('form')
+                            ){
+                                return;
+                            }
                             window.location.href = `/group/${groupid}`;
                         })
-                    // Join Button
-                        
-                    // Leave Button
-                        
-                    // Manage Button
+                    // Button
+                        const form = group.querySelector('form');
+                        const button = group.querySelector('.join-leave button');
+                        // Join Button
+                            if(button.classList.contains('join-button')){
+                                form.action = `/group/${groupid}/join`;
+                                form.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    try {
+                                        const response = await fetch(form.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded'
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content
+                                            })
+                                        });
 
+                                        if(response.ok){
+                                            const data = await response.json();
+                                            if(data.membership === 1){
+                                                form.innerHTML = 
+                                                    `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                                    <button type="submit" class="leave-button">Leave</button>`;
+                                                addJoinLeaveEventListeners();
+                                                // addGroupEventListeners();
+                                                const groupsJoinedContainer = document.querySelector('.user-info .groups-joined');
+                                                groupsJoinedContainer.innerHTML = data.joinedGroupsHTML;
+                                                addRightGroupEventListeners();
+                                            }
+                                        }
+                                    } catch(error){
+                                        console.error('Error: ', error);
+                                    }
+                                })
+                            }
+                        // Leave Button
+                            if(button.classList.contains('leave-button')){
+                                form.action = `/group/${groupid}/leave`;
+                                form.addEventListener('submit', async(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    try {
+                                        const response = await fetch(form.action, {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/x-www-form-urlencoded'
+                                            },
+                                            credentials: 'same-origin',
+                                            body: new URLSearchParams({
+                                                _token: document.querySelector('meta[name="csrf-token"]').content
+                                            })
+                                        });
+
+                                        if(response.ok){
+                                            const data = await response.json();
+                                            if(data.membership === 0){
+                                                form.innerHTML = 
+                                                    `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                                    <button type="submit" class="join-button">Join</button>`;
+                                                addJoinLeaveEventListeners();
+                                                // addGroupEventListeners();
+                                                // update joined groups
+                                                const groupsJoinedContainer = document.querySelector('.user-info .groups-joined');
+                                                groupsJoinedContainer.innerHTML = data.joinedGroupsHTML;
+                                                // add joined groups event listeners
+                                                addRightGroupEventListeners();
+                                            }
+                                        }
+                                    } catch(error){
+                                        console.error('Error: ', error);
+                                    }
+                                })
+                            }
+                        // Manage Button
+                            if(button.classList.contains('manage-button')){
+                                form.method = 'GET';
+                                form.action = `/group/${groupid}/settings`;
+                                form.addEventListener('submit', (e) => {
+                                    e.stopPropagation();
+                                })
+                            }
                     // Mark Listener
                         group.setAttribute('data-listeners-attached', '1');
                     }
@@ -1080,66 +1259,69 @@
 
     // Right Side
         // Variables
-            const rightGroups = document.querySelectorAll('.group-info-minimal');
         // Events
-            rightGroups.forEach(group => {
-            // Create Group button
-                const createGroupBtn = document.querySelector('.create-group-button');
-                createGroupBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = `/groups/create`;
-                })
-            // Onclick go to group page
-                const groupid = group.dataset.groupid;
-                group.addEventListener('click', () => {
-                    window.location.href = `/group/${groupid}`;
-                })
-            // Star and unstar
-                const starForm = group.querySelector('form');
-                const starBtn = starForm.querySelector('.star')
-                if(starBtn){
-                    let starImg = starBtn.querySelector('img');
-                    
-                    starBtn.addEventListener('click', async(e) => {
+            function addRightGroupEventListeners(){
+                const rightGroups = document.querySelectorAll('.group-info-minimal');
+                rightGroups.forEach(group => {
+                // Create Group button
+                    const createGroupBtn = document.querySelector('.create-group-button');
+                    createGroupBtn.addEventListener('click', (e) => {
                         e.preventDefault();
-                        e.stopPropagation();
-
-                        starBtn.disabled = true;
-                        starBtn.style.opacity = '0.5';
-                        starBtn.style.cursor = 'default';
-
-                        setTimeout(() => {
-                            starBtn.disabled = false;
-                            starBtn.style.opacity = '1';
-                            starBtn.style.cursor = 'pointer';
-                        }, 400);
-
-                        try {
-                            const response = await fetch(starForm.action, {
-                                method: 'POST', 
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                },
-                                credentials: 'same-origin',
-                                body: new URLSearchParams({
-                                    _token: document.querySelector('meta[name="csrf-token"]').content,
-                                })
-                            });
-
-                            if(response.ok){
-                                const data = await response.json();
-
-                                starImg.src = data.starValue ?
-                                    '{{ asset("storage/icons/star.png") }}' :
-                                    '{{ asset("storage/icons/star-alt.png") }}' ;
-                            }
-                        } catch (error){
-                            console.error('Error: ', error);
-                        }
+                        window.location.href = `/groups/create`;
                     })
-                }
-            })
+                // Onclick go to group page
+                    const groupid = group.dataset.groupid;
+                    group.addEventListener('click', () => {
+                        window.location.href = `/group/${groupid}`;
+                    })
+                // Star and unstar
+                    const starForm = group.querySelector('form');
+                    const starBtn = starForm.querySelector('.star')
+                    if(starBtn){
+                        let starImg = starBtn.querySelector('img');
+                        
+                        starBtn.addEventListener('click', async(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            starBtn.disabled = true;
+                            starBtn.style.opacity = '0.5';
+                            starBtn.style.cursor = 'default';
+
+                            setTimeout(() => {
+                                starBtn.disabled = false;
+                                starBtn.style.opacity = '1';
+                                starBtn.style.cursor = 'pointer';
+                            }, 400);
+
+                            try {
+                                const response = await fetch(starForm.action, {
+                                    method: 'POST', 
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    credentials: 'same-origin',
+                                    body: new URLSearchParams({
+                                        _token: document.querySelector('meta[name="csrf-token"]').content,
+                                    })
+                                });
+
+                                if(response.ok){
+                                    const data = await response.json();
+
+                                    starImg.src = data.starValue ?
+                                        '{{ asset("storage/icons/star.png") }}' :
+                                        '{{ asset("storage/icons/star-alt.png") }}' ;
+                                }
+                            } catch (error){
+                                console.error('Error: ', error);
+                            }
+                        })
+                    }
+                })
+            }
+            addRightGroupEventListeners();
 </script>
 </html>

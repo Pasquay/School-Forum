@@ -84,4 +84,9 @@ class Group extends Model
     {
         return $this->banner ? asset('storage/' . $this->banner) : null;
     }
+
+    public function getMemberCount(): ?int
+    {
+        return $this->members()->count();
+    }
 }

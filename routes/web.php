@@ -77,6 +77,10 @@ Route::controller(GroupController::class)->group(function() {
     Route::get('/groups/create', 'showCreateGroup')->middleware('auth'); // show group creation form
     Route::post('/groups/create-submit', 'createGroup')->middleware('auth'); // create group
     Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
+    
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star a group
+    Route::post('/group/{id}/join', 'joinGroup')->middleware('auth'); // join a group
+    Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth'); // leave a group
+    Route::get('/group/{id}/settings', 'showGroupSettings')->middleware('auth'); // manage a group/go to group settings
     Route::get('/group/{id}', 'showGroup')->middleware('auth'); // show a group's page
 });

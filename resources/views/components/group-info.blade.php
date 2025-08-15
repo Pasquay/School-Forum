@@ -32,13 +32,16 @@
                                 ->where('user_id', Auth::id())
                                 ->exists();
         @endphp
-        @if($group->owner_id === Auth::id())
-            <button type="button" class="manage-button">Manage</button>
-        @elseif($userMembership)
-            <button type="button" class="leave-button">Leave</button>
-        @else
-            <button type="button" class="join-button">Join</button>
-        @endif
+        <form action="" method="POST">
+            @csrf
+            @if($group->owner_id === Auth::id())
+                <button type="submit" class="manage-button">Manage</button>
+            @elseif($userMembership)
+                <button type="submit" class="leave-button">Leave</button>
+            @else
+                <button type="submit" class="join-button">Join</button>
+            @endif
+        </form>
     </div>
 </div>
 <style>

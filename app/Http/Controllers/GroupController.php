@@ -269,4 +269,108 @@ class GroupController extends Controller
             'starValue' => $newStarState,
         ]);
     }
+
+    public function joinGroup($id){
+        $user = User::findOrFail(Auth::id());
+        $membership = $user->groups()
+                           ->where('groups.id', $id)
+                           ->exists();
+        if(!$membership){
+            $user->groups()
+                 ->attach($id, [
+                    'role' => 'member',
+                    'is_starred' => false,
+                    'is_muted' => false,
+                 ]);
+
+            $group = Group::findOrFail($id);
+            $group->update(['member_count', $group->getMemberCount()]);
+
+            $joinedGroups = $user->groups()
+                                 ->wherePivot('role', 'member')
+                                 ->orderBy('is_starred', 'desc')
+                                 ->orderBy('name', 'asc')
+                                 ->get();
+            
+            $joinedGroupsHTML = '
+                <div class="section-header">
+                    <p>Groups Joined</p>
+                </div>';
+
+            if($joinedGroups->count() > 0){
+                foreach($joinedGroups as $joinedGroup){
+                    $joinedGroupsHTML .= view('components.group-info-minimal', ['group' => $joinedGroup])->render();
+                }
+            } else {
+                $joinedGroupsHTML .= '<p class="empty">No groups joined yet...</p>';
+            }
+
+            return response()->json([
+                'success' => true,
+                'membership' => 1,
+                'joinedGroupsHTML' => $joinedGroupsHTML,
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'membership' => 1,
+            'message' => 'Already a member of this group',
+        ]);
+    }
+
+    public function leaveGroup($id){
+        $user = User::findOrFail(Auth::id());
+        $membership = $user->groups()
+                           ->where('groups.id', $id)
+                           ->exists();
+        if($membership){
+            $user->groups()
+                 ->detach($id);
+
+            $group = Group::findOrFail($id);
+            $group->update(['member_count', $group->getMemberCount()]);
+
+            $joinedGroups = $user->groups()
+                                 ->wherePivot('role', 'member')
+                                 ->orderBy('is_starred', 'desc')
+                                 ->orderBy('name', 'asc')
+                                 ->get();
+
+            $joinedGroupsHTML = '
+                <div class="section-header">
+                    <p>Groups Joined</p>
+                </div>';
+
+            if($joinedGroups->count() > 0){
+                foreach($joinedGroups as $joinedGroup){
+                    $joinedGroupsHTML .= view('components.group-info-minimal', ['group' => $joinedGroup])->render();
+                }
+            } else {
+                $joinedGroupsHTML .= '<p class="empty">No groups joined yet...</p>';
+            }
+
+            return response()->json([
+                'success' => true,
+                'membership' => 0,
+                'joinedGroupsHTML' => $joinedGroupsHTML,
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'membership' => 0,
+            'message' => 'Not a member of this group yet'
+        ]);
+    }
+
+    public function showGroupSettings($id, Request $request){
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        if($group->isOwner($user) || $group->isModerator($user)){
+            return view('group-settings', ['group' => $group]);
+        } else {
+            return $this->showGroups($request)->with('error', 'Must be moderator or owner to access group settings');
+        }
+        
+    }
 }
