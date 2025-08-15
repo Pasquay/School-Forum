@@ -691,7 +691,7 @@
                 let newLoading = false;
                 const navNew = document.querySelector('#new-btn');
 
-                const navMostActive = document.querySelector('#active-dropdown button');
+                const navMostActive = document.querySelector('#most-active-btn');
 
                 let activeTodayNextPage = 2;
                 let activeTodayLoading = false;
@@ -703,7 +703,7 @@
                 
                 let activeMonthNextPage = 2;
                 let activeMonthLoading = false;
-                const navActivemonth = document.querySelector('#active-dropdown button[data-time="month"]');
+                const navActiveMonth = document.querySelector('#active-dropdown button[data-time="month"]');
 
                 let activeYearNextPage = 2;
                 let activeYearLoading = false
@@ -815,8 +815,54 @@
                     // Most Active - Month
 
                     // Most Active - Year
-
+                        
                     // Most Active - All
+                        if(
+                            navActiveAll.classList.contains('active')
+                            && !activeAllLoading
+                            && activeAllNextPage
+                        ){
+                            membersNextPage = 2;
+                            newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            // activeAllNextPage = 2;
+
+                            activeAllLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${activeAllNextPage}?sort=active&time=all&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                activeAllNextPage = data.next_page;
+                                activeAllLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!activeAllNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                activeAllLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
                 }
             })
 

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use App\Models\User;
 use App\Models\Group;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 
@@ -20,25 +21,29 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        if($sortBy === 'active' && $timeFrame !== 'all'){
-            $date = match($timeFrame){
-                'today' => now()->startOfDay(),
-                'week' => now()->startOfWeek(),
-                'month' => now()->startOfMonth(),
-                'year' => now()->startOfYear(),
-                default => null,
-            };
-            if($date){
-                $groups->where('updated_at', '>=', $date);
-            }
-        }
-
         switch($sortBy){
             case 'new':
                 $groups->orderBy('created_at', 'desc');
                 break;
             case 'active':
-                // implement this fr not this fake shit, count the number of posts in the timeframe
+                if($timeFrame !== 'all'){
+                    $date = match($timeFrame){
+                        'today' => now()->startOfDay(),
+                        'week' => now()->startOfWeek(),
+                        'month' => now()->startOfMonth(),
+                        'year' => now()->startOfYear(),
+                        default => null,
+                    };
+                    if($date){
+                        $groups->withCount(['posts' => function($query) use ($date){
+                            $query->where('created_at', '>=', $date);
+                        }])->orderBy('posts_count', 'desc');
+                    }
+                } else {
+                    $groups->withCount('posts')
+                           ->orderBy('posts_count', 'desc');
+                }
+                break;
             case 'members':
             default:
                 $groups->orderBy('member_count', 'desc');
@@ -117,28 +122,37 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        if($sortBy === 'active' && $timeFrame !== 'all'){
-            $date = match($timeFrame){
-                'today' => now()->startOfDay(),
-                'week' => now()->startOfWeek(),
-                'month' => now()->startOfMonth(),
-                'year' => now()->startOfYear(),
-                default => null,
-            };
-            if($date){
-                $groups->where('updated_at', '>=', $date);
-            }
-        }
-
         switch($sortBy){
             case 'new':
-                $groups->orderBy('created_at', 'desc');
+                $groups->orderBy('created_at', 'desc')
+                       ->orderBy('name', 'asc');
                 break;
             case 'active':
-                // implement this fr not this fake shit, count the number of posts in the timeframe
+                if($timeFrame !== 'all'){
+                    $date = match($timeFrame){
+                        'today' => now()->startOfDay(),
+                        'week' => now()->startOfWeek(),
+                        'month' => now()->startOfMonth(),
+                        'year' => now()->startOfYear(),
+                        default => null,
+                    };
+                    if($date){
+                        $groups->withCount(['posts' => function($query) use ($date){
+                                $query->where('created_at', '>=', $date);
+                            }])->orderBy('posts_count', 'desc')
+                               ->orderBy('name', 'asc'); 
+                    }
+                } else {
+                    $groups->withCount('posts')
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
+                }
+                break;
             case 'members':
             default:
-                $groups->orderBy('member_count', 'desc');
+                $groups->orderBy('member_count', 'desc')
+                       ->orderBy('name', 'asc');
+
         }
 
         $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
@@ -148,7 +162,6 @@ class GroupController extends Controller
         }
 
         // Pagination
-        
         $perPage = 10;
         $currentPage = $page;
 
