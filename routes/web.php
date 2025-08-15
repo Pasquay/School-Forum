@@ -74,9 +74,9 @@ Route::controller(ReplyVoteController::class)->group(function() {
 
 Route::controller(GroupController::class)->group(function() {
     Route::get('/groups', 'showGroups')->middleware('auth'); // show groups page
-    Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
-    Route::get('/group/{id}', 'showGroup')->middleware('auth'); // show a group's page
     Route::get('/groups/create', 'showCreateGroup')->middleware('auth'); // show group creation form
     Route::post('/groups/create-submit', 'createGroup')->middleware('auth'); // create group
+    Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star a group
+    Route::get('/group/{id}', 'showGroup')->middleware('auth'); // show a group's page
 });

@@ -809,13 +809,193 @@
                             });
                         }
                     // Most Active - Today
+                        if(
+                            navActiveToday.classList.contains('active')
+                            && !activeTodayLoading
+                            && activeTodayNextPage
+                        ){
+                            membersNextPage = 2;
+                            newNextPage = 2;
+                            // activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            activeAllNextPage = 2;
 
+                            activeTodayLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${activeTodayNextPage}?sort=active&time=today&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                activeTodayNextPage = data.next_page;
+                                activeTodayLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!activeTodayNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                activeTodayLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
                     // Most Active - Week
+                        if(
+                            navActiveWeek.classList.contains('active')
+                            && !activeWeekLoading
+                            && activeWeekNextPage
+                        ){
+                            membersNextPage = 2;
+                            newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            // activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            activeAllNextPage = 2;
 
+                            activeWeekLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${activeWeekNextPage}?sort=active&time=week&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                activeWeekNextPage = data.next_page;
+                                activeWeekLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!activeWeekNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                activeWeekLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
                     // Most Active - Month
+                        if(
+                            navActiveMonth.classList.contains('active')
+                            && !activeMonthLoading
+                            && activeMonthNextPage
+                        ){
+                            membersNextPage = 2;
+                            newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            // activeMonthNextPage = 2;
+                            activeYearNextPage = 2;
+                            activeAllNextPage = 2;
 
+                            activeMonthLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${activeMonthNextPage}?sort=active&time=month&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                activeMonthNextPage = data.next_page;
+                                activeMonthLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!activeMonthNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                activeMonthLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
                     // Most Active - Year
-                        
+                        if(
+                            navActiveYear.classList.contains('active')
+                            && !activeYearLoading
+                            && activeYearNextPage
+                        ){
+                            membersNextPage = 2;
+                            newNextPage = 2;
+                            activeTodayNextPage = 2;
+                            activeWeekNextPage = 2;
+                            activeMonthNextPage = 2;
+                            // activeYearNextPage = 2;
+                            activeAllNextPage = 2;
+
+                            activeYearLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
+                            loader.style.display = 'block';
+                            loader.textContent = 'Loading...';
+
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            fetch(`/groups/${activeYearNextPage}?sort=active&time=year&show_joined=${showJoined}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const loader = document.querySelector('.groups-list p.empty');
+                                loader.insertAdjacentHTML('beforebegin', data.html + "<p class='empty'></p>");
+                                activeYearNextPage = data.next_page;
+                                activeYearLoading = false;
+                                loader.style.display = 'none';
+
+                                // attach event listeners
+
+                                if(!activeYearNextPage){
+                                    loader.textContent = 'No more groups';
+                                    loader.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error: ', error);
+                                activeYearLoading = false;
+                                loader.style.display = 'none';
+                            });
+                        }
                     // Most Active - All
                         if(
                             navActiveAll.classList.contains('active')
@@ -873,7 +1053,8 @@
             rightGroups.forEach(group => {
             // Create Group button
                 const createGroupBtn = document.querySelector('.create-group-button');
-                createGroupBtn.addEventListener('click', () => {
+                createGroupBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
                     window.location.href = `/groups/create`;
                 })
             // Onclick go to group page

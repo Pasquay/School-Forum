@@ -163,7 +163,7 @@ class GroupController extends Controller
 
         // Pagination
         $perPage = 10;
-        $currentPage = $page;
+        $currentPage = (int)$page;
 
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
 
