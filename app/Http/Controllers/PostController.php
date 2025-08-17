@@ -42,6 +42,9 @@ class PostController extends Controller
             'deleted_at' => NULL,
             'user_id' => $userId 
         ])->latest()
+            ->with(['group' => function($query){
+                $query->withTrashed();
+            }])
             ->withCount(['votes', 'comments'])
             ->paginate(15);
      
@@ -65,6 +68,9 @@ class PostController extends Controller
         $deletedPosts = Post::onlyTrashed()
             ->where(['user_id' => $userId])
             ->latest()
+            ->with(['group' => function($query){
+                $query->withTrashed();
+            }])
             ->withCount(['votes'])
             ->get();
 
@@ -80,6 +86,9 @@ class PostController extends Controller
         $deletedPosts = Post::onlyTrashed()
             ->where(['user_id' => $userId])
             ->latest()
+            ->with(['group' => function($query){
+                $query->withTrashed();
+            }])
             ->withCount(['votes', 'comments'])
             ->paginate(15, ['*'], 'page', $request->get('page', 1));
 
