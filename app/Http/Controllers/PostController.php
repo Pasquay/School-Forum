@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -23,6 +24,27 @@ class PostController extends Controller
             return $post;
         });
 
+        // Right Side Groups
+            $user = User::findOrFail(Auth::id());
+
+            $createdGroups = $user->groups()
+                                  ->wherePivot('role', 'owner')
+                                  ->orderBy('is_starred', 'desc')
+                                  ->orderBy('name', 'asc')
+                                  ->get();
+
+            $moderatedGroups = $user->groups()
+                                    ->wherePivot('role', 'moderator')
+                                    ->orderBy('is_starred', 'desc')
+                                    ->orderBy('name', 'asc')
+                                    ->get();
+
+            $joinedGroups = $user->groups()
+                                 ->wherePivot('role', 'member')
+                                 ->orderBy('is_starred', 'desc')
+                                 ->orderBy('name', 'asc')
+                                 ->get();
+
         if($request->ajax()){
             $html = '';
             foreach($posts as $post){
@@ -34,7 +56,12 @@ class PostController extends Controller
             ]);
         }
 
-        return view('home', ['posts' => $posts]);
+        return view('home', compact(
+            'posts',
+            'createdGroups',
+            'moderatedGroups',
+            'joinedGroups',
+        ));
     }
 
     public function getUserPost(Request $request, $userId){

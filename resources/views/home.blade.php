@@ -84,6 +84,14 @@
             background-color: #357abd;
         }
 
+        main {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 2rem; /* optional: adds space between left and right */
+        }
+
         .search {
             display: flex;
             align-items: center;
@@ -351,6 +359,107 @@
             line-height: 1.5;
             transition: background 0.2s;
         }
+        /* RIGHT SIDE */
+            .right-side {
+                flex: 0 0 340px;
+                max-width: 340px;
+                min-width: 340px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+                position: sticky;
+                top: 88px;
+                height: fit-content;
+                max-height: calc(100vh - 88px);
+                overflow-y: auto;
+            }
+
+            /* RIGHT SIDE SCROLLBAR */
+                .right-side::-webkit-scrollbar {
+                    width: 8px;
+                }
+
+                .right-side::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 4px;
+                }
+
+                .right-side::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 4px;
+                    transition: background 0.2s;
+                }
+
+                .right-side::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
+
+                /* For Firefox */
+                .right-side {
+                    scrollbar-width: thin;
+                    scrollbar-color: #c1c1c1 #f1f1f1;
+                }
+
+            .user-info {
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.10);
+                padding: 2rem 1.5rem;
+                margin-bottom: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: start;
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .groups-created, .groups-moderated, .groups-joined {
+                width: 100%;
+            }
+
+            .main-header {
+                text-align: center;
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                color: #333;
+                letter-spacing: 0.01em;
+            }
+
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 10px;
+                width: 100%;
+            }
+
+            .section-header p {
+                margin: 0;
+                font-size: 18px; 
+                flex: 1;
+                line-height: 1.5;
+                font-weight: 500;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+
+            .section-header button:hover {
+                background-color: #357abd;
+            }
+
+            .user-info .empty {
+                color: #666;
+                font-style: italic;
+                text-align: center;
+                padding: 1rem 0 1rem 0;
+                margin: 0;
+                font-size: 0.9rem;
+                width: 100%;
+                border-bottom: 1px solid #f0f0f0;
+                display: block;
+            }
     </style>
 </head>
 <body>
@@ -397,31 +506,77 @@
             </ul>
         </div>
     @endif
-    <div class="create-post-form" id='create-post-form'>
-        <form action="/create-post" method='POST'>
-            @csrf
-            <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
-            <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
-            <button type="submit" id='create-post-submit' style='display:none;'>Post</button>
-        </form>
-    </div>
-    <div class="posts-column" id='posts-column'>
-        @foreach($posts as $post)
-            @include('components.post', ['post' => $post])
-        @endforeach
-    </div>
-    @include('components.back-to-top-button')
-    <div class="loader" id='loader' 
-        style='
-            text-align:center;
-            margin:5rem;
-            display:none;'
-    >
-        Loading...
-    </div>
-    <p class="home-bottom" id='home-bottom' style='display:none;'>
-        You're all caught up!     
-    </p>
+    <main>
+        <div class="left-side">
+            <div class="create-post-form" id='create-post-form'>
+                <form action="/create-post" method='POST'>
+                    @csrf
+                    <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
+                    <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
+                    <button type="submit" id='create-post-submit' style='display:none;'>Post</button>
+                </form>
+            </div>
+            <div class="posts-column" id='posts-column'>
+                @foreach($posts as $post)
+                    @include('components.post', ['post' => $post])
+                @endforeach
+            </div>
+            @include('components.back-to-top-button')
+            <div class="loader" id='loader' 
+                style='
+                    text-align:center;
+                    margin:5rem;
+                    display:none;'
+            >
+                Loading...
+            </div>
+            <p class="home-bottom" id='home-bottom' style='display:none;'>
+                You're all caught up!     
+            </p>
+        </div>
+
+        <div class="right-side">
+            <div class="user-info" id="user-info">
+                <div class="groups-created">
+                    <p class="main-header">Your Groups</p>
+                    <div class="section-header">
+                        <p>Groups Created</p>
+                    </div>
+                    @if($createdGroups->count() > 0)
+                        @foreach($createdGroups as $group)
+                            @include('components.group-info-minimal', ['group' => $group])
+                        @endforeach
+                    @else
+                        <p class="empty">No groups created yet...</p>
+                    @endif
+                </div>
+                <div class="groups-moderated">
+                    <div class="section-header">
+                        <p>Groups Moderated</p>
+                    </div>
+                    @if($moderatedGroups->count() > 0)
+                        @foreach($moderatedGroups as $group)
+                            @include('components.group-info-minimal', ['group' => $group])
+                        @endforeach
+                    @else
+                        <p class="empty">No groups to moderate...</p>
+                    @endif
+                </div>
+                <div class="groups-joined">
+                    <div class="section-header">
+                        <p>Groups Joined</p>
+                    </div>
+                    @if($joinedGroups->count() > 0)
+                        @foreach($joinedGroups as $group)
+                            @include('components.group-info-minimal', ['group' => $group])
+                        @endforeach
+                    @else
+                        <p class="empty">No groups joined yet...</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </main>
 </body>
 <script>
     const createPostForm = document.getElementById('create-post-form');
@@ -687,5 +842,62 @@
                 }
             })
         });
+    // Right Side
+        function addRightGroupEventListeners(){
+            const rightGroups = document.querySelectorAll('.group-info-minimal');
+            rightGroups.forEach(group => {
+            // Onclick lead to group Page
+                const groupid = group.dataset.groupid;
+                group.addEventListener('click', () => {
+                    window.location.href = `/group/${groupid}`;
+                })
+            // Star and Unstar Group
+                const starForm = group.querySelector('form');
+                const starBtn = group.querySelector('.star');
+                if(starBtn){
+                    let starImg = starBtn.querySelector('img');
+
+                    starBtn.addEventListener('click', async(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        starBtn.disabled = true;
+                        starBtn.style.opacity = '0.5';
+                        starBtn.style.cursor = 'default';
+
+                        setTimeout(() => {
+                            starBtn.disabled = false;
+                            starBtn.style.opacity = '1';
+                            starBtn.style.cursor = 'pointer';
+                        }, 400);
+
+                        try {
+                            const response = await fetch(starForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'x-www-form-urlencoded',
+                                },
+                                credentials: 'same-origin',
+                                body: new URLSearchParams({
+                                    _token: document.querySelector('meta[name="csrf-token"]').content,
+                                })
+                            });
+
+                            if(response.ok){
+                                const data = await response.json();
+                                starImg.src = data.starValue ?
+                                    '{{ asset("storage/icons/star.png") }}' :
+                                    '{{ asset("storage/icons/star-alt.png") }}' ;
+                            }
+                        } catch(error){
+                            console.error('Error: ', error);
+                        }
+                    })
+                }
+            })
+        }
+        addRightGroupEventListeners();
 </script>
 </html>

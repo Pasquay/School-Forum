@@ -261,7 +261,7 @@ class GroupController extends Controller
             return redirect()->back()->with('error', $error->getMessage())->withInput();
         }
     }
-
+ 
     public function showGroup($id){
         $group = Group::findOrFail($id);
 

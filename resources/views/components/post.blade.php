@@ -46,11 +46,13 @@
     </div>
 </div>
 <script>
-    const groupExists = ('{{ $post->group->deleted_at }}') ? '0' : '1' ;
-    const groupLink = document.querySelector('#group-link-{{ $post->group->id }}');
-    if(!groupExists && groupLink){
-        groupLink.textContent = '#DELETED GROUP';
-        groupLink.href = '#';
-        groupLink.classList.add('deleted');
-    } 
+    (function() {
+        const groupExists = ('{{ $post->group->deleted_at }}') ? '0' : '1';
+        const groupLink = document.querySelector('#group-link-{{ $post->group->id }}');
+        if(!groupExists && groupLink){
+            groupLink.textContent = '#DELETED GROUP';
+            groupLink.href = '#';
+            groupLink.classList.add('deleted');
+        }
+    })();
 </script>

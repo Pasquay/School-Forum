@@ -587,7 +587,7 @@
                 </div>
             </div>
         </div>
-    </main>
+    </main> 
     @include('components.back-to-top-button')
 </body>
 <script>
@@ -1362,7 +1362,6 @@
             })
 
     // Right Side
-        // Variables
         // Events
             function addRightGroupEventListeners(){
                 const rightGroups = document.querySelectorAll('.group-info-minimal');
