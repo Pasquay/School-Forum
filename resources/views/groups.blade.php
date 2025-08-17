@@ -536,7 +536,7 @@
                 </div>
             </div>
 
-            <div class="groups-list" id=''>
+            <div class="groups-list">
                 @if($groups->count() > 0)
                     @foreach($groups as $group)
                         @include('components.group-info', ['group' => $group])
@@ -592,6 +592,7 @@
 </body>
 <script>
     // Left Side
+        let activeSearch = false;
         // Search Bar
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.querySelector('#group-search');
@@ -599,12 +600,20 @@
                 let searchTimeout = null;
 
                 searchInput.addEventListener('input', function(){
-                    console.log(this.value);
                     clearTimeout(searchTimeout);
                     const query = (this.value || '').trim();
 
                     searchTimeout = setTimeout(() => {
                         groupsListContainer.innerHTML = '<p class="empty">Searching...</p>';
+                        
+                        activeSearch = (query === '') ? false : true;
+                        membersNextPage = 2;
+                        newNextPage = 2;
+                        activeTodayNextPage = 2;
+                        activeWeekNextPage = 2;
+                        activeMonthNextPage = 2;
+                        activeYearNextPage = 2;
+                        activeAllNextPage = 2;
 
                         const sortButton = document.querySelector('.left-side .nav button.active, .dropdown-toggle.active');
                         const sort = sortButton ? sortButton.getAttribute('data-sort') : 'members';
@@ -631,7 +640,7 @@
                         });
                     }, 200);
                 })
-            })            
+            })   
         // Navbar dropdown functionality
             document.addEventListener('DOMContentLoaded', function() {
                 const navMostMembers = document.querySelector('#most-members-btn');
@@ -656,7 +665,14 @@
                         '<p class="empty">Loading...</p>';
 
                     const showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                    fetch(`/groups?sort=${sort}&time=${time}&show_joined=${showJoined}`, {
+                    const searchInput = document.querySelector('#group-search');
+                    const query = (searchInput.value || '').trim();                    
+                    activeSearch = (query === '') ? false : true;
+                    const fetchRoute = (activeSearch) ? 
+                        `/groups?search=${encodeURIComponent(query)}&sort=${sort}&time=${time}&show_joined=${showJoined}` : 
+                        `/groups?sort=${sort}&time=${time}&show_joined=${showJoined}`;
+                    console.log(fetchRoute);
+                    fetch(fetchRoute, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json',
@@ -676,18 +692,25 @@
                 // Most Members
                     navMostMembers.addEventListener('click', function() {
                         setActiveNav(this);
+                        membersNextPage = 2;
                         fetchGroups('members');
                     })
                 
                 // New
                     navNew.addEventListener('click', function() {
                         setActiveNav(this);
+                        newNextPage = 2;
                         fetchGroups('new')
                     })
 
                 // Most Active Dropdown
                     dropdownToggle.addEventListener('click', function(e) {
                         e.stopPropagation();
+                        activeTodayNextPage = 2;
+                        activeWeekNextPage = 2;
+                        activeMonthNextPage = 2;
+                        activeYearNextPage = 2;
+                        activeAllNextPage = 2;
                         setActiveNav(this);
                         dropdownMenu.style.display = 
                             dropdownMenu.style.display === 'none' ? 'block' : 'none';
@@ -819,7 +842,7 @@
                     if(group.getAttribute('data-listeners-attached') !== '1'){
                     // Onclick lead to Group Page
                         const groupid = group.dataset.groupid;
-                        group.addEventListener('click', () => {
+                        group.addEventListener('click', (e) => {
                             if(
                                 e.target.tagName === 'BUTTON' ||
                                 e.target.tagName === 'FORM' ||
@@ -962,6 +985,8 @@
                 const loader = document.querySelector('.groups-list p.empty');
             document.addEventListener('scroll', () => {
                 if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
+                    const searchInput = document.querySelector('#group-search');
+                    const query = (searchInput.value || '').trim();
                     // Most Members
                         if(
                             navMostMembers.classList.contains('active')
@@ -977,10 +1002,19 @@
                             activeAllNextPage = 2;
 
                             membersLoading = true;
+
+                            const loader = document.querySelector('.groups-list p.empty');
                             loader.style.display = 'block';
                             loader.textContent = 'Loading...';
+                            //
+                            let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${membersNextPage}?search=${encodeURIComponent(query)}&sort=members&time=all&show_joined=${showJoined}` : 
+                                `/groups/${membersNextPage}?sort=members&time=all&show_joined=${showJoined}`;
 
-                            fetch(`/groups/${membersNextPage}`, {
+                            fetch(fetchRoute, {
+                            //
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1027,7 +1061,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${newNextPage}?sort=new&time=all&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${newNextPage}?search=${encodeURIComponent(query)}&sort=new&time=all&show_joined=${showJoined}` : 
+                                `/groups/${newNextPage}?sort=new&time=all&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1075,7 +1114,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${activeTodayNextPage}?sort=active&time=today&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${activeTodayNextPage}?search=${encodeURIComponent(query)}&sort=active&time=today&show_joined=${showJoined}` : 
+                                `/groups/${activeTodayNextPage}?sort=active&time=today&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1123,7 +1167,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${activeWeekNextPage}?sort=active&time=week&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${activeWeekNextPage}?search=${encodeURIComponent(query)}&sort=active&time=week&show_joined=${showJoined}` : 
+                                `/groups/${activeWeekNextPage}?sort=active&time=week&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1171,7 +1220,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${activeMonthNextPage}?sort=active&time=month&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${activeMonthNextPage}?search=${encodeURIComponent(query)}&sort=active&time=month&show_joined=${showJoined}` : 
+                                `/groups/${activeMonthNextPage}?sort=active&time=month&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1219,7 +1273,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${activeYearNextPage}?sort=active&time=year&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${activeYearNextPage}?search=${encodeURIComponent(query)}&sort=active&time=year&show_joined=${showJoined}` : 
+                                `/groups/${activeYearNextPage}?sort=active&time=year&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }
@@ -1267,7 +1326,12 @@
                             loader.textContent = 'Loading...';
 
                             let showJoined = document.querySelector('#show_joined').checked ? '1' : '0';
-                            fetch(`/groups/${activeAllNextPage}?sort=active&time=all&show_joined=${showJoined}`, {
+                            activeSearch = (query === '') ? false : true;
+                            const fetchRoute = (activeSearch) ? 
+                                `/groups/${activeAllNextPage}?search=${encodeURIComponent(query)}&sort=active&time=all&show_joined=${showJoined}` : 
+                                `/groups/${activeAllNextPage}?sort=active&time=all&show_joined=${showJoined}`;
+
+                            fetch(fetchRoute, {
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest',
                                 }

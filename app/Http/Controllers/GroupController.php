@@ -29,7 +29,8 @@ class GroupController extends Controller
 
         switch($sortBy){
             case 'new':
-                $groups->orderBy('created_at', 'desc');
+                $groups->orderBy('created_at', 'desc')
+                       ->orderBy('name', 'asc');
                 break;
             case 'active':
                 if($timeFrame !== 'all'){
@@ -44,17 +45,20 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function($query) use ($date){
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc');
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
                            ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc');
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
             default:
-                $groups->orderBy('member_count', 'desc');
+                $groups->orderBy('member_count', 'desc')
+                       ->orderBy('name', 'asc');
         }
 
         $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
@@ -124,10 +128,16 @@ class GroupController extends Controller
         $sortBy = $request->get('sort', 'members');
         $timeFrame = $request->get('time', 'all');
         $showJoined = $request->get('show_joined', '1');
+        $search = $request->get('search', '');
 
         $user = User::findOrFail(Auth::id());
 
         $groups = Group::query();
+
+        if($search){
+            $groups->where('name', 'like', '%' . $search . '%')
+                   ->orWhere('description', 'like', '%' . $search . '%');
+        }
 
         switch($sortBy){
             case 'new':
