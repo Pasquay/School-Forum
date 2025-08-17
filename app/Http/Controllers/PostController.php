@@ -13,6 +13,7 @@ class PostController extends Controller
     public function getLatest(Request $request){
         $posts = Post::whereNull('deleted_at')
             ->latest()
+            ->with(['group'])
             ->withCount(['votes', 'comments'])
             ->paginate(15);
             
@@ -102,6 +103,7 @@ class PostController extends Controller
 
     public function getPost($id){
         $post = Post::where('id', $id)
+            ->with(['group'])
             ->withCount('comments')
             ->firstOrFail();
         $post->votes = $post->getVoteCountAttribute();

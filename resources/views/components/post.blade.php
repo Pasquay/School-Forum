@@ -1,6 +1,6 @@
 <div class="post {{ $post->deleted_at ? 'deleted' : '' }}" id='{{ $post->id }}'>
     <small>
-        <a href="/user/{{ $post->user_id }}" class="username-link">{{ '@' . $post->user->name }}</a>  |  {{ $post->created_at->format('F j, Y \a\t g:i a') }}.
+        <a href="/group/{{ $post->group->id }}" class="username-link">{{ '#' . $post->group->name }}</a> | <a href="/user/{{ $post->user_id }}" class="username-link">{{ '@' . $post->user->name }}</a> | {{ $post->created_at->format('F j, Y \a\t g:i a') }}.
         @if($post->updated_at != $post->created_at && !$post->deleted_at)
             <span class='edit-indicator'>Edited on {{ $post->updated_at->format('F j, Y \a\t g:i a') }}</span>
         @elseif($post->deleted_at)
