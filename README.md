@@ -3,7 +3,7 @@
 ## 1. Clone the Repository
 
 ```sh
-git clone <repository-url>
+git clone https://github.com/Pasquay/School-Forum.git
 ```
 
 ## 2. Download Dependencies
