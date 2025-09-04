@@ -24,6 +24,7 @@ class Group extends Model
         'owner_id',
         'member_count',
         'is_private',
+        'type'
     ];
 
     protected $casts = [
