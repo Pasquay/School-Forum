@@ -114,7 +114,7 @@
         @endif
         <form action="/login" method="post">
             @csrf
-            <input type="text" name="login-name" placeholder="Name" required>
+            <input type="text" name="login-email" placeholder="Email" required>
             <input type="password" name="login-password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
