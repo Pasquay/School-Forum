@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CommentVote extends Model
 {
-    protected $fillable = [
+    protected $fillable = [ 
         'comment_id',
         'user_id',
         'vote'
