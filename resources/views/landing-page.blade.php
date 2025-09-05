@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Carolink - Connect & Grow</title>
-
+    <!-- Updated font import to use modern serif font Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -79,6 +79,7 @@
         /* Hero Section */
 
         .hero {
+            /* Made hero section full viewport height */
             height: 100vh;
             display: flex;
             align-items: center;
@@ -88,9 +89,11 @@
             position: relative;
             background: transparent;
             animation: heroFloat 6s ease-in-out infinite;
+            /* Added decorative elements to hero section */
             overflow: hidden;
         }
 
+        /* Decorative circles to hero section */
 
         .hero::before {
             content: '';
@@ -308,6 +311,7 @@
 
         .section-subtitle {
             text-align: center;
+            /* Increased subtitle size */
             font-size: 1.3rem;
             color: #666;
             margin-bottom: 4rem;
@@ -1120,16 +1124,16 @@
         <!-- Added id to hero section for smooth scrolling -->
         <section class="hero" id="home">
             <div class="container">
-
-                <!-- Changed hero title from "Your University Hub" to "Carolink" -->
-                <h1>
-                    <span class="letter">C</span><span class="letter">a</span><span class="letter">r</span><span class="letter">o</span><span class="letter">l</span><span class="letter">i</span><span class="letter">n</span><span class="letter">k</span>
-
+                <div class="hero-content">
+                    <!-- Changed hero title from "Your University Hub" to "Carolink" -->
+                    <h1>
+                        <span class="letter">C</span><span class="letter">a</span><span class="letter">r</span><span class="letter">o</span><span class="letter">l</span><span class="letter">i</span><span class="letter">n</span><span class="letter">k</span>
+                    </h1>
                     <p>Access classes, assignments, announcements, and social features all in one place.</p>
                     <div class="cta-buttons">
                         <a href="#" class="btn btn-primary" id="heroLoginBtn">Get Started</a>
                     </div>
-            </div>
+                </div>
             </div>
         </section>
 
@@ -1174,266 +1178,266 @@
                 <!-- Made header title dynamic for login/register -->
                 <h2 id="modalTitle">Student Login</h2>
                 <span class="close">&times;</span>
-                <h2 id="modalTitle">Student Login</h2>
-                <div class="modal-body">
-                    <!-- Added login form container -->
-                    <div id="loginContainer" class="form-container">
-
-                        <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
-                            {{ session('success') }}
+            </div>
+            <div class="modal-body">
+                <!-- Added login form container -->
+                <div id="loginContainer" class="form-container">
+                    @if (session()->has('success'))
+                    <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                        {{ session('success') }}
+                    </div>
+                    @endif @if (session()->has('error'))
+                    <div style="display: flex; background-color: #f8d7da; color: #000000; padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f5c6cb; text-align: center; align-items: center; justify-content: center;">
+                        <p style='margin: 0;'>{{ session('error') }}</p>
+                    </div>
+                    @endif
+                    <form id="loginForm" action="/login" method="post">
+                        @csrf
+                        <div class="form-group">
+                            <label for="email">University Email</label>
+                            <input type="email" id="email" name="login-email" placeholder="id@usc.edu.ph" required>
                         </div>
-                        @endif @if (session()->has('error'))
-                        <div style="display: flex; background-color: #f8d7da; color: #000000; padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f5c6cb; text-align: center; align-items: center; justify-content: center;">
-                            <p style='margin: 0;'>{{ session('error') }}</p>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="login-password" placeholder="Enter your password" required>
                         </div>
-                        @endif
-                        <form id="loginForm" action="/login" method="post">
-                            @csrf
-                            <div class="form-group">
-                                <label for="email">University Email</label>
-                                <input type="email" id="email" name="login-email" placeholder="id@usc.edu.ph" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" id="password" name="login-password" placeholder="Enter your password" required>
-                            </div>
-                            <button type="submit" class="login-btn">Login to Carolink</button>
+                        <button type="submit" class="login-btn">Login to Carolink</button>
 
-                            <!-- Google Sign-In -->
-                            <div class="divider"><span>or</span></div>
+                        <!-- Google Sign-In -->
+                        <div class="divider"><span>or</span></div>
 
-                            <!-- Custom Google Sign-In Button -->
-                            <button class="gsi-material-button" onclick="handleGoogleSignIn()">
-                                <div class="gsi-material-button-state"></div>
-                                <div class="gsi-material-button-content-wrapper">
-                                    <div class="gsi-material-button-icon">
-                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                            <path fill="none" d="M0 0h48v48H0z"></path>
-                                        </svg>
-                                    </div>
-                                    <span class="gsi-material-button-contents">Sign in with Google</span>
-                                    <span style="display: none;">Sign in with Google</span>
+                        <!-- Custom Google Sign-In Button -->
+                        <button class="gsi-material-button" onclick="handleGoogleSignIn()">
+                            <div class="gsi-material-button-state"></div>
+                            <div class="gsi-material-button-content-wrapper">
+                                <div class="gsi-material-button-icon">
+                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                                        <path fill="none" d="M0 0h48v48H0z"></path>
+                                    </svg>
                                 </div>
-                            </button>
-
-                            <!-- Hidden default Google Sign-In for functionality -->
-                            <div id="g_id_onload"
-                                data-client_id="495352471012-51n88psp7q90qph631ai7hnvqhsmi3ve.apps.googleusercontent.com"
-                                data-callback="handleCredentialResponse">
+                                <span class="gsi-material-button-contents">Sign in with Google</span>
+                                <span style="display: none;">Sign in with Google</span>
                             </div>
-                            <div class="g_id_signin"
-                                data-type="standard"
-                                data-theme="outline"
-                                data-size="large"
-                                data-text="continue_with"
-                                data-shape="rectangular"
-                                data-logo_alignment="left">
-                            </div>
+                        </button>
 
-                            <div class="forgot-password">
-                                <a href="#" id="showRegisterLink">Register</a>
-                                <a href="#" id="forgotPasswordLink">Forgot your password?</a>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Added register form container -->
-                    <div id="registerContainer" class="form-container hidden">
-                        @if ($errors->any())
-                        <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                            <ul style="margin: 0; padding-left: 1rem;">
-                                @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                        <!-- Hidden default Google Sign-In for functionality -->
+                        <div id="g_id_onload"
+                            data-client_id="495352471012-51n88psp7q90qph631ai7hnvqhsmi3ve.apps.googleusercontent.com"
+                            data-callback="handleCredentialResponse">
                         </div>
-                        @endif
-                        <form id="registerForm" action="/register" method="post">
-                            @csrf
-                            <div class="form-group">
-                                <label for="registerName">Full Name</label>
-                                <input type="text" id="registerName" name="name" placeholder="Enter your name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerEmail">University Email</label>
-                                <input type="email" id="registerEmail" name="email" placeholder="id@usc.edu.ph" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="registerPassword">Password</label>
-                                <input type="password" id="registerPassword" name="password" placeholder="Create a password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Re-enter Password</label>
-                                <input type="password" id="confirmPassword" name="password_confirmation" placeholder="Confirm your password" required>
-                            </div>
-                            <button type="submit" class="login-btn">Create Account</button>
-                            <div class="forgot-password">
-                                <a href="#" id="showLoginLink">Back to Login</a>
-                            </div>
-                        </form>
+                        <div class="g_id_signin"
+                            data-type="standard"
+                            data-theme="outline"
+                            data-size="large"
+                            data-text="continue_with"
+                            data-shape="rectangular"
+                            data-logo_alignment="left">
+                        </div>
+
+                        <div class="forgot-password">
+                            <a href="#" id="showRegisterLink">Register</a>
+                            <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Added register form container -->
+                <div id="registerContainer" class="form-container hidden">
+                    @if ($errors->any())
+                    <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <ul style="margin: 0; padding-left: 1rem;">
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
+                    @endif
+                    <form id="registerForm" action="/register" method="post">
+                        @csrf
+                        <div class="form-group">
+                            <label for="registerName">Full Name</label>
+                            <input type="text" id="registerName" name="name" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">University Email</label>
+                            <input type="email" id="registerEmail" name="email" placeholder="id@usc.edu.ph" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" name="password" placeholder="Create a password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Re-enter Password</label>
+                            <input type="password" id="confirmPassword" name="password_confirmation" placeholder="Confirm your password" required>
+                        </div>
+                        <button type="submit" class="login-btn">Create Account</button>
+                        <div class="forgot-password">
+                            <a href="#" id="showLoginLink">Back to Login</a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-        <footer id="contact">
-            <div class="container">
-                <div class="footer-content">
-                    <p>
-                        <!-- Updated footer links to scroll to sections -->
-                        <a href="#home">Home</a>
-                        <a href="#home">Home</a>
-                        <a href="#contact">Contact</a>
-                    </p>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2025 Carolink. All rights reserved.</p>
-                </div>
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <p>
+                    <!-- Updated footer links to scroll to sections -->
+                    <a href="#home">Home</a>
+                    <a href="#features">Features</a>
+                    <a href="#contact">Contact</a>
+                </p>
             </div>
-        </footer>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Carolink. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-        <script>
-            let currentSlide = 0;
-            const slides = document.querySelectorAll('.feature-card');
-            const indicators = document.querySelectorAll('.indicator');
-            const track = document.getElementById('carouselTrack');
-            const totalSlides = slides.length;
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.feature-card');
+        const indicators = document.querySelectorAll('.indicator');
+        const track = document.getElementById('carouselTrack');
+        const totalSlides = slides.length;
 
-            function updateCarousel() {
-                track.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-                indicators.forEach((indicator, index) => {
-                    indicator.classList.toggle('active', index === currentSlide);
-                });
-            }
-
-            function nextSlide() {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                updateCarousel();
-            }
-
-            setInterval(nextSlide, 4000);
+        function updateCarousel() {
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
 
             indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    currentSlide = index;
-                    updateCarousel();
-                });
+                indicator.classList.toggle('active', index === currentSlide);
             });
+        }
 
-            const modal = document.getElementById('loginModal');
-            const heroLoginBtn = document.getElementById('heroLoginBtn');
-            const closeBtn = document.getElementsByClassName('close')[0];
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateCarousel();
+        }
 
-            heroLoginBtn.onclick = function(e) {
-                e.preventDefault();
-                modal.style.display = 'block';
-            }
+        setInterval(nextSlide, 4000);
 
-            closeBtn.onclick = function() {
+        indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                currentSlide = index;
+                updateCarousel();
+            });
+        });
+
+        const modal = document.getElementById('loginModal');
+        const heroLoginBtn = document.getElementById('heroLoginBtn');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        heroLoginBtn.onclick = function(e) {
+            e.preventDefault();
+            modal.style.display = 'block';
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
                 modal.style.display = 'none';
             }
+        }
 
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
-                }
+        document.getElementById('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            this.submit();
+        }
+
+        document.getElementById('registerForm').onsubmit = function(e) {
+            e.preventDefault();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
             }
+            this.submit();
+        }
 
-            document.getElementById('loginForm').onsubmit = function(e) {
-                e.preventDefault();
-                this.submit();
-            }
+        document.getElementById('showRegisterLink').onclick = function(e) {
+            e.preventDefault();
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('registerContainer').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Student Registration';
+        }
 
-            document.getElementById('registerForm').onsubmit = function(e) {
-                e.preventDefault();
-                const password = document.getElementById('registerPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
+        document.getElementById('showLoginLink').onclick = function(e) {
+            e.preventDefault();
+            document.getElementById('registerContainer').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('modalTitle').textContent = 'Student Login';
+        }
 
-                if (password !== confirmPassword) {
-                    alert('Passwords do not match!');
-                    return;
-                }
-                this.submit();
-            }
+        // Google Sign-In callback function
+        function handleCredentialResponse(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
 
-            document.getElementById('showRegisterLink').onclick = function(e) {
-                e.preventDefault();
-                document.getElementById('loginContainer').classList.add('hidden');
-                document.getElementById('registerContainer').classList.remove('hidden');
-                document.getElementById('modalTitle').textContent = 'Student Registration';
-            }
+            console.log("ID: " + responsePayload.sub);
+            console.log('Full Name: ' + responsePayload.name);
+            console.log("Email: " + responsePayload.email);
 
-            document.getElementById('showLoginLink').onclick = function(e) {
-                e.preventDefault();
-                document.getElementById('registerContainer').classList.add('hidden');
-                document.getElementById('loginContainer').classList.remove('hidden');
-                document.getElementById('modalTitle').textContent = 'Student Login';
-            }
-
-            // Google Sign-In callback function
-            function handleCredentialResponse(response) {
-                const responsePayload = decodeJwtResponse(response.credential);
-
-                console.log("ID: " + responsePayload.sub);
-                console.log('Full Name: ' + responsePayload.name);
-                console.log("Email: " + responsePayload.email);
-
-                // Send the user data to backend
-                fetch('/google-login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            name: responsePayload.name,
-                            email: responsePayload.email
-                        })
+            // Send the user data to backend
+            fetch('/google-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        name: responsePayload.name,
+                        email: responsePayload.email
                     })
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
-                            return response.json();
-                        }
-                    })
-                    .catch(error => {
-                        alert('Google login failed.');
-                        console.error(error);
-                    });
-            }
-
-            // Function to handle custom Google button click
-            function handleGoogleSignIn() {
-                // Trigger the hidden Google Sign-In button
-                const googleButton = document.querySelector('.g_id_signin');
-                if (googleButton) {
-                    // Try to find and click the actual Google button inside
-                    const actualButton = googleButton.querySelector('[role="button"]');
-                    if (actualButton) {
-                        actualButton.click();
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
                     } else {
-                        // Fallback: trigger Google Sign-In programmatically
-                        google.accounts.id.prompt();
+                        return response.json();
                     }
+                })
+                .catch(error => {
+                    alert('Google login failed.');
+                    console.error(error);
+                });
+        }
+
+        // Function to handle custom Google button click
+        function handleGoogleSignIn() {
+            // Trigger the hidden Google Sign-In button
+            const googleButton = document.querySelector('.g_id_signin');
+            if (googleButton) {
+                // Try to find and click the actual Google button inside
+                const actualButton = googleButton.querySelector('[role="button"]');
+                if (actualButton) {
+                    actualButton.click();
+                } else {
+                    // Fallback: trigger Google Sign-In programmatically
+                    google.accounts.id.prompt();
                 }
             }
+        }
 
-            // 4. Helper function to decode the JWT token from Google.
-            function decodeJwtResponse(token) {
-                var base64Url = token.split('.')[1];
-                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-                return JSON.parse(jsonPayload);
-            }
-        </script>
+        // 4. Helper function to decode the JWT token from Google.
+        function decodeJwtResponse(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+    </script>
 </body>
 
 </html>
