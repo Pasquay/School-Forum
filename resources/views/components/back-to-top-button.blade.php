@@ -65,7 +65,7 @@
     aria-label='back-to-top'
 >
     <img 
-        src="{{ asset('storage/icons/back-to-top.png') }}" 
+        src="{{ asset('/icons/back-to-top.png') }}" 
         alt="↑"
     >
 </button>

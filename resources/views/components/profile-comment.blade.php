@@ -20,19 +20,19 @@
                 <form action="/comment/upvote/{{ $comment->id }}" method="POST">
                     @csrf
                     <button type="submit" {{ $comment->deleted_at ? 'disabled' : '' }}>
-                        <img src="{{ asset('storage/icons/up-arrow' . ($comment->userVote == 1 ? '-alt' : '') . '.png') }}" alt="Upvote">
+                        <img src="{{ asset('/icons/up-arrow' . ($comment->userVote == 1 ? '-alt' : '') . '.png') }}" alt="Upvote">
                     </button>
                 </form>
                 <p>{{ $comment->votes }}</p>
                 <form action="/comment/downvote/{{ $comment->id }}" method="POST">
                     @csrf
                     <button type="submit" {{ $comment->deleted_at ? 'disabled' : '' }}>
-                        <img src="{{ asset('storage/icons/down-arrow' . ($comment->userVote == -1 ? '-alt' : '') . '.png') }}" alt="Downvote">
+                        <img src="{{ asset('/icons/down-arrow' . ($comment->userVote == -1 ? '-alt' : '') . '.png') }}" alt="Downvote">
                     </button>
                 </form>
             </div>
             <div class='reply-count-container'>
-                <img src="{{ asset('storage/icons/chat.png') }}" alt="" class='reply-image'>
+                <img src="{{ asset('/icons/chat.png') }}" alt="" class='reply-image'>
                 @if($comment->replyCount === 0)
                     <p class='reply-count'>Replies</p>
                 @else

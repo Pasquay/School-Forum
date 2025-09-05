@@ -21,14 +21,14 @@
             <form action="/home/upvote/{{ $post->id }}" method="POST">
                 @csrf
                 <button type="submit" {{ $post->deleted_at ? 'disabled' : '' }}>
-                    <img src="{{ asset('storage/icons/up-arrow' . ($post->userVote == 1 ? '-alt' : '') . '.png') }}" alt="upvote">
+                    <img src="{{ asset('/icons/up-arrow' . ($post->userVote == 1 ? '-alt' : '') . '.png') }}" alt="upvote">
                 </button>
             </form>
             <p>{{ $post->votes }}</p>
             <form action="/home/downvote/{{ $post->id }}" method='POST'>
                 @csrf
                 <button type="submit" {{ $post->deleted_at ? 'disabled' : '' }}>
-                    <img src="{{ asset('storage/icons/down-arrow' . ($post->userVote == -1 ? '-alt' : '') . '.png') }}" alt="downvote">
+                    <img src="{{ asset('/icons/down-arrow' . ($post->userVote == -1 ? '-alt' : '') . '.png') }}" alt="downvote">
                 </button>
             </form>
         </div>

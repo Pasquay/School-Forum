@@ -663,12 +663,12 @@
 
                                             const upArrow = upvoteForm.querySelector('img');
                                             upArrow.src = data.voteValue == 1 ?
-                                                "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                                                "{{ asset('storage/icons/up-arrow.png') }}" ;
+                                                "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                                "{{ asset('/icons/up-arrow.png') }}" ;
                                             
                                             const downArrow = downvoteForm.querySelector('img');
                                             if (data.voteValue == 1){
-                                                downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                                downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
                                             }
                                         }
                                     } catch (error) {
@@ -702,12 +702,12 @@
                             
                                             const downArrow = downvoteForm.querySelector('img');
                                             downArrow.src = data.voteValue == -1 ?
-                                                "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                                                "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                                "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                                "{{ asset('/icons/down-arrow.png') }}" ;
                             
                                             const upArrow = upvoteForm.querySelector('img');
                                             if(data.voteValue == -1){
-                                                upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                                upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
                                             }
                                         }
                                     } catch(error){
@@ -790,12 +790,12 @@
 
                         const upArrow = upvoteForm.querySelector('img');
                         upArrow.src = data.voteValue == 1 ?
-                            "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/up-arrow.png') }}" ;
+                            "{{ asset('/icons/up-arrow-alt.png') }}" :
+                            "{{ asset('/icons/up-arrow.png') }}" ;
                         
                         const downArrow = downvoteForm.querySelector('img');
                         if (data.voteValue == 1){
-                            downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                            downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
                         }
                     }
                 } catch (error) {
@@ -829,12 +829,12 @@
         
                         const downArrow = downvoteForm.querySelector('img');
                         downArrow.src = data.voteValue == -1 ?
-                            "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                            "{{ asset('storage/icons/down-arrow.png') }}" ;
+                            "{{ asset('/icons/down-arrow-alt.png') }}" :
+                            "{{ asset('/icons/down-arrow.png') }}" ;
         
                         const upArrow = upvoteForm.querySelector('img');
                         if(data.voteValue == -1){
-                            upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                            upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
                         }
                     }
                 } catch(error){
@@ -888,8 +888,8 @@
                             if(response.ok){
                                 const data = await response.json();
                                 starImg.src = data.starValue ?
-                                    '{{ asset("storage/icons/star.png") }}' :
-                                    '{{ asset("storage/icons/star-alt.png") }}' ;
+                                    '{{ asset("/icons/star.png") }}' :
+                                    '{{ asset("/icons/star-alt.png") }}' ;
                             }
                         } catch(error){
                             console.error('Error: ', error);

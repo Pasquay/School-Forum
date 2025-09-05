@@ -1415,8 +1415,8 @@
                                     const data = await response.json();
 
                                     starImg.src = data.starValue ?
-                                        '{{ asset("storage/icons/star.png") }}' :
-                                        '{{ asset("storage/icons/star-alt.png") }}' ;
+                                        '{{ asset("/icons/star.png") }}' :
+                                        '{{ asset("/icons/star-alt.png") }}' ;
                                 }
                             } catch (error){
                                 console.error('Error: ', error);

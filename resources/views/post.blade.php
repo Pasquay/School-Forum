@@ -1132,7 +1132,7 @@
                     @if (Auth::id() === $post->user_id)
                     <div class="settings-container">
                         <button class="settings-button" id='settings-button'>
-                            <img src="{{ asset('storage/icons/dots.png') }}" alt='Settings' id='dots-icon'>
+                            <img src="{{ asset('/icons/dots.png') }}" alt='Settings' id='dots-icon'>
                         </button>
                         <div class="dropdown-menu" id='settings-dropdown-menu'>
                             <button class="dropdown-item" id='edit-post-button'>Edit</button>
@@ -1150,14 +1150,14 @@
                         <form action="/post/upvote/{{ $post->id }}" method="POST">
                             @csrf
                             <button type="submit">
-                                <img src="{{ asset('storage/icons/up-arrow' . ($post->userVote == 1 ? '-alt' : '') . '.png') }}" alt="upvote">
+                                <img src="{{ asset('/icons/up-arrow' . ($post->userVote == 1 ? '-alt' : '') . '.png') }}" alt="upvote">
                             </button>
                         </form>
                         <p>{{ $post->votes }}</p>
                         <form action="/post/downvote/{{ $post->id }}" method="POST">
                             @csrf
                             <button type="submit">
-                                <img src="{{ asset('storage/icons/down-arrow' . ($post->userVote == -1 ? '-alt' : '') . '.png') }}" alt="downvote">
+                                <img src="{{ asset('/icons/down-arrow' . ($post->userVote == -1 ? '-alt' : '') . '.png') }}" alt="downvote">
                             </button>
                         </form>
                     </div>
@@ -1223,7 +1223,7 @@
                             @if(Auth::id() == $comment->user_id)
                                 <div class="comment-settings-container">
                                     <button class="settings-button" id='settings-button-{{ $comment->id }}'>
-                                        <img src="{{ asset('storage/icons/dots.png') }}" alt="Settings" id='dots-icon-{{ $comment->id }}'>
+                                        <img src="{{ asset('/icons/dots.png') }}" alt="Settings" id='dots-icon-{{ $comment->id }}'>
                                     </button>
                                     <div class="dropdown-menu" id='settings-dropdown-menu-{{ $comment->id }}'>
                                         <button class="dropdown-item" id='edit-comment-button-{{ $comment->id }}'>Edit</button>
@@ -1241,21 +1241,21 @@
                             <form action="/comment/upvote/{{ $comment->id }}" method="POST">
                                 @csrf
                                 <button type="submit">
-                                    <img src="{{ asset('storage/icons/up-arrow' . ($comment->userVote == 1 ? '-alt' : '') . '.png') }}" alt="Upvote">
+                                    <img src="{{ asset('/icons/up-arrow' . ($comment->userVote == 1 ? '-alt' : '') . '.png') }}" alt="Upvote">
                                 </button>
                             </form>
                             <p>{{ $comment->votes }}</p>
                             <form action="/comment/downvote/{{ $comment->id }}" method="POST">
                                 @csrf
                                 <button type="submit">
-                                    <img src="{{ asset('storage/icons/down-arrow' . ($comment->userVote == -1 ? '-alt' : '') . '.png') }}" alt="Downvote">
+                                    <img src="{{ asset('/icons/down-arrow' . ($comment->userVote == -1 ? '-alt' : '') . '.png') }}" alt="Downvote">
                                 </button>
                             </form>
                         </div>
                         <form id='replies-form-{{ $comment->id }}' action="/comment/{{ $comment->id }}/replies" method='GET'>
                             @csrf
                             <button type="submit">
-                                <img src="{{ asset('storage/icons/chat.png') }}" alt="">
+                                <img src="{{ asset('/icons/chat.png') }}" alt="">
                                 @if($comment->replies_count > 0)
                                     Replies ({{$comment->replies_count}}) 
                                 @else
@@ -1643,11 +1643,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     postVoteCount.textContent = data.voteCount;
 
                     upArrow.src = (data.voteValue == 1) ?
-                        "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                        "{{ asset('storage/icons/up-arrow.png') }}" ;
+                        "{{ asset('/icons/up-arrow-alt.png') }}" :
+                        "{{ asset('/icons/up-arrow.png') }}" ;
 
                     if(data.voteValue == 1){
-                        downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                        downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
                     }
                 }
             } catch (error){
@@ -1680,11 +1680,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     postVoteCount.textContent = data.voteCount;
 
                     downArrow.src = (data.voteValue == -1) ?
-                        "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                        "{{ asset('storage/icons/down-arrow.png') }}" ;
+                        "{{ asset('/icons/down-arrow-alt.png') }}" :
+                        "{{ asset('/icons/down-arrow.png') }}" ;
 
                     if(data.voteValue == -1){
-                        upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                        upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
                     }
                 }
             } catch (error){
@@ -1732,11 +1732,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     commentVoteCount.textContent = data.voteCount;
 
                     upArrow.src = (data.voteValue == 1) ?
-                        "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                        "{{ asset('storage/icons/up-arrow.png') }}" ;
+                        "{{ asset('/icons/up-arrow-alt.png') }}" :
+                        "{{ asset('/icons/up-arrow.png') }}" ;
 
                     if(data.voteValue == 1){
-                        downArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                        downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
                     }
                 }
             } catch (error){
@@ -1768,11 +1768,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     commentVoteCount.textContent = data.voteCount;
 
                     downArrow.src = (data.voteValue == -1) ?
-                        "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                        "{{ asset('storage/icons/down-arrow.png') }}" ;
+                        "{{ asset('/icons/down-arrow-alt.png') }}" :
+                        "{{ asset('/icons/down-arrow.png') }}" ;
 
                     if(data.voteValue == -1){
-                        upArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                        upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
                     }
                 }
             } catch (error){
@@ -1842,7 +1842,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     settingsContainer.innerHTML = 
                                     `<div class='reply-settings-container'>
                                         <button class='settings-button' id='reply-settings-button-${reply.id}'>
-                                            <img src='{{ asset('storage/icons/dots.png') }}' alt='Settings' id='reply-dots-icon-${reply.id}'>
+                                            <img src='{{ asset('/icons/dots.png') }}' alt='Settings' id='reply-dots-icon-${reply.id}'>
                                         </button>
                                         <div class='dropdown-menu' id='reply-settings-dropdown-menu-${reply.id}'>
                                             <button class='dropdown-item' id='edit-reply-button-${reply.id}'>Edit</button>
@@ -1860,13 +1860,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const replyDownArrow = cloneVote.querySelector('form:last-child img');
                                 replyUpvoteForm.action = `/reply/upvote/${reply.id}`;
                                 replyUpArrow.src = (reply.userVote == 1) ?
-                                "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                                "{{ asset('storage/icons/up-arrow.png') }}" ;
+                                "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                "{{ asset('/icons/up-arrow.png') }}" ;
                                 replyVoteCount.textContent = reply.votes;
                                 replyDownvoteForm.action = `/reply/downvote/${reply.id}`;
                                 replyDownArrow.src = (reply.userVote == -1) ?
-                                "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                                "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                "{{ asset('/icons/down-arrow.png') }}" ;
                                 const replyShareButton = clone.querySelector('.share-button');
                                 replyShareButton.id = `reply-share-button-${reply.id}`;
 
@@ -1910,11 +1910,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                             replyVoteCount.textContent = data.voteCount;
 
                                             replyUpArrow.src = (data.voteValue == 1) ?
-                                                "{{ asset('storage/icons/up-arrow-alt.png') }}" :
-                                                "{{ asset('storage/icons/up-arrow.png') }}" ;
+                                                "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                                "{{ asset('/icons/up-arrow.png') }}" ;
                                             
                                             if(data.voteValue == 1){
-                                                replyDownArrow.src = "{{ asset('storage/icons/down-arrow.png') }}";
+                                                replyDownArrow.src = "{{ asset('/icons/down-arrow.png') }}";
                                             }
                                         }
                                     } catch(error){
@@ -1947,11 +1947,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                             replyVoteCount.textContent = data.voteCount;
 
                                             replyDownArrow.src = (data.voteValue == -1) ?
-                                                "{{ asset('storage/icons/down-arrow-alt.png') }}" :
-                                                "{{ asset('storage/icons/down-arrow.png') }}" ;
+                                                "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                                "{{ asset('/icons/down-arrow.png') }}" ;
 
                                             if(data.voteValue == -1){
-                                                replyUpArrow.src = "{{ asset('storage/icons/up-arrow.png') }}";
+                                                replyUpArrow.src = "{{ asset('/icons/up-arrow.png') }}";
                                             }
                                         }
                                     } catch(error){
@@ -1983,10 +1983,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                     const clonedSettingsButtonImg = clonedSettings.querySelector('.settings-button img');
                                     const clonedSettingsDropdown = clonedSettings.querySelector('.dropdown-menu');
                                     clonedSettingsButton.addEventListener('mouseenter', () => {
-                                        clonedSettingsButtonImg.src = '{{ asset("storage/icons/dots-alt.png") }}';
+                                        clonedSettingsButtonImg.src = '{{ asset("/icons/dots-alt.png") }}';
                                     });
                                     clonedSettingsButton.addEventListener('mouseleave', () => {
-                                        clonedSettingsButtonImg.src = '{{ asset("storage/icons/dots.png") }}';
+                                        clonedSettingsButtonImg.src = '{{ asset("/icons/dots.png") }}';
                                     });
                                     clonedSettingsButton.addEventListener('click', (e) => {
                                         e.stopPropagation();

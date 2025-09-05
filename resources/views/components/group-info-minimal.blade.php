@@ -21,9 +21,9 @@
             <img 
                 src="
                     @if($group->pivot->is_starred === 1)
-                        {{ asset('storage/icons/star.png') }}
+                        {{ asset('/icons/star.png') }}
                     @else
-                        {{ asset('storage/icons/star-alt.png') }}
+                        {{ asset('/icons/star-alt.png') }}
                     @endif
                 " 
                 alt="star" 
