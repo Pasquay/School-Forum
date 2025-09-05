@@ -57,7 +57,7 @@ DB_PASSWORD=<your MySQL password>
 Run the migration command:
 
 ```sh
-php artisan migrate
+php artisan migrate --seed
 ```
 
 ## 7. Start the Webserver
