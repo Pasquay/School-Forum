@@ -334,6 +334,7 @@ class UserController extends Controller
                     'overview',
                     'posts',
                     'comments',
+                    'createdGroups',
                 ));
             }
     }

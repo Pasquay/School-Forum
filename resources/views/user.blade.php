@@ -825,6 +825,9 @@
         .user-info-row-1 {
             display: flex;
             justify-content: space-between;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e1e1e1;
+            align-items: center;
             width: 100%;
         }
 
@@ -839,11 +842,24 @@
             transition: color 0.2s;
         }
 
+        .user-name-role {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info-row-1 img {
+            width: 22px;
+            height: 22px;
+            margin-left: 2px;
+            vertical-align: middle;
+            object-fit: contain;
+        }
+
         .user-info-row-1 button {
             min-width: 5rem;
             background-color: #4a90e2;
             color: white;
-            padding: 0.3rem 0.8rem;
+            padding: 0.5rem 0.8rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
@@ -859,10 +875,9 @@
             display: flex;
             flex-direction: row;
             width: 100%;
-            padding: 1rem 0;
+            padding: 0 0 1rem 0;
             border-top: 1px solid #e1e1e1;
             border-bottom: 1px solid #e1e1e1;
-            margin: 0.5rem 0;
         }
 
         .user-info-row-2 p {
@@ -992,6 +1007,58 @@
             line-height: 1.5;
             transition: background 0.2s;
         }
+    /* CREATED GROUPS */
+        .groups-created {
+            width: 100%;
+            border-top: 1px solid #e1e1e1;
+            padding-top: 0.7rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+            width: 100%;
+        }
+        
+        .section-header p {
+            margin: 0;
+            font-size: 20px; 
+            flex: 1;
+            line-height: 1.5;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .section-header button {
+            min-width: 5rem;
+            background-color: #4a90e2;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .section-header button:hover {
+            background-color: #357abd;
+        }
+        
+        .groups-created .empty {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem 0 1rem 0;
+            margin: 0;
+            font-size: 0.9rem;
+            width: 100%;
+            border-bottom: 1px solid #f0f0f0;
+            display: block;
+        }
     </style>
 </head>
 <body data-user-id='{{ $user->id }}'>
@@ -1075,8 +1142,14 @@
         </div>
         <div class="right-side">
             <div class="user-info" id='user-info'>
+            <!-- PROFILE INFORMATION -->
                 <div class="user-info-row-1">
-                    <p>{{ '@' . $user->name }}</p>
+                    <div class="user-name-role">
+                        <p>{{ '@' . $user->name }}</p>
+                        @if($user->role === "staff")
+                            <img src="{{ asset('storage/icons/staff-check.png') }}" alt="| Teacher">
+                        @endif
+                    </div>
                     <button class='profile-share-button' id='profile-share-button'>Share</button>
                 </div>
                 <div class="user-info-row-2">
@@ -1093,6 +1166,20 @@
                 </div>
                 <div class="user-info-row-4">
                     <p><span>Joined:</span><br>{{ $user->created_at->format('F j, Y') }}</p>
+                </div>
+            <!-- GROUPS INFORMATION -->
+                <div class="groups-created">
+                    <div class="section-header">
+                        <p>Groups Created</p>
+                        <button class="create-group-button">Create Group</button>
+                    </div>
+                    @if($createdGroups->count() > 0)
+                        @foreach($createdGroups as $group)
+                            @include('components.group-info-minimal', ['group' => $group])
+                        @endforeach
+                    @else
+                        <p class="empty">No groups created yet...</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1133,6 +1220,71 @@
                     }, 1200);
                 })
             })
+        // Groups
+            function addRightGroupEventListeners(){
+                const createdGroups = document.querySelectorAll('.groups-created .group-info-minimal');
+                console.log(createdGroups);
+                // Create Group Button
+                    const createGroupBtn = document.querySelector('.create-group-button');
+                    createGroupBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.location.href = `/groups/create`;
+                    })
+                createdGroups.forEach(group => {
+                    // Onclick go to group page
+                        const groupid = group.dataset.groupid;
+                        group.addEventListener('click', () => {
+                            window.location.href = `/group/${groupid}`;
+                        })
+                    // Star and unstar
+                        const starForm = group.querySelector('form');
+                        const starBtn = starForm.querySelector('.star')
+                        if(starBtn){
+                            let starImg = starBtn.querySelector('img');
+                            
+                            starBtn.addEventListener('click', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                starBtn.disabled = true;
+                                starBtn.style.opacity = '0.5';
+                                starBtn.style.cursor = 'default';
+
+                                setTimeout(() => {
+                                    starBtn.disabled = false;
+                                    starBtn.style.opacity = '1';
+                                    starBtn.style.cursor = 'pointer';
+                                }, 400);
+
+                                try {
+                                    const response = await fetch(starForm.action, {
+                                        method: 'POST', 
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                                        })
+                                    });
+
+                                    if(response.ok){
+                                        const data = await response.json();
+
+                                        starImg.src = data.starValue ?
+                                            '{{ asset("storage/icons/star.png") }}' :
+                                            '{{ asset("storage/icons/star-alt.png") }}' ;
+                                    }
+                                } catch (error){
+                                    console.error('Error: ', error);
+                                }
+                            })
+                        }
+                    })
+            }
+            addRightGroupEventListeners();
     // LEFT SIDE
         // Navbar
             // Variables
