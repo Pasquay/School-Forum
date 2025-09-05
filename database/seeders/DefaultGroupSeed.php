@@ -49,5 +49,15 @@ class DefaultGroupSeed extends Seeder
             ]
         );
 
+        Group::firstOrCreate(
+            ['name' => 'Student Hub'],
+            [
+                'description' => 'A private space for students to communicate and collaborate, share resources, and discuss academic matters.',
+                'owner_id' => $owner->id,
+                'type' => 'academic',
+                'is_private' => true,
+                'member_count' => 1,
+            ]
+        );
     }
 }

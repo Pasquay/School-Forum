@@ -26,9 +26,10 @@ class UserController extends Controller
             $userData = $request->validate([
                 'name' => ['required', Rule::unique('users', 'name')],
                 'email' => ['required', 'email'],
-                'password' => ['required', 'min:8', 'confirmed']
+                'password' => ['required', 'min:8', 'confirmed'],
             ]);
             $userData['password'] = bcrypt($userData['password']);
+            $userData['role'] = 'student';
 
             User::create($userData);
 
@@ -297,6 +298,15 @@ class UserController extends Controller
                 ['path' => request()->url()]
             );
 
+        // Created Groups
+            $createdGroups = $user->groups()
+                                  ->wherePivot('role', 'owner')
+                                  ->orderBy('is_starred', 'desc')
+                                  ->orderBy('name', 'asc')
+                                  ->get();
+
+        // Groups joined
+
         // Response
             if($user->id == Auth::id()){
                 return view('profile', compact(
@@ -311,6 +321,7 @@ class UserController extends Controller
                     'deletedOverview',
                     'deletedPosts',
                     'deletedCommentsAndReplies',
+                    'createdGroups',
                 ));
             }
             else{

@@ -9,7 +9,7 @@ use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReplyVoteController;
 use App\Http\Controllers\CommentVoteController;
-
+ 
 Route::controller(UserController::class)->group(function() {
     Route::get('/', 'showLogin'); // load login page
     Route::post('/login', 'login'); // user login

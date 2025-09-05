@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Log;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,7 @@ class User extends Authenticatable
         'password',
         'bio',
         'photo',
+        'role',
     ];
 
     /**
@@ -86,7 +88,7 @@ class User extends Authenticatable
         return $this->belongsToMany(Group::class, 'group_members')
             ->withPivot(['role', 'is_starred', 'is_muted'])
             ->wherePivot('is_muted', true)
-            ->withTimestamps();
+            ->withTimestamps(); 
     }
 
     /**
@@ -125,5 +127,33 @@ class User extends Authenticatable
                     ->where('group_id', $group->id)
                     ->wherePivot('is_muted', true)
                     ->exists();
+    }
+
+    /**
+     * ON CREATION BEHAVIOR
+     */
+
+    protected static function booted()
+    {
+        static::created(function($user){
+            switch($user->role){
+                case 'student':
+                    $groupIds = [1, 2, 4];
+                    break;
+                case 'staff':
+                    $groupIds = [1, 2, 3];
+                    break;
+                default:
+                    $groupIds = [1, 2];
+                    break;
+            }
+
+            $defaultGroups = Group::whereIn('id', $groupIds)->get();
+            foreach($defaultGroups as $group){
+                $group->members()->syncWithoutDetaching([$user->id]);
+                // \Log::info('Group: ', $group->name);
+            }
+            // Log::info('User role on creation: ' . $user->role);
+        });
     }
 }
