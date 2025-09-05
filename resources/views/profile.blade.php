@@ -1524,7 +1524,6 @@
         // Groups
             function addRightGroupEventListeners(){
                 const createdGroups = document.querySelectorAll('.groups-created .group-info-minimal');
-                console.log(createdGroups);
                 // Create Group Button
                     const createGroupBtn = document.querySelector('.create-group-button');
                     createGroupBtn.addEventListener('click', (e) => {

@@ -641,7 +641,6 @@ class UserController extends Controller
             ));
         }
     }
-
     
 
     public function getUserCommentsAndReplies($id)
