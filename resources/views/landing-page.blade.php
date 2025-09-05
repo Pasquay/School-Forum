@@ -503,13 +503,16 @@
 
         .modal-content {
             background: var(--color-cream);
-            margin: 8% auto;
+            margin: 5vh auto;
             border-radius: 20px;
             width: 90%;
             max-width: 440px;
+            max-height: 90vh;
             box-shadow: 0 30px 100px rgba(45, 74, 43, 0.2);
             overflow: hidden;
             animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
@@ -565,6 +568,9 @@
         .modal-body {
             padding: 3rem 2.5rem;
             background: var(--color-cream);
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(90vh - 120px);
         }
 
         /* Enhanced form group styling with floating labels */
@@ -1115,6 +1121,121 @@
                 letter-spacing: 0.02em;
             }
         }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                margin: 2% auto;
+                width: 95%;
+                max-width: 95vw;
+                max-height: 95vh;
+                border-radius: 12px;
+                overflow-y: auto;
+                position: relative;
+            }
+
+            .modal-header {
+                padding: 1rem 1rem 0.8rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+                max-height: calc(95vh - 80px);
+                overflow-y: auto;
+            }
+
+            .modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group input {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .login-btn {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* For short screens (when window is dragged vertically) */
+        @media (max-height: 600px) {
+            .modal-content {
+                margin: 1vh auto;
+                max-height: 98vh;
+            }
+
+            .modal-header {
+                padding: 1rem 1.5rem 0.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .modal-body {
+                padding: 1rem 1.5rem;
+                max-height: calc(98vh - 70px);
+            }
+
+            .form-group {
+                margin-bottom: 0.8rem;
+            }
+
+            .form-group input {
+                padding: 0.5rem;
+            }
+
+            .login-btn {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        /* For very short screens */
+        @media (max-height: 400px) {
+            .modal-content {
+                margin: 0.5vh auto;
+                max-height: 99vh;
+            }
+
+            .modal-header {
+                padding: 0.5rem 1rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .modal-body {
+                padding: 0.5rem 1rem;
+                max-height: calc(99vh - 50px);
+            }
+
+            .form-group {
+                margin-bottom: 0.5rem;
+            }
+
+            .form-group label {
+                font-size: 0.8rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .form-group input {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .login-btn {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+                margin-bottom: 0.3rem;
+            }
+        }
     </style>
 </head>
 
@@ -1175,12 +1296,10 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <!-- Made header title dynamic for login/register -->
                 <h2 id="modalTitle">Student Login</h2>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- Added login form container -->
                 <div id="loginContainer" class="form-container">
                     @if (session()->has('success'))
                     <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
@@ -1203,10 +1322,8 @@
                         </div>
                         <button type="submit" class="login-btn">Login to Carolink</button>
 
-                        <!-- Google Sign-In -->
                         <div class="divider"><span>or</span></div>
 
-                        <!-- Custom Google Sign-In Button -->
                         <button class="gsi-material-button" onclick="handleGoogleSignIn()">
                             <div class="gsi-material-button-state"></div>
                             <div class="gsi-material-button-content-wrapper">
@@ -1224,7 +1341,6 @@
                             </div>
                         </button>
 
-                        <!-- Hidden default Google Sign-In for functionality -->
                         <div id="g_id_onload"
                             data-client_id="495352471012-51n88psp7q90qph631ai7hnvqhsmi3ve.apps.googleusercontent.com"
                             data-callback="handleCredentialResponse">
@@ -1245,7 +1361,6 @@
                     </form>
                 </div>
 
-                <!-- Added register form container -->
                 <div id="registerContainer" class="form-container hidden">
                     @if ($errors->any())
                     <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
@@ -1288,7 +1403,6 @@
         <div class="container">
             <div class="footer-content">
                 <p>
-                    <!-- Updated footer links to scroll to sections -->
                     <a href="#home">Home</a>
                     <a href="#features">Features</a>
                     <a href="#contact">Contact</a>
@@ -1412,17 +1526,13 @@
                 });
         }
 
-        // Function to handle custom Google button click
         function handleGoogleSignIn() {
-            // Trigger the hidden Google Sign-In button
             const googleButton = document.querySelector('.g_id_signin');
             if (googleButton) {
-                // Try to find and click the actual Google button inside
                 const actualButton = googleButton.querySelector('[role="button"]');
                 if (actualButton) {
                     actualButton.click();
                 } else {
-                    // Fallback: trigger Google Sign-In programmatically
                     google.accounts.id.prompt();
                 }
             }
