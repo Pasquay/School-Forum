@@ -50,7 +50,7 @@ class UserController extends Controller
             'login-password' => ['required']
         ]);
 
-        if (Auth::attempt(['name' => $user['login-name'], 'password' => $user['login-password']])) {
+        if (Auth::attempt(['email' => $user['login-email'], 'password' => $user['login-password']])) {
             $req->session()->regenerate();
             return redirect('/home')->with('success', 'Logged in successfully');
         }

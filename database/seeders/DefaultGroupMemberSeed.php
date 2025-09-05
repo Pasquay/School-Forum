@@ -23,7 +23,7 @@ class DefaultGroupMemberSeed extends Seeder
                 $group->save();
             }
             $group->members()->syncWithoutDetaching([
-                $owner->id = ['role' => 'owner']
+                $owner->id => ['role' => 'owner']
             ]);
         }
     }

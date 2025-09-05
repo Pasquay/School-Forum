@@ -1171,7 +1171,6 @@
                 <div class="groups-created">
                     <div class="section-header">
                         <p>Groups Created</p>
-                        <button class="create-group-button">Create Group</button>
                     </div>
                     @if($createdGroups->count() > 0)
                         @foreach($createdGroups as $group)
@@ -1224,12 +1223,6 @@
             function addRightGroupEventListeners(){
                 const createdGroups = document.querySelectorAll('.groups-created .group-info-minimal');
                 console.log(createdGroups);
-                // Create Group Button
-                    const createGroupBtn = document.querySelector('.create-group-button');
-                    createGroupBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        window.location.href = `/groups/create`;
-                    })
                 createdGroups.forEach(group => {
                     // Onclick go to group page
                         const groupid = group.dataset.groupid;
