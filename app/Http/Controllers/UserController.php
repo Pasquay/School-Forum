@@ -335,6 +335,13 @@ class UserController extends Controller
                                   ->orderBy('name', 'asc')
                                   ->get();
 
+        // Moderated Groups
+            $moderatedGroups = $user->groups()
+                                    ->wherePivot('role', 'moderator')
+                                    ->orderBy('is_starred', 'desc')
+                                    ->orderBy('name', 'asc')
+                                    ->get();
+
         // Response
         if ($user->id == Auth::id()) {
             return view('profile', compact(
@@ -349,10 +356,16 @@ class UserController extends Controller
                 'deletedOverview',
                 'deletedPosts',
                 'deletedCommentsAndReplies',
-                    'createdGroups',
+                'createdGroups',
+                'moderatedGroups',
             ));
         } else {
             $createdGroups->transform(function($group) use ($user){
+                $group->notLoggedUser = 1;
+                return $group;
+            });
+
+            $moderatedGroups->transform(function($group) use ($user){
                 $group->notLoggedUser = 1;
                 return $group;
             });
@@ -367,6 +380,7 @@ class UserController extends Controller
                 'posts',
                 'comments',
                 'createdGroups',
+                'moderatedGroups',
             ));
         }
     }
