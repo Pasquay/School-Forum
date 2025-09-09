@@ -335,8 +335,6 @@ class UserController extends Controller
                                   ->orderBy('name', 'asc')
                                   ->get();
 
-        // Groups joined
-
         // Response
         if ($user->id == Auth::id()) {
             return view('profile', compact(
@@ -354,6 +352,11 @@ class UserController extends Controller
                     'createdGroups',
             ));
         } else {
+            $createdGroups->transform(function($group) use ($user){
+                $group->notLoggedUser = 1;
+                return $group;
+            });
+            
             return view('user', compact(
                 'user',
                 'postCount',
@@ -363,7 +366,7 @@ class UserController extends Controller
                 'overview',
                 'posts',
                 'comments',
-                    'createdGroups',
+                'createdGroups',
             ));
         }
     }
