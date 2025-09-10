@@ -263,9 +263,20 @@ class GroupController extends Controller
     }
  
     public function showGroup($id){
-        $group = Group::findOrFail($id);
+        // Load all members
+        $group = Group::with('members')->findOrFail($id);
 
-        return view('group', ['group' => $group]);
+        // Find the current user's membership (if any)
+        $membership = $group->members->where('id', Auth::id())->first();
+
+        // All members for the member list
+        $memberList = $group->members;
+
+        return view('group', compact(
+            'group',
+            'membership',
+            'memberList',
+        ));
     }
 
     public function toggleStar($id){
@@ -283,6 +294,24 @@ class GroupController extends Controller
         return response()->json([
             'success' => true,
             'starValue' => $newStarState,
+        ]);
+    }
+
+    public function toggleMute($id){
+        $user = User::findOrFail(Auth::id());
+        $group = $user->groups()->where('group_id', $id)->first();
+
+        if(!$group) return back()->with('error', 'You are not a member of that group');
+        
+        $muteState = $group->pivot->is_muted;
+
+        $newMuteState = $muteState ? 0 : 1;
+
+        $user->groups()->updateExistingPivot($id, ['is_muted' => $newMuteState]);
+
+        return response()->json([
+            'success' => true,
+            'muteValue' => $newMuteState,
         ]);
     }
 

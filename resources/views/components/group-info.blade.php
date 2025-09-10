@@ -33,7 +33,7 @@
                                 ->exists();
         @endphp
         <form action="" method="POST">
-            @csrf
+            @csrf 
             @if($group->owner_id === Auth::id())
                 <button type="submit" class="manage-button">Manage</button>
             @elseif($userMembership)
