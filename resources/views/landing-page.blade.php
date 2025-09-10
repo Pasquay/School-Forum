@@ -501,20 +501,6 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        .modal-content {
-            background: var(--color-cream);
-            margin: 5vh auto;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 440px;
-            max-height: 90vh;
-            box-shadow: 0 30px 100px rgba(45, 74, 43, 0.2);
-            overflow: hidden;
-            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-        }
-
         .modal-header {
             background: linear-gradient(135deg, var(--color-dark-green), var(--color-medium-green));
             color: var(--color-white);
@@ -551,7 +537,6 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             line-height: 1;
             padding: 0.75rem;
-            border-radius: 50%;
             background: rgba(255, 255, 255, 0.15);
             width: 40px;
             height: 40px;
@@ -836,6 +821,614 @@
             width: 100%;
         }
 
+        /* Sliding Form Styles */
+        .sliding-container {
+            border-radius: 15px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            overflow: visible;
+            background: var(--color-cream);
+            width: 95%;
+            max-width: 900px;
+            height: 600px;
+            max-height: 90vh;
+            box-shadow: 0 30px 100px rgba(45, 74, 43, 0.2);
+            opacity: 0;
+            animation: slidingContainerFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+        }
+
+        /* Modal Close Button - positioned on top right of modal */
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--color-dark-green);
+            font-size: 1.8rem;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Close button styling when sign-in form is active (default state) */
+        .sliding-container:not(.right-panel-active) .modal-close {
+            background: var(--color-dark-green);
+            color: var(--color-white);
+            box-shadow: 0 2px 10px rgba(45, 74, 43, 0.3);
+        }
+
+        /* Close button styling when sign-up form is active */
+        .sliding-container.right-panel-active .modal-close {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--color-dark-green);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-close:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Hover effects for different states */
+        .sliding-container:not(.right-panel-active) .modal-close:hover {
+            background: var(--color-medium-green);
+            color: var(--color-white);
+            box-shadow: 0 4px 15px rgba(45, 74, 43, 0.4);
+        }
+
+        .sliding-container.right-panel-active .modal-close:hover {
+            background: rgba(255, 255, 255, 1);
+            color: var(--color-medium-green);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Session Messages */
+        .session-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            animation: slideInDown 0.3s ease-out;
+            max-width: 90%;
+            width: auto;
+            min-width: 280px;
+            text-align: center;
+            word-wrap: break-word;
+            transition: all 0.3s ease;
+        }
+
+        .session-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .session-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .session-message ul {
+            margin: 0;
+            padding-left: 1rem;
+            list-style-type: disc;
+            text-align: left;
+        }
+
+        .session-message li {
+            margin-bottom: 0.25rem;
+        }
+
+        .session-message.fade-out {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+
+        .sliding-form-container {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            transition: all 0.6s ease-in-out;
+        }
+
+        .sliding-form-container form {
+            background-color: var(--color-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            height: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .sliding-form-container h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin: 0 0 0 0;
+            color: var(--color-dark-green);
+            font-size: 2rem;
+        }
+
+        .sliding-form-container input {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 10px 12px;
+            margin: 6px 0;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .sliding-form-container input:focus {
+            outline: none;
+            background-color: #e8e8e8;
+            box-shadow: 0 0 0 2px var(--color-sage-green);
+        }
+
+        /* Inline Error Messages for sliding forms */
+        .sliding-form-container .form-error {
+            color: #dc3545;
+            font-size: 11px;
+            margin: 2px 0 6px 0;
+            display: none;
+            animation: fadeInError 0.3s ease-out;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        .sliding-form-container .form-error.show {
+            display: block;
+        }
+
+        .sliding-form-container .form-error ul {
+            margin: 0;
+            padding-left: 1rem;
+            list-style-type: disc;
+        }
+
+        .sliding-form-container .form-error li {
+            margin-bottom: 2px;
+        }
+
+        .sliding-form-container .input-error {
+            border: 1px solid #dc3545 !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .sliding-btn {
+            border-radius: 20px;
+            border: 1px solid var(--color-dark-green);
+            background-color: var(--color-dark-green);
+            color: var(--color-white);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 10px 35px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s ease-in;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+
+        .sliding-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sliding-btn:focus {
+            outline: none;
+        }
+
+        .sliding-btn:hover {
+            background-color: var(--color-pakistan-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 74, 43, 0.3);
+        }
+
+        .sliding-btn.ghost {
+            background-color: transparent;
+            border-color: var(--color-white);
+            color: var(--color-white);
+        }
+
+        .sliding-btn.ghost:hover {
+            background-color: var(--color-white);
+            color: var(--color-dark-green);
+        }
+
+        .sign-in-container {
+            left: 0;
+            width: 50%;
+            z-index: 2;
+        }
+
+        .sliding-container.right-panel-active .sign-in-container {
+            transform: translateX(100%);
+        }
+
+        .sign-up-container {
+            left: 0;
+            width: 50%;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .sliding-container.right-panel-active .sign-up-container {
+            transform: translateX(100%);
+            opacity: 1;
+            z-index: 5;
+            animation: show 0.6s;
+        }
+
+        @keyframes show {
+
+            0%,
+            49.99% {
+                opacity: 0;
+                z-index: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 1;
+                z-index: 5;
+            }
+        }
+
+        .sliding-overlay-container {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.6s ease-in-out;
+            z-index: 100;
+        }
+
+        .sliding-container.right-panel-active .sliding-overlay-container {
+            transform: translateX(-100%);
+        }
+
+        .sliding-overlay {
+            background: linear-gradient(135deg, var(--color-dark-green), var(--color-medium-green));
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 0 0;
+            color: var(--color-white);
+            position: relative;
+            left: -100%;
+            height: 100%;
+            width: 200%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .sliding-container.right-panel-active .sliding-overlay {
+            transform: translateX(50%);
+        }
+
+        .sliding-overlay-panel {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0 40px;
+            text-align: center;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            transform: translateX(0);
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .sliding-overlay-panel h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .sliding-overlay-panel p {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+            letter-spacing: 0.5px;
+            margin: 20px 0 30px;
+        }
+
+        .overlay-left {
+            transform: translateX(-20%);
+        }
+
+        .sliding-container.right-panel-active .overlay-left {
+            transform: translateX(0);
+        }
+
+        .overlay-right {
+            right: 0;
+            transform: translateX(0);
+        }
+
+        .sliding-container.right-panel-active .overlay-right {
+            transform: translateX(20%);
+        }
+
+        .social-container {
+            margin: 15px 0;
+        }
+
+        .social-btn {
+            border: 1px solid #DDDDDD;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 0px;
+            height: 50px;
+            width: 50px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-btn:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .form-subtitle {
+            font-size: 11px;
+            color: #666;
+            margin: 8px 0 15px 0;
+        }
+
+        .forgot-link {
+            color: var(--color-sage-green);
+            font-size: 12px;
+            text-decoration: none;
+            margin: 15px 0;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--color-dark-green);
+        }
+
+        /* Forgot Password Modal Styles */
+        .forgot-password-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-white);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+            text-align: center;
+            z-index: 150;
+            border-radius: 15px;
+        }
+
+        .forgot-password-container.active {
+            display: flex;
+        }
+
+        .forgot-password-container h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-dark-green);
+            font-size: 2rem;
+        }
+
+        .forgot-password-container p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 350px;
+        }
+
+        .forgot-password-container input {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 12px 15px;
+            margin: 8px 0 20px 0;
+            width: 100%;
+            max-width: 350px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password-container input:focus {
+            outline: none;
+            background-color: #e8e8e8;
+            box-shadow: 0 0 0 2px var(--color-sage-green);
+        }
+
+        .forgot-password-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .back-to-login {
+            color: var(--color-sage-green);
+            font-size: 12px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-to-login:hover {
+            color: var(--color-dark-green);
+        }
+
+        /* Email Sent Success Message */
+        .email-sent-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-white);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 40px;
+            text-align: center;
+            z-index: 160;
+            border-radius: 15px;
+        }
+
+        .email-sent-message.active {
+            display: flex;
+        }
+
+        .email-sent-message .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--color-sage-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            animation: successPulse 0.6s ease-out;
+        }
+
+        .email-sent-message .success-icon::after {
+            content: '✓';
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .email-sent-message h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--color-dark-green);
+            font-size: 2rem;
+        }
+
+        .email-sent-message p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        @keyframes successPulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Inline Error Messages */
+        .form-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            display: none;
+            animation: fadeInError 0.3s ease-out;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        .form-error ul {
+            margin: 0;
+            padding-left: 1rem;
+            list-style-type: disc;
+        }
+
+        .form-error li {
+            margin-bottom: 3px;
+        }
+
+        .input-error {
+            border-color: #dc3545 !important;
+            background-color: #fff5f5 !important;
+        }
+
+        .form-success {
+            color: #28a745;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            display: none;
+            animation: fadeInError 0.3s ease-out;
+        }
+
+        .form-success.show {
+            display: block;
+        }
+
+        @keyframes fadeInError {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Footer */
 
         footer {
@@ -1083,15 +1676,27 @@
             }
         }
 
-        @keyframes modalSlideIn {
+        @keyframes slidingContainerFadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px) scale(0.95);
+                transform: translate(-50%, -50%) translateY(-20px) scale(0.98);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translate(-50%, -50%) translateY(0) scale(1);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) translateY(-30px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) translateY(0) scale(1);
             }
         }
 
@@ -1120,126 +1725,313 @@
                 /* Also reduced mobile letter spacing to match desktop */
                 letter-spacing: 0.02em;
             }
+
+            /* Session message responsive adjustments */
+            .session-message {
+                max-width: 95%;
+                min-width: 250px;
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+                top: 15px;
+            }
         }
 
         @media (max-width: 600px) {
-            .modal-content {
-                margin: 2% auto;
+
+            /* Mobile sliding form adjustments */
+            .sliding-container {
                 width: 95%;
                 max-width: 95vw;
-                max-height: 95vh;
+                height: 550px;
+                max-height: 90vh;
                 border-radius: 12px;
-                overflow-y: auto;
-                position: relative;
             }
 
-            .modal-header {
-                padding: 1rem 1rem 0.8rem;
+            /* Session message mobile adjustments */
+            .session-message {
+                max-width: 98%;
+                min-width: 200px;
+                padding: 0.7rem 0.8rem;
+                font-size: 0.85rem;
+                top: 10px;
+                left: 1%;
+                right: 1%;
+                transform: none;
+                margin: 0 auto;
+                word-break: break-word;
             }
 
-            .modal-body {
-                padding: 1rem;
-                max-height: calc(95vh - 80px);
-                overflow-y: auto;
+            .session-message ul {
+                padding-left: 0.8rem;
             }
 
-            .modal-header h2 {
-                font-size: 1.2rem;
+            .modal-close {
+                top: 15px;
+                right: 15px;
+                width: 36px;
+                height: 36px;
+                font-size: 1.5rem;
             }
 
-            .form-group {
-                margin-bottom: 1rem;
+            .sliding-form-container {
+                width: 100% !important;
+                left: 0 !important;
+                transform: translateX(0) !important;
+                opacity: 1 !important;
+                z-index: 2 !important;
             }
 
-            .form-group input {
-                padding: 0.6rem;
-                font-size: 0.9rem;
+            .sliding-container.right-panel-active .sign-in-container {
+                transform: translateX(-100%) !important;
+                opacity: 0;
+                z-index: 1;
             }
 
-            .login-btn {
-                padding: 0.6rem;
-                font-size: 0.9rem;
+            .sliding-container.right-panel-active .sign-up-container {
+                transform: translateX(0) !important;
+                opacity: 1;
+                z-index: 2;
+            }
+
+            .sliding-overlay-container {
+                display: none;
+            }
+
+            .sliding-form-container form {
+                padding: 20px;
+            }
+
+            .sliding-form-container h1 {
+                font-size: 1.5rem;
+            }
+
+            .sliding-form-container input {
+                padding: 10px 12px;
+                font-size: 14px;
+                margin: 5px 0;
+            }
+
+            .sliding-btn {
+                padding: 10px 30px;
+                font-size: 11px;
+            }
+
+            .form-subtitle {
+                font-size: 11px;
+                margin: 8px 0 15px 0;
             }
         }
 
         /* For short screens (when window is dragged vertically) */
         @media (max-height: 600px) {
-            .modal-content {
-                margin: 1vh auto;
-                max-height: 98vh;
+            .sliding-container {
+                height: 400px;
+                max-height: 95vh;
             }
 
-            .modal-header {
-                padding: 1rem 1.5rem 0.5rem;
+            .sliding-form-container form {
+                padding: 15px 30px;
             }
 
-            .modal-header h2 {
-                font-size: 1.3rem;
+            .sliding-form-container h1 {
+                font-size: 1.4rem;
+                margin-bottom: 10px;
             }
 
-            .modal-body {
-                padding: 1rem 1.5rem;
-                max-height: calc(98vh - 70px);
+            .sliding-form-container input {
+                padding: 8px 12px;
+                margin: 4px 0;
             }
 
-            .form-group {
-                margin-bottom: 0.8rem;
+            .sliding-btn {
+                padding: 8px 25px;
+                margin: 5px 0;
             }
 
-            .form-group input {
-                padding: 0.5rem;
+            .forgot-password-container {
+                padding: 20px;
             }
 
-            .login-btn {
-                padding: 0.5rem;
-                margin-bottom: 0.5rem;
+            .forgot-password-container h1 {
+                font-size: 1.4rem;
+                margin-bottom: 10px;
+            }
+
+            .forgot-password-container p {
+                font-size: 12px;
+                margin-bottom: 15px;
             }
         }
 
         /* For very short screens */
         @media (max-height: 400px) {
-            .modal-content {
-                margin: 0.5vh auto;
-                max-height: 99vh;
+            .sliding-container {
+                height: 350px;
+                max-height: 98vh;
             }
 
-            .modal-header {
-                padding: 0.5rem 1rem;
+            .sliding-form-container form {
+                padding: 10px 20px;
             }
 
-            .modal-header h2 {
-                font-size: 1.1rem;
+            .sliding-form-container h1 {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
             }
 
-            .modal-body {
-                padding: 0.5rem 1rem;
-                max-height: calc(99vh - 50px);
+            .sliding-form-container input {
+                padding: 6px 10px;
+                font-size: 14px;
+                margin: 3px 0;
             }
 
-            .form-group {
-                margin-bottom: 0.5rem;
+            .sliding-btn {
+                padding: 6px 20px;
+                font-size: 11px;
+                margin: 3px 0;
             }
 
-            .form-group label {
-                font-size: 0.8rem;
-                margin-bottom: 0.2rem;
+            .form-subtitle {
+                font-size: 10px;
+                margin: 5px 0 10px 0;
             }
 
-            .form-group input {
-                padding: 0.4rem;
-                font-size: 0.8rem;
+            .forgot-password-container {
+                padding: 15px;
             }
 
-            .login-btn {
-                padding: 0.4rem;
-                font-size: 0.8rem;
-                margin-bottom: 0.3rem;
+            .forgot-password-container h1 {
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+            }
+
+            .forgot-password-container p {
+                font-size: 11px;
+                margin-bottom: 12px;
+            }
+
+            .forgot-password-container input {
+                padding: 6px 10px;
+                margin: 3px 0 15px 0;
             }
         }
+            .tc-btn-link {
+                background: transparent;
+                border: 0;
+                padding: 6px 0;
+                font-weight: 600;
+                color: #133C06;
+                cursor: pointer;
+                text-decoration: underline;
+            }
+            .tc-btn-link:hover { color: #092B00; }
+
+            .tc-error {
+                margin-top: 6px;
+                font-size: .9rem;
+                color: #c0392b;
+            }
+
+            .tc-backdrop {
+                position: fixed; inset: 0;
+                display: none; align-items: center; justify-content: center;
+                background: rgba(0,0,0,.45);
+                z-index: 9999;
+            }
+
+            .tc-modal {
+                width: min(900px, 95vw);
+                background: #ededed;
+                color: #092B00;
+                border-radius: 16px;
+                box-shadow: 0 20px 50px rgba(0,0,0,.25);
+                overflow: hidden;
+                border: 2px solid #6A8E61;
+            }
+
+            .tc-modal-header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #133C06;
+            color: #EDEDED;
+            padding: 16px 20px;
+            }
+
+            .tc-modal-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            text-align: center;
+            flex: none;
+            }
+
+            .tc-close {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: 0;
+            color: #FFFFFF;
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            }
+
+
+            .tc-modal-body {
+                padding: 18px 20px;
+                background: #EDEDED;
+                max-height: 55vh; overflow: auto;
+            }
+            .tc-modal-body p, .tc-modal-body ul { margin: 0 0 12px 0; }
+            .tc-modal-body ul { padding-left: 18px; }
+            .tc-check { display:flex; gap:10px; align-items:center; margin-top: 10px; justify-content: center; width: 100%;}
+            .tc-check input[type="checkbox"] {
+                width: 18px; height: 18px; accent-color: #6A8E61;
+            }
+
+            .tc-modal-footer {
+                display:flex; gap:10px; justify-content: center;
+                background: #FFFFFF; padding: 12px 20px 16px;
+                border-top: 1px solid #EDEDED;
+            }
+            .tc-primary, .tc-secondary {
+                padding: 10px 14px; border-radius: 10px; font-weight: 600; cursor: pointer; border: 0;
+            }
+            .tc-primary { background: #6A8E61; color: #FFFFFF; }
+            .tc-primary:hover { background: #4f6e4b; }
+            .tc-secondary { background: #EDEDED; color: #092B00; }
+            .tc-secondary:hover { background: #dcdcdc; }
+
+            @keyframes tcshake { 10%, 90% {transform: translateX(-1px);} 20%, 80% {transform: translateX(2px);} 30%, 50%, 70% {transform: translateX(-4px);} 40%, 60% {transform: translateX(4px);} }
+            .tc-shake { animation: tcshake .45s; }
     </style>
 </head>
 
 <body>
+    <!-- Session Messages -->
+    @if (session()->has('success'))
+    <div class="session-message success">
+        {{ session('success') }}
+    </div>
+    @endif
+    @if (session()->has('error'))
+    <div class="session-message error">
+        {{ session('error') }}
+    </div>
+    @endif
+    @if ($errors->any())
+    <div class="session-message error">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <main>
         <!-- Added id to hero section for smooth scrolling -->
@@ -1294,109 +2086,150 @@
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Student Login</h2>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="loginContainer" class="form-container">
-                    @if (session()->has('success'))
-                    <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
-                        {{ session('success') }}
-                    </div>
-                    @endif @if (session()->has('error'))
-                    <div style="display: flex; background-color: #f8d7da; color: #000000; padding: 0.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f5c6cb; text-align: center; align-items: center; justify-content: center;">
-                        <p style='margin: 0;'>{{ session('error') }}</p>
-                    </div>
-                    @endif
-                    <form id="loginForm" action="/login" method="post">
-                        @csrf
-                        <div class="form-group">
-                            <label for="email">University Email</label>
-                            <input type="email" id="email" name="login-email" placeholder="id@usc.edu.ph" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="login-password" placeholder="Enter your password" required>
-                        </div>
-                        <button type="submit" class="login-btn">Login to Carolink</button>
 
-                        <div class="divider"><span>or</span></div>
+        <!-- Sliding Form Container -->
+        <div class="sliding-container" id="slidingContainer">
+            <!-- Close Button -->
+            <span class="modal-close" onclick="document.getElementById('loginModal').style.display='none'">&times;</span>
 
-                        <button class="gsi-material-button" onclick="handleGoogleSignIn()">
-                            <div class="gsi-material-button-state"></div>
-                            <div class="gsi-material-button-content-wrapper">
-                                <div class="gsi-material-button-icon">
-                                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                                        <path fill="none" d="M0 0h48v48H0z"></path>
-                                    </svg>
-                                </div>
-                                <span class="gsi-material-button-contents">Sign in with Google</span>
-                                <span style="display: none;">Sign in with Google</span>
-                            </div>
+            <!-- Sign In Form -->
+            <div class="sliding-form-container sign-in-container">
+                <form id="loginForm" action="/login" method="post">
+                    @csrf
+                    <h1>Student Login</h1>
+
+                    <div class="social-container">
+                        <button type="button" class="social-btn gsi-material-button" onclick="handleGoogleSignIn()">
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px;">
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                            </svg>
                         </button>
-
-                        <div id="g_id_onload"
-                            data-client_id="495352471012-51n88psp7q90qph631ai7hnvqhsmi3ve.apps.googleusercontent.com"
-                            data-callback="handleCredentialResponse">
-                        </div>
-                        <div class="g_id_signin"
-                            data-type="standard"
-                            data-theme="outline"
-                            data-size="large"
-                            data-text="continue_with"
-                            data-shape="rectangular"
-                            data-logo_alignment="left">
-                        </div>
-
-                        <div class="forgot-password">
-                            <a href="#" id="showRegisterLink">Register</a>
-                            <a href="#" id="forgotPasswordLink">Forgot your password?</a>
-                        </div>
-                    </form>
-                </div>
-
-                <div id="registerContainer" class="form-container hidden">
-                    @if ($errors->any())
-                    <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                        <ul style="margin: 0; padding-left: 1rem;">
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
                     </div>
-                    @endif
-                    <form id="registerForm" action="/register" method="post">
-                        @csrf
-                        <div class="form-group">
-                            <label for="registerName">Full Name</label>
-                            <input type="text" id="registerName" name="name" placeholder="Enter your name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerEmail">University Email</label>
-                            <input type="email" id="registerEmail" name="email" placeholder="id@usc.edu.ph" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" name="password" placeholder="Create a password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Re-enter Password</label>
-                            <input type="password" id="confirmPassword" name="password_confirmation" placeholder="Confirm your password" required>
-                        </div>
-                        <button type="submit" class="login-btn">Create Account</button>
-                        <div class="forgot-password">
-                            <a href="#" id="showLoginLink">Back to Login</a>
-                        </div>
-                    </form>
+                    <span class="form-subtitle">or use your university email</span>
+
+                    <input type="email" name="login-email" id="loginEmail" placeholder="id@usc.edu.ph" required />
+                    <div class="form-error" id="loginEmailError"></div>
+
+                    <input type="password" name="login-password" id="loginPassword" placeholder="Password" required />
+                    <div class="form-error" id="loginPasswordError"></div>
+                    <div class="form-error" id="loginGeneralError"></div>
+
+                    <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot your password?</a>
+                    <button type="submit" class="sliding-btn">Sign In</button>
+                </form>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div class="sliding-form-container sign-up-container">
+                <form id="registerForm" action="/register" method="post">
+                    @csrf
+                    <h1>Create Account</h1>
+
+                    <div class="social-container">
+                        <button type="button" class="social-btn gsi-material-button" onclick="handleGoogleSignIn()">
+                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" style="width: 20px; height: 20px;">
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <span class="form-subtitle">or use your email for registration</span>
+
+                    <input type="text" name="name" id="registerName" placeholder="Full Name" required />
+                    <div class="form-error" id="registerNameError"></div>
+
+                    <input type="email" name="email" id="registerEmail" placeholder="id@usc.edu.ph" required />
+                    <div class="form-error" id="registerEmailError"></div>
+
+                    <input type="password" id="registerPassword" name="password" placeholder="Password" required />
+                    <div class="form-error" id="registerPasswordError"></div>
+
+                    <input type="password" id="confirmPassword" name="password_confirmation" placeholder="Confirm Password" required />
+                    <div class="form-error" id="confirmPasswordError"></div>
+                    <div class="form-error" id="registerGeneralError"></div>
+
+                    <div class="mt-3" id="tcSection">
+                    <input type="hidden" name="accepted_terms" id="accepted_terms" value="0">
+
+                    <button type="button" id="openTermsBtn" class="tc-btn-link"
+                        aria-haspopup="dialog" aria-controls="tcBackdrop">
+                        View Terms & Conditions
+                    </button>
+                    <p id="tcError" class="tc-error" style="display:none;">
+                    • Must agree to the Terms & Conditions
+                    </p>
+                    </div>
+
+                    <button type="submit" class="sliding-btn">Sign Up</button>
+                </form>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div class="forgot-password-container" id="forgotPasswordContainer">
+                <form id="forgotPasswordForm" action="{{ route('password.email') }}" method="post">
+                    @csrf
+                    <h1>Reset Password</h1>
+                    <p>Enter your university email address and we'll send you a link to reset your password.</p>
+
+                    <input type="email" name="email" id="forgotEmail" placeholder="id@usc.edu.ph" required />
+                    <div class="form-error" id="forgotEmailError"></div>
+
+                    <div class="forgot-password-buttons">
+                        <button type="submit" class="sliding-btn">Send Reset Link</button>
+                    </div>
+
+                    <a href="#" class="back-to-login" id="backToLogin">← Back to Login</a>
+                </form>
+            </div>
+
+            <!-- Email Sent Success Message -->
+            <div class="email-sent-message" id="emailSentMessage">
+                <div class="success-icon"></div>
+                <h1>Email Sent!</h1>
+                <p>We've sent a password reset link to your university email address. Please check your inbox and follow the instructions to reset your password.</p>
+                <p><strong>Don't see the email?</strong> Check your spam folder or wait a few minutes for it to arrive.</p>
+
+                <div class="forgot-password-buttons">
+                    <button type="button" class="sliding-btn" id="backToLoginFromSuccess">Back to Login</button>
+                </div>
+            </div>
+
+            <!-- Sliding Overlay -->
+            <div class="sliding-overlay-container">
+                <div class="sliding-overlay">
+                    <div class="sliding-overlay-panel overlay-left">
+                        <h1>Welcome Back!</h1>
+                        <p>To keep connected with your university community, please login with your personal info</p>
+                        <button class="sliding-btn ghost" id="signIn">Sign In</button>
+                    </div>
+                    <div class="sliding-overlay-panel overlay-right">
+                        <h1>Hello, Student!</h1>
+                        <p>Enter your details and start your journey with Carolink</p>
+                        <button class="sliding-btn ghost" id="signUp">Sign Up</button>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Hidden Google Sign-In Elements -->
+        <div id="g_id_onload" style="display: none;"
+            data-client_id="495352471012-51n88psp7q90qph631ai7hnvqhsmi3ve.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin" style="display: none;"
+            data-type="standard"
+            data-theme="outline"
+            data-size="large"
+            data-text="continue_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+        </div>
+    </div>
     </div>
 
     <footer id="contact">
@@ -1415,6 +2248,54 @@
     </footer>
 
     <script>
+        // Auto-hide session messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const sessionMessages = document.querySelectorAll('.session-message');
+            sessionMessages.forEach(message => {
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    message.classList.add('fade-out');
+                    // Remove from DOM after fade animation
+                    setTimeout(() => {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+
+                // Allow manual close by clicking on the message
+                message.addEventListener('click', function() {
+                    this.classList.add('fade-out');
+                    setTimeout(() => {
+                        this.remove();
+                    }, 300);
+                });
+
+                // Make it more interactive - pause auto-hide on hover
+                let autoHideTimeout;
+                let removeTimeout;
+
+                const startAutoHide = () => {
+                    autoHideTimeout = setTimeout(() => {
+                        message.classList.add('fade-out');
+                        removeTimeout = setTimeout(() => {
+                            message.remove();
+                        }, 300);
+                    }, 5000);
+                };
+
+                const cancelAutoHide = () => {
+                    clearTimeout(autoHideTimeout);
+                    clearTimeout(removeTimeout);
+                    message.classList.remove('fade-out');
+                };
+
+                message.addEventListener('mouseenter', cancelAutoHide);
+                message.addEventListener('mouseleave', startAutoHide);
+
+                // Start initial auto-hide
+                startAutoHide();
+            });
+        });
+
         let currentSlide = 0;
         const slides = document.querySelectorAll('.feature-card');
         const indicators = document.querySelectorAll('.indicator');
@@ -1445,15 +2326,18 @@
 
         const modal = document.getElementById('loginModal');
         const heroLoginBtn = document.getElementById('heroLoginBtn');
-        const closeBtn = document.getElementsByClassName('close')[0];
+        const closeBtn = document.getElementsByClassName('modal-close')[0];
 
+        // Modal controls
         heroLoginBtn.onclick = function(e) {
             e.preventDefault();
             modal.style.display = 'block';
         }
 
-        closeBtn.onclick = function() {
-            modal.style.display = 'none';
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            }
         }
 
         window.onclick = function(event) {
@@ -1462,35 +2346,392 @@
             }
         }
 
+        // Sliding form controls
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const slidingContainer = document.getElementById('slidingContainer');
+
+        if (signUpButton && signInButton && slidingContainer) {
+            signUpButton.addEventListener('click', () => {
+                slidingContainer.classList.add("right-panel-active");
+            });
+
+            signInButton.addEventListener('click', () => {
+                slidingContainer.classList.remove("right-panel-active");
+            });
+        }
+
+        // Forgot Password controls
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
+        const backToLoginLink = document.getElementById('backToLogin');
+        const signInContainer = document.querySelector('.sign-in-container');
+        const overlayContainer = document.querySelector('.sliding-overlay-container');
+        const emailSentMessage = document.getElementById('emailSentMessage');
+        const backToLoginFromSuccess = document.getElementById('backToLoginFromSuccess');
+
+        if (forgotPasswordLink && forgotPasswordContainer && backToLoginLink && signInContainer) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Hide the sign-in form and overlay, show forgot password form
+                signInContainer.style.display = 'none';
+                if (overlayContainer) overlayContainer.style.display = 'none';
+                forgotPasswordContainer.classList.add('active');
+                // Remove any active panel state to show default styling
+                slidingContainer.classList.remove("right-panel-active");
+            });
+
+            backToLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Hide forgot password form and show sign-in form and overlay
+                forgotPasswordContainer.classList.remove('active');
+                signInContainer.style.display = 'block';
+                if (overlayContainer) overlayContainer.style.display = 'block';
+            });
+        }
+
+        // Handle back to login from success message
+        if (backToLoginFromSuccess) {
+            backToLoginFromSuccess.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Hide success message and show sign-in form and overlay
+                if (emailSentMessage) emailSentMessage.classList.remove('active');
+                signInContainer.style.display = 'block';
+                if (overlayContainer) overlayContainer.style.display = 'block';
+            });
+        }
+
+        // Form validation and utility functions
+        function clearErrors() {
+            const errors = document.querySelectorAll('.form-error.show');
+            const errorInputs = document.querySelectorAll('.input-error');
+
+            errors.forEach(error => {
+                error.classList.remove('show');
+                error.innerHTML = '';
+            });
+
+            errorInputs.forEach(input => {
+                input.classList.remove('input-error');
+            });
+        }
+
+        function showError(inputId, errorId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(errorId);
+
+            if (input) input.classList.add('input-error');
+            if (errorDiv) {
+                errorDiv.innerHTML = message;
+                errorDiv.classList.add('show');
+            }
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePassword(password) {
+            const errors = [];
+            if (password.length < 8) {
+                errors.push('Must be at least 8 characters long');
+            }
+            if (!/[A-Z]/.test(password)) {
+                errors.push('Must contain at least one uppercase letter');
+            }
+            if (!/[a-z]/.test(password)) {
+                errors.push('Must contain at least one lowercase letter');
+            }
+            if (!/[0-9]/.test(password)) {
+                errors.push('Must contain at least one number');
+            }
+            return errors;
+        }
+
+        // Form submissions with validation and AJAX
         document.getElementById('loginForm').onsubmit = function(e) {
             e.preventDefault();
-            this.submit();
+            clearErrors();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            // Client-side validation
+            let hasErrors = false;
+
+            if (!email) {
+                showError('loginEmail', 'loginEmailError', 'Email is required');
+                hasErrors = true;
+            } else if (!validateEmail(email)) {
+                showError('loginEmail', 'loginEmailError', 'Please enter a valid email address');
+                hasErrors = true;
+            }
+
+            if (!password) {
+                showError('loginPassword', 'loginPasswordError', 'Password is required');
+                hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            // Show loading state
+            submitBtn.textContent = 'Signing In...';
+            submitBtn.disabled = true;
+
+            // AJAX request
+            fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        'login-email': email,
+                        'login-password': password
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle HTTP errors (401, 422, etc.)
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Login failed');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect || '/home';
+                    } else {
+                        // Show server errors
+                        console.log('Server response:', data); // Debug log
+                        if (data.errors) {
+                            if (data.errors['login-email']) {
+                                showError('loginEmail', 'loginEmailError', data.errors['login-email'][0]);
+                            }
+                            if (data.errors['login-password']) {
+                                showError('loginPassword', 'loginPasswordError', data.errors['login-password'][0]);
+                            }
+                        } else if (data.message) {
+                            showError('', 'loginGeneralError', data.message);
+                        } else {
+                            showError('', 'loginGeneralError', 'Login failed. Please try again.');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    // Show the actual error message from server if available
+                    showError('', 'loginGeneralError', error.message || 'Network error. Please try again.');
+                })
+                .finally(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                });
         }
 
         document.getElementById('registerForm').onsubmit = function(e) {
             e.preventDefault();
+            clearErrors();
+
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
 
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+            // Client-side validation
+            let hasErrors = false;
+
+            if (!name) {
+                showError('registerName', 'registerNameError', 'Full name is required');
+                hasErrors = true;
+            }
+
+            if (!email) {
+                showError('registerEmail', 'registerEmailError', 'Email is required');
+                hasErrors = true;
+            } else if (!validateEmail(email)) {
+                showError('registerEmail', 'registerEmailError', 'Please enter a valid email address');
+                hasErrors = true;
+            }
+
+            if (!password) {
+                showError('registerPassword', 'registerPasswordError', 'Password is required');
+                hasErrors = true;
+            } else {
+                const passwordErrors = validatePassword(password);
+                if (passwordErrors.length > 0) {
+                    showError('registerPassword', 'registerPasswordError',
+                        '<ul>' + passwordErrors.map(err => '<li>' + err + '</li>').join('') + '</ul>');
+                    hasErrors = true;
+                }
+            }
+
+            if (!confirmPassword) {
+                showError('confirmPassword', 'confirmPasswordError', 'Please confirm your password');
+                hasErrors = true;
+            } else if (password !== confirmPassword) {
+                showError('confirmPassword', 'confirmPasswordError', 'Passwords do not match');
+                hasErrors = true;
+            }
+
+            if (hasErrors) return;
+
+            // Show loading state
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+
+            // AJAX request
+            fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password,
+                        password_confirmation: confirmPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message and redirect
+                        document.getElementById('loginModal').style.display = 'none';
+                        // Create a temporary success message
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'session-message success';
+                        successDiv.textContent = 'Account created successfully! You can now log in.';
+                        document.body.appendChild(successDiv);
+                        setTimeout(() => successDiv.remove(), 3000);
+                        
+                        // Reset the form and switch to sign-in
+                        this.reset();
+                        document.getElementById('slidingContainer').classList.remove('right-panel-active');
+                    } else {
+                        // Show server errors
+                        if (data.errors) {
+                            if (data.errors.name) {
+                                showError('registerName', 'registerNameError', data.errors.name[0]);
+                            }
+                            if (data.errors.email) {
+                                showError('registerEmail', 'registerEmailError', data.errors.email[0]);
+                            }
+                            if (data.errors.password) {
+                                showError('registerPassword', 'registerPasswordError', data.errors.password[0]);
+                            }
+                        } else if (data.message) {
+                            showError('', 'registerGeneralError', data.message);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('', 'registerGeneralError', 'Wrong Email or Password!');
+                })
+                .finally(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Forgot Password form submission
+        document.getElementById('forgotPasswordForm').onsubmit = function(e) {
+            e.preventDefault();
+
+            // Clear any previous errors
+            clearErrors();
+
+            // Validate email
+            const email = document.getElementById('forgotEmail').value;
+            if (!validateEmail(email)) {
+                showError('forgotEmail', 'forgotEmailError', 'Please enter a valid university email address.');
                 return;
             }
-            this.submit();
-        }
 
-        document.getElementById('showRegisterLink').onclick = function(e) {
-            e.preventDefault();
-            document.getElementById('loginContainer').classList.add('hidden');
-            document.getElementById('registerContainer').classList.remove('hidden');
-            document.getElementById('modalTitle').textContent = 'Student Registration';
-        }
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
 
-        document.getElementById('showLoginLink').onclick = function(e) {
-            e.preventDefault();
-            document.getElementById('registerContainer').classList.add('hidden');
-            document.getElementById('loginContainer').classList.remove('hidden');
-            document.getElementById('modalTitle').textContent = 'Student Login';
+            // Submit the form via AJAX
+            const formData = new FormData(this);
+            const formElement = this;
+
+            fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data); // Debug log
+                    
+                    // Reset button state first
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    
+                    if (data.success) {
+                        console.log('Success received, switching views...');
+                        
+                        // Get elements fresh
+                        const forgotContainer = document.getElementById('forgotPasswordContainer');
+                        const successMessage = document.getElementById('emailSentMessage');
+                        
+                        console.log('Forgot container found:', !!forgotContainer);
+                        console.log('Success message found:', !!successMessage);
+                        
+                        // Hide forgot password form
+                        if (forgotContainer) {
+                            forgotContainer.classList.remove('active');
+                            console.log('Forgot container hidden');
+                        }
+                        
+                        // Show success message
+                        if (successMessage) {
+                            successMessage.classList.add('active');
+                            console.log('Success message shown');
+                        }
+                        
+                        // Reset form after a small delay
+                        setTimeout(() => {
+                            formElement.reset();
+                        }, 100);
+                        
+                    } else {
+                        console.log('Error in response:', data);
+
+                        if (data.errors && data.errors.email) {
+                            showError('forgotEmail', 'forgotEmailError', data.errors.email[0]);
+                        } else if (data.message) {
+                            showError('forgotEmail', 'forgotEmailError', data.message);
+                        } else {
+                            showError('forgotEmail', 'forgotEmailError', 'An error occurred. Please try again.');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    showError('forgotEmail', 'forgotEmailError', 'An error occurred. Please try again.');
+                });
         }
 
         // Google Sign-In callback function
@@ -1548,6 +2789,179 @@
             return JSON.parse(jsonPayload);
         }
     </script>
+        <div id="tcBackdrop" class="tc-backdrop" role="dialog" aria-modal="true" aria-labelledby="tcTitle" style="display:none;">
+        <div class="tc-modal">
+            <div class="tc-modal-header">
+            <h3 id="tcTitle">Terms &amp; Conditions</h3>
+            <button type="button" id="tcClose" class="tc-close" aria-label="Close">×</button>
+            </div>
+
+            <div class="tc-modal-body">
+            <h3>General Privacy Statement</h3>
+        <p>
+            The University of San Carlos (USC) values and understands the importance of protecting
+            the privacy of personal information and the confidentiality of data, information and knowledge
+            and is committed to the responsible handling of such. This Privacy Policy Statement explains
+            what information will be gathered and the details how collected information is used without
+            breaching its privacy and confidentiality.
+        </p>
+
+        <h3>Scope</h3>
+        <p>
+            This Privacy Policy Statement applies to personal information about applicants, prospective
+            applicants, students and employees maintained, used, processed and/or kept in custody by the
+            University of San Carlos.
+        </p>
+
+        <h3>Types of Personal Information</h3>
+        <ul>
+            <li><strong>Personal information:</strong> Recorded information about a living identifiable or easily identifiable individual.</li>
+            <li><strong>Sensitive information:</strong> Personal information about a living individual's race or ethnicity, political opinions, religious or philosophical beliefs, sexual preferences or practices, criminal record, or memberships details, such as trade union or professional, political or trade associations, genetic data and biometric data.</li>
+            <li><strong>Medical information:</strong> Information about a living or deceased individual's physical, mental or psychological health.</li>
+        </ul>
+
+        <h3>1. Information that we collect</h3>
+        <p>USC collects the following information:</p>
+        <ul>
+            <li><strong>Personal Information:</strong> name, residential address, email address, telephone number, date of birth, passport details (for international applicants) and nationality. USC will also assign you with a unique applicant/student identification number once you apply or are accepted in the University.</li>
+            <li><strong>Education background &amp; employment history:</strong> schools/universities attended, programs and courses completed, dates of completion, past work history, evaluations, previous employers and service information.</li>
+            <li>Information about family or personal affiliations, academic and extracurricular interests relevant to scholarships or student financial aid/assistance.</li>
+            <li>Sensitive personal information such as political affiliations, sexual preferences or practices, criminal record, memberships details, religious or philosophical beliefs, ethnicity.</li>
+            <li>Information concerning health/medical conditions including history, diagnosis, disability and dietary needs.</li>
+        </ul>
+
+        <h3>2. How we collect your information</h3>
+        <ul>
+            <li>From the information you provide when you contact USC or express interest in studying.</li>
+            <li>When applying and completing application/enrollment forms and procedures.</li>
+            <li>When making inquiries, or communicating via email or USC’s official social media accounts.</li>
+            <li>From interactions as a student, employee, donor, or third party (e.g., references from previous schools, universities, employers).</li>
+        </ul>
+
+        <h3>3. From whom we collect information</h3>
+        <ul>
+            <li>Prospective and current students</li>
+            <li>Exchange students, professors, job applicants, existing employees</li>
+            <li>Alumni, donors (individual/company), research participants</li>
+            <li>Industry partners, contractors, suppliers, concessionaires</li>
+            <li>Civic organization volunteers, other members of the public who interact with USC</li>
+        </ul>
+
+        <h3>4. How we use your information</h3>
+        <p>
+            USC uses personal and sensitive personal information to perform and fulfill core functions:
+        </p>
+        <ul>
+            <li><strong>Educational support:</strong> admission, enrollment, assessments, learning, graduation, counselling, library, medical exams, data analysis.</li>
+            <li><strong>Research:</strong> data analysis, commercialization, administration.</li>
+            <li><strong>Community extension &amp; industry engagement:</strong> alumni relations, industry partnerships, website operations, events, forums.</li>
+            <li><strong>Employment:</strong> recruitment, payroll, employee development, HR activities, medical exams.</li>
+            <li><strong>Operational/infrastructure management:</strong> fees, finance, IT, legal, CCTV, identity management, emergency response.</li>
+            <li><strong>Non-academic matters:</strong> student accommodation, parking, grievances, disciplinary actions.</li>
+            <li><strong>Other purposes permitted by law:</strong> information provision to government agencies and legal entities.</li>
+        </ul>
+
+        <h3>5. To whom we share your information</h3>
+        <p>
+            USC may share personal data with third parties if required by official business, Data Privacy
+            Act provisions, or legal obligations:
+        </p>
+        <ul>
+            <li>Employees and administrators</li>
+            <li>Agencies and partners providing healthcare, insurance, scholarships, education, funding, references, professional certification bodies, government agencies, researchers, survey providers</li>
+        </ul>
+
+        <h3>6. How we store and protect your information</h3>
+        <ul>
+            <li>Stored information is archived under USC ICT Policy with retention and disposal measures.</li>
+            <li>Information destroyed upon request unless legally required otherwise; destruction ensures confidentiality.</li>
+            <li>Personal info stored as hard copies, electronic data, or within USC’s Integrated School Management Information System and related repositories.</li>
+        </ul>
+
+        <h3>7. Rights and Access to Information</h3>
+        <p>Data subjects have rights to access, update, correct, or request deletion where applicable:</p>
+        <ul>
+            <li>Rectify incorrect or incomplete data (<em>Right to Rectification</em>).</li>
+            <li>Request deletion if legal grounds exist (<em>Right to Erasure</em>).</li>
+            <li>Restrict or object to processing (<em>Right to Object/Restrict Processing</em>).</li>
+            <li>Obtain copies in electronic format or request sharing with authorized persons (<em>Right to Portability</em>).</li>
+        </ul>
+
+        <h3>8. Review</h3>
+        <p>
+            The Board of Trustees shall review this policy every two (2) years and may amend it as
+            necessary.
+        </p>
+
+        <h3>9. Effectivity</h3>
+        <p>
+            This Policy takes effect upon adoption by the Board of Trustees.
+            <br>Adopted this 11th day of May 2019.
+        </p>
+
+            <label class="tc-check">
+                <input type="checkbox" id="tcAcknowledge">
+                <span>I understand the terms and conditions</span>
+            </label>
+            </div>
+
+            <div class="tc-modal-footer">
+                <button type="button" id="tcAccept" class="tc-primary">Accept &amp; Continue</button>
+            <button type="button" id="tcDismiss" class="tc-secondary">Close</button>
+            </div>
+        </div>
+        </div>
+        <script>
+        (function () {
+        const form = document.getElementById('registerForm');
+        const submitBtn = form ? form.querySelector('button[type="submit"], input[type="submit"]') : null;
+
+        // ---- New T&C elements we added ----
+        const openBtn   = document.getElementById('openTermsBtn');
+        const errorMsg  = document.getElementById('tcError');
+        const acceptedField = document.getElementById('accepted_terms');
+
+        const backdrop  = document.getElementById('tcBackdrop');
+        const closeBtn  = document.getElementById('tcClose');
+        const dismissBtn= document.getElementById('tcDismiss');
+        const acceptBtn = document.getElementById('tcAccept');
+        const checkbox  = document.getElementById('tcAcknowledge');
+
+        if (!form || !submitBtn || !openBtn || !backdrop) return; // failsafe: don't break anything
+
+        const openModal  = () => { backdrop.style.display = 'flex'; checkbox.focus(); };
+        const closeModal = () => { backdrop.style.display = 'none'; };
+
+        openBtn.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        dismissBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) closeModal(); // click on overlay closes
+        });
+
+        acceptBtn.addEventListener('click', () => {
+            if (!checkbox.checked) {
+            checkbox.focus();
+            checkbox.classList.add('tc-shake');
+            setTimeout(() => checkbox.classList.remove('tc-shake'), 450);
+            return;
+            }
+            acceptedField.value = '1';
+            errorMsg.style.display = 'none';
+            openBtn.textContent = 'Terms & Conditions ✓ Accepted';
+            closeModal();
+        });
+
+        form.addEventListener('submit', (e) => {
+            if (acceptedField.value !== '1') {
+            e.preventDefault();
+            errorMsg.style.display = 'block';
+            openModal();
+            }
+        });
+        })();
+    </script>
+
 </body>
 
 </html>
