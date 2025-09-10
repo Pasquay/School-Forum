@@ -22,6 +22,11 @@ Route::controller(UserController::class)->group(function() {
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
     Route::get('/user/{id}/deleted-overview', 'getUserDeletedOverview')->middleware('auth'); // load page 2+ deleted user overview
     Route::get('/user/{id}/deleted-comments-and-replies', 'getUserDeletedCommentsAndReplies')->middleware('auth'); // load page 2+ deleted user comments and replies
+    
+    // Password reset routes
+    Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
+    Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
+    Route::post('/password/reset', 'resetPassword')->name('password.update'); // update password
 });
 
 Route::controller(PostController::class)->group(function () {

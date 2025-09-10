@@ -8,12 +8,15 @@ use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Container\Attributes\DB;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
-use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -35,8 +38,16 @@ class UserController extends Controller
 
             User::create($userData);
 
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Account created successfully']);
+            }
+
             return redirect('/')->with('success', 'Account created successfully');
         } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'errors' => $e->validator->errors()], 422);
+            }
+
             return redirect('/')
                 ->withErrors($e->validator)
                 ->withInput($request->except('password', 'password_confirmation'));
@@ -45,17 +56,46 @@ class UserController extends Controller
 
     public function login(Request $req)
     {
-        $user = $req->validate([
-            'login-email' => ['required'],
-            'login-password' => ['required']
-        ]);
+        try {
+            $user = $req->validate([
+                'login-email' => ['required', 'email'],
+                'login-password' => ['required']
+            ]);
 
-        if (Auth::attempt(['email' => $user['login-email'], 'password' => $user['login-password']])) {
-            $req->session()->regenerate();
-            return redirect('/home')->with('success', 'Logged in successfully');
+            // Debug: Check if user exists
+            $userExists = User::where('email', $user['login-email'])->first();
+            if (!$userExists) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No user found with that email address.',
+                    'debug' => 'user_not_found'
+                ], 200); // Use 200 instead of 401 to avoid catch block
+            }
+
+            if (Auth::attempt(['email' => $user['login-email'], 'password' => $user['login-password']])) {
+                $req->session()->regenerate();
+                return response()->json(['success' => true, 'redirect' => '/home']);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid password. Please check your password.',
+                'debug' => 'invalid_password'
+            ], 200); // Use 200 instead of 401 to avoid catch block
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->validator->errors(),
+                'debug' => 'validation_error'
+            ], 200); // Use 200 instead of 422 to avoid catch block
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error: ' . $e->getMessage(),
+                'debug' => 'server_error'
+            ], 200);
         }
-
-        return redirect('/')->with('error', 'Invalid credentials');
     }
 
     // Google login handler
@@ -98,242 +138,242 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Overview
-            $overviewPosts = Post::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id
-            ])->latest()
-                ->withcount(['votes', 'comments'])
-                ->get();
+        $overviewPosts = Post::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withcount(['votes', 'comments'])
+            ->get();
 
-            $overviewPosts->transform(function($post){
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                $post->type = 'post';
-                return $post;
-            });
+        $overviewPosts->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->type = 'post';
+            return $post;
+        });
 
-            $overviewComments = Comment::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id
-            ])->latest()
-                ->withcount(['votes'])
-                ->with([
-                    'post' => function($query){
-                        $query->withTrashed();
-                    }, 
-                    'post.user', 
-                    'user',
-                ])
-                ->get();
+        $overviewComments = Comment::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withcount(['votes'])
+            ->with([
+                'post' => function ($query) {
+                    $query->withTrashed();
+                },
+                'post.user',
+                'user',
+            ])
+            ->get();
 
-            $overviewComments->transform(function($comment){
-                $comment->votes = $comment->getVoteCountAttribute();
-                $comment->userVote = $comment->getUserVoteAttribute();
-                $comment->type = 'comment';
-                return $comment;
-            });
+        $overviewComments->transform(function ($comment) {
+            $comment->votes = $comment->getVoteCountAttribute();
+            $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->type = 'comment';
+            return $comment;
+        });
 
-            $overviewReplies = Reply::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id
-            ])->latest()
-                ->withCount(['votes'])
-                ->with([
-                    'comment' => function($query){
-                        $query->withTrashed();
-                    },
-                    'comment.user',
-                    'comment.post' => function($query){
-                        $query->withTrashed();
-                    },
-                    'comment.post.user',
-                ])
-                ->get();
+        $overviewReplies = Reply::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.post.user',
+            ])
+            ->get();
 
-            $overviewReplies->transform(function($reply){
-                $reply->votes = $reply->getVoteCountAttribute();
-                $reply->userVote = $reply->getUserVoteAttribute();
-                $reply->type = 'reply';
-                return $reply;
-            });
+        $overviewReplies->transform(function ($reply) {
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
 
-            $perPage = 15;
-            $currentPage = request('page', 1);
-            
-            $overviewAll = $overviewPosts->concat($overviewComments)->concat($overviewReplies)->sortByDesc('created_at');
-            $overviewCount = $overviewAll->count();
-            $offset = ($currentPage - 1) * $perPage;
-            $overviewItems = $overviewAll->slice($offset, $perPage)->values();
-            
-            $postCount = $overviewPosts->count();
-            $commentCount = $overviewComments->count();
-            $replyCount = $overviewReplies->count();
-            $likeCount = $overviewAll->sum('votes');
+        $perPage = 15;
+        $currentPage = request('page', 1);
 
-            $overview = new \Illuminate\Pagination\LengthAwarePaginator(
-                $overviewItems,
-                $overviewCount,
-                $perPage,
-                $currentPage,
-                ['path' => request()->url()]
-            );
-            
+        $overviewAll = $overviewPosts->concat($overviewComments)->concat($overviewReplies)->sortByDesc('created_at');
+        $overviewCount = $overviewAll->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $overviewItems = $overviewAll->slice($offset, $perPage)->values();
+
+        $postCount = $overviewPosts->count();
+        $commentCount = $overviewComments->count();
+        $replyCount = $overviewReplies->count();
+        $likeCount = $overviewAll->sum('votes');
+
+        $overview = new \Illuminate\Pagination\LengthAwarePaginator(
+            $overviewItems,
+            $overviewCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
         // Posts
-            $posts = Post::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id 
-            ])->latest()
-                ->withCount(['votes', 'comments'])
-                ->paginate(15);
-            
-            $posts->getCollection()->transform(function($post) {
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                return $post;
-            });
+        $posts = Post::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withCount(['votes', 'comments'])
+            ->paginate(15);
+
+        $posts->getCollection()->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            return $post;
+        });
 
         // Comments & Replies
-            $comments = Comment::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id
-            ])->latest()
-                ->withCount(['votes'])
-                ->with([
-                    'post' => function($query){
-                        $query->withTrashed();
-                    }, 
-                    'post.user',
-                    'user',
-                ])
-                ->paginate(15);
-
-            $comments->getCollection()->transform(function($comment) {
-                $comment->votes = $comment->getVoteCountAttribute();
-                $comment->userVote = $comment->getUserVoteAttribute();
-                $comment->replyCount = $comment->getReplyCountAttribute();
-                $comment->type = 'comment';
-                return $comment;
-            });
-
-            $replies = Reply::where([
-                'deleted_at' => NULL,
-                'user_id' => $user->id
-            ])->latest()
-                ->withCount(['votes'])
-                ->with([
-                        'comment' => function($query){
-                            $query->withTrashed();
-                        }, 
-                        'comment.user', 
-                        'comment.post' => function($query){
-                            $query->withTrashed();
-                        }, 
-                        'comment.post.user'
-                ])
-                ->paginate(15);
-
-            $replies->getCollection()->transform(function($reply){
-                $reply->votes = $reply->getVoteCountAttribute();
-                $reply->userVote = $reply->getUserVoteAttribute();
-                $reply->type = 'reply';
-                return $reply;
-            });
-
-            $repliesCount = $replies->count();
-
-            $commentsPerPage = 15;
-            $commentsCurrentPage = request('page', 1);
-
-            $commentsAndReplies = $comments->concat($replies)->sortByDesc('created_at');
-            $commentsAndRepliesCount = $commentsAndReplies->count();
-            $commentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
-            $commentsItems = $commentsAndReplies->slice($commentsOffset, $commentsPerPage)->values();
-
-            $comments = new \Illuminate\Pagination\LengthAwarePaginator(
-                $commentsItems,
-                $commentsAndRepliesCount,
-                $commentsPerPage,
-                $commentsCurrentPage,
-                ['path' => request()->url()]
-            );
-        
-        // Deleted Overview
-            $deletedOverview = $this->getUserDeletedOverview($user->id);
-        // Deleted Posts
-            $deletedPosts = Post::onlyTrashed()
-                ->where(['user_id' => $user->id])
-                ->latest()
-                ->withCount(['votes', 'comments'])
-                ->paginate(15);
-
-            $deletedPosts->getCollection()->transform(function($post) {
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                return $post;
-            });
-                
-        // Deleted Comments
-            $deletedComments = Comment::onlyTrashed()
-                ->where(['user_id' => $user->id])
-                ->latest()
-                ->withCount(['votes'])
-                ->with(['post' => function($query){
+        $comments = Comment::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withCount(['votes'])
+            ->with([
+                'post' => function ($query) {
                     $query->withTrashed();
-                }, 'post.user'])
-                ->paginate(15);
+                },
+                'post.user',
+                'user',
+            ])
+            ->paginate(15);
 
-            $deletedComments->getCollection()->transform(function ($comment) {
-                $comment->votes = $comment->getVoteCountAttribute();
-                $comment->userVote = $comment->getUserVoteAttribute();
-                $comment->type = 'comment';
-                return $comment;
-            });
+        $comments->getCollection()->transform(function ($comment) {
+            $comment->votes = $comment->getVoteCountAttribute();
+            $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->replyCount = $comment->getReplyCountAttribute();
+            $comment->type = 'comment';
+            return $comment;
+        });
 
-            $deletedReplies = Reply::onlyTrashed()
-                ->where(['user_id' => $user->id])
-                ->latest()
-                ->withCount(['votes'])
-                ->with([
-                    'comment' => function($query){
-                        $query->withTrashed();
-                    },
-                    'comment.user',
-                    'comment.post' => function($query){
-                        $query->withTrashed();
-                    },
-                    'comment.post.user',
-                ])
-                ->paginate(15);
+        $replies = Reply::where([
+            'deleted_at' => NULL,
+            'user_id' => $user->id
+        ])->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.post.user'
+            ])
+            ->paginate(15);
 
-            $deletedReplies->getCollection()->transform(function($reply){
-                $reply->votes = $reply->getVoteCountAttribute();
-                $reply->userVote = $reply->getUserVoteAttribute();
-                $reply->type = 'reply';
-                return $reply;
-            });
-                
-            $deletedCommentsPerPage = 15;
-            $deletedCommentsCurrentPage = request('page', 1);
+        $replies->getCollection()->transform(function ($reply) {
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
 
-            $deletedCommentsAndReplies = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
-            $deletedCommentsAndRepliesCount = $deletedCommentsAndReplies->count();
-            $deletedCommentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
-            $deletedCommentsItems = $deletedCommentsAndReplies->slice($deletedCommentsOffset, $deletedCommentsPerPage)->values();
+        $repliesCount = $replies->count();
 
-            $deletedCommentsAndReplies = new \Illuminate\Pagination\LengthAwarePaginator(
-                $deletedCommentsItems,
-                $deletedCommentsAndRepliesCount,
-                $deletedCommentsPerPage,
-                $deletedCommentsCurrentPage,
-                ['path' => request()->url()]
-            );
+        $commentsPerPage = 15;
+        $commentsCurrentPage = request('page', 1);
+
+        $commentsAndReplies = $comments->concat($replies)->sortByDesc('created_at');
+        $commentsAndRepliesCount = $commentsAndReplies->count();
+        $commentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
+        $commentsItems = $commentsAndReplies->slice($commentsOffset, $commentsPerPage)->values();
+
+        $comments = new \Illuminate\Pagination\LengthAwarePaginator(
+            $commentsItems,
+            $commentsAndRepliesCount,
+            $commentsPerPage,
+            $commentsCurrentPage,
+            ['path' => request()->url()]
+        );
+
+        // Deleted Overview
+        $deletedOverview = $this->getUserDeletedOverview($user->id);
+        // Deleted Posts
+        $deletedPosts = Post::onlyTrashed()
+            ->where(['user_id' => $user->id])
+            ->latest()
+            ->withCount(['votes', 'comments'])
+            ->paginate(15);
+
+        $deletedPosts->getCollection()->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            return $post;
+        });
+
+        // Deleted Comments
+        $deletedComments = Comment::onlyTrashed()
+            ->where(['user_id' => $user->id])
+            ->latest()
+            ->withCount(['votes'])
+            ->with(['post' => function ($query) {
+                $query->withTrashed();
+            }, 'post.user'])
+            ->paginate(15);
+
+        $deletedComments->getCollection()->transform(function ($comment) {
+            $comment->votes = $comment->getVoteCountAttribute();
+            $comment->userVote = $comment->getUserVoteAttribute();
+            $comment->type = 'comment';
+            return $comment;
+        });
+
+        $deletedReplies = Reply::onlyTrashed()
+            ->where(['user_id' => $user->id])
+            ->latest()
+            ->withCount(['votes'])
+            ->with([
+                'comment' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.user',
+                'comment.post' => function ($query) {
+                    $query->withTrashed();
+                },
+                'comment.post.user',
+            ])
+            ->paginate(15);
+
+        $deletedReplies->getCollection()->transform(function ($reply) {
+            $reply->votes = $reply->getVoteCountAttribute();
+            $reply->userVote = $reply->getUserVoteAttribute();
+            $reply->type = 'reply';
+            return $reply;
+        });
+
+        $deletedCommentsPerPage = 15;
+        $deletedCommentsCurrentPage = request('page', 1);
+
+        $deletedCommentsAndReplies = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
+        $deletedCommentsAndRepliesCount = $deletedCommentsAndReplies->count();
+        $deletedCommentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
+        $deletedCommentsItems = $deletedCommentsAndReplies->slice($deletedCommentsOffset, $deletedCommentsPerPage)->values();
+
+        $deletedCommentsAndReplies = new \Illuminate\Pagination\LengthAwarePaginator(
+            $deletedCommentsItems,
+            $deletedCommentsAndRepliesCount,
+            $deletedCommentsPerPage,
+            $deletedCommentsCurrentPage,
+            ['path' => request()->url()]
+        );
 
         // Created Groups
-            $createdGroups = $user->groups()
-                                  ->wherePivot('role', 'owner')
-                                  ->orderBy('is_starred', 'desc')
-                                  ->orderBy('name', 'asc')
-                                  ->get();
+        $createdGroups = $user->groups()
+            ->wherePivot('role', 'owner')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
         // Groups joined
 
@@ -351,7 +391,7 @@ class UserController extends Controller
                 'deletedOverview',
                 'deletedPosts',
                 'deletedCommentsAndReplies',
-                    'createdGroups',
+                'createdGroups',
             ));
         } else {
             return view('user', compact(
@@ -363,22 +403,24 @@ class UserController extends Controller
                 'overview',
                 'posts',
                 'comments',
-                    'createdGroups',
+                'createdGroups',
             ));
         }
     }
 
-    public function loadSettings($id){
+    public function loadSettings($id)
+    {
         $user = User::findOrFail($id);
 
-        if($user->id === Auth::id()){
+        if ($user->id === Auth::id()) {
             return view('user-settings');
         } else {
             return $this->loadUser($id);
         }
     }
 
-    public function getUserOverview($id){
+    public function getUserOverview($id)
+    {
         $user = User::findOrFail($id);
         $perPage = 15;
         $currentPage = request('page', 1);
@@ -641,7 +683,7 @@ class UserController extends Controller
             ));
         }
     }
-    
+
 
     public function getUserCommentsAndReplies($id)
     {
@@ -799,5 +841,69 @@ class UserController extends Controller
         //     Log::error("Stack trace: " . $e->getTraceAsString());
         //     return response()->json(['error' => 'Internal server error: ' . $e->getMessage()], 500);
         // }
+    }
+
+    // Password Reset Methods
+    public function sendPasswordResetEmail(Request $request)
+    {
+        try {
+            $request->validate(['email' => 'required|email']);
+
+            $status = Password::sendResetLink(
+                $request->only('email')
+            );
+
+            if ($status === Password::RESET_LINK_SENT) {
+                if ($request->expectsJson() || $request->ajax() || $request->header('Accept') === 'application/json') {
+                    return response()->json(['success' => true, 'message' => 'Password reset link sent to your email!']);
+                }
+                return redirect('/')->with('success', 'Password reset link sent to your email!');
+            } else {
+                if ($request->expectsJson() || $request->ajax() || $request->header('Accept') === 'application/json') {
+                    return response()->json(['success' => false, 'message' => 'Unable to send password reset email. Please check your email address.'], 400);
+                }
+                return redirect('/')->with('error', 'Unable to send password reset email. Please check your email address.');
+            }
+        } catch (ValidationException $e) {
+            if ($request->expectsJson() || $request->ajax() || $request->header('Accept') === 'application/json') {
+                return response()->json(['success' => false, 'errors' => $e->validator->errors()], 422);
+            }
+            return redirect('/')
+                ->withErrors($e->validator)
+                ->withInput();
+        }
+    }
+
+    public function showResetForm($token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->save();
+                }
+            );
+
+            return $status === Password::PASSWORD_RESET
+                ? redirect('/')->with('success', 'Your password has been reset successfully!')
+                : redirect()->back()->withErrors(['email' => [__($status)]]);
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput($request->except('password', 'password_confirmation'));
+        }
     }
 }
