@@ -17,7 +17,11 @@
         method="post"
     >
         @csrf
-        <button class="star">
+        <button class="star" 
+            @if(isset($group->notLoggedUser) && $group->notLoggedUser == 1)
+                disabled
+            @endif
+        >
             <img 
                 src="
                     @if($group->pivot->is_starred === 1)

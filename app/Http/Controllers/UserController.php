@@ -375,7 +375,12 @@ class UserController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        // Groups joined
+        // Moderated Groups
+        $moderatedGroups = $user->groups()
+            ->wherePivot('role', 'moderator')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
         // Response
         if ($user->id == Auth::id()) {
@@ -394,6 +399,16 @@ class UserController extends Controller
                 'createdGroups',
             ));
         } else {
+            $createdGroups->transform(function ($group) use ($user) {
+                $group->notLoggedUser = 1;
+                return $group;
+            });
+
+            $moderatedGroups->transform(function ($group) use ($user) {
+                $group->notLoggedUser = 1;
+                return $group;
+            });
+
             return view('user', compact(
                 'user',
                 'postCount',

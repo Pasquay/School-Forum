@@ -1134,9 +1134,11 @@
             display: flex;
             width: 100%;
             flex-direction: row;
-            padding-top: 1rem;
+            padding: 1rem 0;
             border-top: 1px solid #e1e1e1;
+            border-bottom: 1px solid #e1e1e1;
             margin-top: 0.5rem;
+            margin-bottom: -0.4rem;           
         }
 
         .user-info-row-4 span {
@@ -1152,17 +1154,11 @@
             font-weight: 500;
         }
 
-        .user-info-row-4 {
-            display: flex;
-            flex-direction: row;
-        }
-
         .user-info-row-5 {
             display: flex;
             width: 100%;
             flex-direction: row;
-            padding-top: 1rem;
-            border-top: 1px solid #e1e1e1;
+            padding-top: 0.4rem;
         }
 
         .user-info-row-5 p {
@@ -1206,10 +1202,9 @@
             transition: background 0.2s;
         }
     /* CREATED GROUPS */
-        .groups-created {
+        .groups {
             width: 100%;
-            border-top: 1px solid #e1e1e1;
-            padding-top: 0.7rem;
+            margin-bottom: -0.4rem;
         }
         
         .section-header {
@@ -1246,7 +1241,7 @@
             background-color: #357abd;
         }
         
-        .groups-created .empty {
+        .groups .empty {
             color: #666;
             font-style: italic;
             text-align: center;
@@ -1444,7 +1439,7 @@
                     <p><span>Joined:</span><br>{{ $user->created_at->format('F j, Y') }}</p>
                 </div>
             <!-- GROUPS INFORMATION -->
-                <div class="groups-created">
+                <div class="groups" id="groups-created">
                     <div class="section-header">
                         <p>Groups Created</p>
                         <button class="create-group-button">Create Group</button>
@@ -1455,6 +1450,18 @@
                         @endforeach
                     @else
                         <p class="empty">No groups created yet...</p>
+                    @endif
+                </div>
+                <div class="groups" id="groups-moderated">
+                    <div class="section-header">
+                        <p>Groups Moderated</p>
+                    </div>
+                    @if($moderatedGroups->count() > 0)
+                        @foreach($moderatedGroups as $group)
+                            @include('components.group-info-minimal', ['group' => $group])
+                        @endforeach
+                    @else
+                        <p class="empty">No groups moderated yet...</p>
                     @endif
                 </div>
             <!-- PROFILE SETTINGS -->
@@ -1523,7 +1530,8 @@
             })
         // Groups
             function addRightGroupEventListeners(){
-                const createdGroups = document.querySelectorAll('.groups-created .group-info-minimal');
+            // CREATED GROUPS
+                const createdGroups = document.querySelectorAll('#groups-created .group-info-minimal');
                 // Create Group Button
                     const createGroupBtn = document.querySelector('.create-group-button');
                     createGroupBtn.addEventListener('click', (e) => {
@@ -1583,6 +1591,63 @@
                             })
                         }
                     })
+            // MODERATED GROUPS
+                const moderatedGroups = document.querySelectorAll('#groups-moderated .group-info-minimal');
+                moderatedGroups.forEach(group => {
+                    // Onclick go to group page
+                        const groupid = group.dataset.groupid;
+                        group.addEventListener('click', () => {
+                            window.location.href = `/group/${groupid}`;
+                        })
+                    // Star and unstar
+                        const starForm = group.querySelector('form');
+                        const starBtn = starForm.querySelector('.star')
+                        if(starBtn){
+                            let starImg = starBtn.querySelector('img');
+                            
+                            starBtn.addEventListener('click', async(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                starBtn.disabled = true;
+                                starBtn.style.opacity = '0.5';
+                                starBtn.style.cursor = 'default';
+
+                                setTimeout(() => {
+                                    starBtn.disabled = false;
+                                    starBtn.style.opacity = '1';
+                                    starBtn.style.cursor = 'pointer';
+                                }, 400);
+
+                                try {
+                                    const response = await fetch(starForm.action, {
+                                        method: 'POST', 
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                                        })
+                                    });
+
+                                    if(response.ok){
+                                        const data = await response.json();
+
+                                        starImg.src = data.starValue ?
+                                            '{{ asset("/icons/star.png") }}' :
+                                            '{{ asset("/icons/star-alt.png") }}' ;
+                                    }
+                                } catch (error){
+                                    console.error('Error: ', error);
+                                }
+                            })
+                        }
+                })
+            // JOINED GROUPS
+                // const joinedGroups = document.querySelectorAll('#groups-joined .group-info-minimal');
             }
             addRightGroupEventListeners();
     // LEFT SIDE
