@@ -161,7 +161,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function create(Request $request){
+    public function create(Request $request, $id){
         $postData = $request->validate([
             'create-post-title' => ['required', 'max:70'],
             'create-post-content' => ['required', 'max:2000'],
@@ -170,10 +170,12 @@ class PostController extends Controller
         Post::create([
             'title' => $postData['create-post-title'],
             'content' => $postData['create-post-content'],
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
+            'group_id' => $id,
         ]);
 
-        return redirect('/home')->with('success', 'Post created successfully');
+        if((int)$id === 1) return redirect('/home')->with('success', 'Post created successfully');
+        else return redirect('/group/' . $id)->with('success', 'Post created successfully');
     }
 
     public function edit($id, Request $request){

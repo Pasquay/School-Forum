@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Log;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
 use Illuminate\Http\Request;
@@ -264,18 +265,46 @@ class GroupController extends Controller
  
     public function showGroup($id){
         // Load all members
-        $group = Group::with('members')->findOrFail($id);
+            $group = Group::with('members')->findOrFail($id);
 
         // Find the current user's membership (if any)
-        $membership = $group->members->where('id', Auth::id())->first();
+            $membership = $group->members->where('id', Auth::id())
+                                        ->first();
 
         // All members for the member list
-        $memberList = $group->members;
+            $memberList = $group->members;
+
+        // First 15 posts in the group
+            $allPosts = Post::where('group_id', $group->id)
+                        ->latest()
+                        ->withCount(['votes', 'comments'])
+                        ->get();
+
+            $allPosts->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                return $post;
+            });
+
+            $perPage = 15;
+            $currentPage = request('page', 1);
+            $total = $allPosts->count();
+            $offset = ($currentPage - 1) * $perPage;
+            $items = $allPosts->slice($offset, $perPage)->values();
+
+            $posts = new \Illuminate\Pagination\LengthAwarePaginator(
+                $items,
+                $total,
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
 
         return view('group', compact(
             'group',
             'membership',
             'memberList',
+            'posts',
         ));
     }
 

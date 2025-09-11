@@ -397,6 +397,7 @@ class UserController extends Controller
                 'deletedPosts',
                 'deletedCommentsAndReplies',
                 'createdGroups',
+                'moderatedGroups',
             ));
         } else {
             $createdGroups->transform(function ($group) use ($user) {
@@ -419,6 +420,7 @@ class UserController extends Controller
                 'posts',
                 'comments',
                 'createdGroups',
+                'moderatedGroups',
             ));
         }
     }

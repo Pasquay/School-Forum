@@ -79,11 +79,11 @@
 
             main {
                 display: flex;
-                flex-direction: row;
-                justify-content: center;
-                align-items: flex-start;
-                padding: 2rem;
-                gap: 2rem;
+                flex-direction: column;
+                align-items: center;
+                padding: 2.5rem 2rem 2rem 2rem;
+                width: 100%;
+                box-sizing: border-box;
             }
         /* Group Info Top */
             .group-info.top {
@@ -195,8 +195,58 @@
                 .manage-button:hover {
                     background-color: #357abd;
                 }
-        /*  */
-        /*  */
+        /* LEFT */
+            .left {
+                flex: 0 0 220px;
+                max-width: 220px;
+                min-width: 180px;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                padding: 2rem 1.2rem;
+                margin-right: 0.5rem;
+                min-height: 300px;
+                display: flex;
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+        /* CENTER */
+            .center {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 2.5rem;
+                width: 100%;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            .content {
+                flex: 1 1 700px;
+                max-width: 900px;
+                min-width: 0;
+                padding: 2.5rem 2rem;
+                min-height: 300px;
+                margin-bottom: 2rem;
+                margin-right: 0.5rem;
+            }
+        /* GROUP INFO RIGHT */
+            .group-info.right {
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                padding: 2rem 1.5rem;
+                min-width: 320px;
+                max-width: 340px;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+                align-self: flex-start;
+                position: sticky;
+                top: 88px;
+            }
         /*  */
         /*  */
     </style>
@@ -269,75 +319,91 @@
                 </div>
             </div>
         </div>
-        <div class="content">
-            [POSTS/ANNOUNCEMENTS GO HERE]
-        </div>
-        <div class="group-info right">
-            <div class="rules">
-                <h2>Rules:</h2>
-                @php $rules = $group->rules ? : []; @endphp
-                <ul class="rules-list">
-                    @if(!empty($rules))
-                        @foreach($rules as $rule)
-                            <li class="rule-item">
-                                <h3>{{ $rule['title'] }}</h3>
-                                <p>{{ $rule['description'] }}</p>
-                            </li>
-                        @endforeach
-                    @else
-                        <div class="no-rules">No rules set for this group.</div>
-                    @endif
-                </ul>
+
+        <div class="center">
+            <div class="left">
+                [LEFT NAV GOES HERE]
             </div>
-            <div class="resources">
-                <h2>Resources</h2>
-                @php $resources = $group->resources ? : []; @endphp
-                <ul class="resources-list">
-                    @if(!empty($resources))
-                        @foreach($resources as $resource)
-                            <li class="resource-item">
-                                <h3>{{ $resource['title'] }}</h3>
-                                <p>{{ $rule['description'] }}</p>
-                            </li>
-                        @endforeach
-                    @else
-                        <div class="no-resources">No resources set for this group.</div>
-                    @endif
-                </ul>
+            <div class="content">
+                [POST SEARCH BAR]<br>
+                [POST SEARCH FILTER NAVBAR]<br>
+                @include('components.create-post-form', ['group' => $group])
+                [ANNOUNCEMENTS/PINS GO HERE]<br>
+                @if($posts->count() > 0)
+                    @foreach($posts as $post)
+                        @include('components.post', ['post' => $post])
+                    @endforeach
+                @else
+                    <p class="empty">No posts yet...</p>
+                @endif
             </div>
-            <div class="member-list">
-                <div class="owner">
-                    <h4>Owner</h4>
-                    @foreach($memberList as $member)
-                        @if($member->pivot->role === 'owner')
-                            <div class="member">
-                                <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
-                                <span>{{ $member->name }}</span> <!-- ADD THE staff-check.png TO OWNER -->
-                            </div>
+            <div class="group-info right">
+                <div class="rules">
+                    <h2>Rules:</h2>
+                    @php $rules = $group->rules ? : []; @endphp
+                    <ul class="rules-list">
+                        @if(!empty($rules))
+                            @foreach($rules as $rule)
+                                <li class="rule-item">
+                                    <h3>{{ $rule['title'] }}</h3>
+                                    <p>{{ $rule['description'] }}</p>
+                                </li>
+                            @endforeach
+                        @else
+                            <div class="no-rules">No rules set for this group.</div>
                         @endif
-                    @endforeach
+                    </ul>
                 </div>
-                <div class="moderators">
-                    <h4>Moderators</h4>
-                    @foreach($memberList as $member)
-                        @if($member->pivot->role === 'moderator')
-                            <div class="member">
-                                <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
-                                <span>{{ $member->name }}</span>
-                            </div>
+                <div class="resources">
+                    <h2>Resources</h2>
+                    @php $resources = $group->resources ? : []; @endphp
+                    <ul class="resources-list">
+                        @if(!empty($resources))
+                            @foreach($resources as $resource)
+                                <li class="resource-item">
+                                    <h3>{{ $resource['title'] }}</h3>
+                                    <p>{{ $rule['description'] }}</p>
+                                </li>
+                            @endforeach
+                        @else
+                            <div class="no-resources">No resources set for this group.</div>
                         @endif
-                    @endforeach
+                    </ul>
                 </div>
-                <div class="members">
-                    <h4>Members</h4>
-                    @foreach($memberList as $member)
-                        @if($member->pivot->role === 'member')
-                            <div class="member">
-                                <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
-                                <span>{{ $member->name }}</span>
-                            </div>
-                        @endif
-                    @endforeach
+                <div class="member-list">
+                    <div class="owner">
+                        <h4>Owner</h4>
+                        @foreach($memberList as $member)
+                            @if($member->pivot->role === 'owner')
+                                <div class="member">
+                                    <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
+                                    <span>{{ $member->name }}</span> <!-- ADD THE staff-check.png TO OWNER -->
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <div class="moderators">
+                        <h4>Moderators</h4>
+                        @foreach($memberList as $member)
+                            @if($member->pivot->role === 'moderator')
+                                <div class="member">
+                                    <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
+                                    <span>{{ $member->name }}</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <div class="members">
+                        <h4>Members</h4>
+                        @foreach($memberList as $member)
+                            @if($member->pivot->role === 'member')
+                                <div class="member">
+                                    <!-- <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}"> -->
+                                    <span>{{ $member->name }}</span>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
@@ -562,5 +628,118 @@
     // RIGHT ACTIONS
     // LEFT ACTIONS
     // MAIN CONTENT ACTIONS
+        // POST
+            // Variables
+                const posts = document.querySelectorAll('.post');
+            function addPostEventListeners(){
+            // Link post cards to post pages
+                Array.from(posts).forEach(post => {
+                    post.addEventListener('click', () => {
+                        window.location.href = `/post/${post.id}`;
+                    });
+            // Post share  buttons
+                    const shareBtn = post.querySelector('.post-share-button');
+                    shareBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        postUrl = `${window.location.origin}/post/${post.id}`;
+                        navigator.clipboard.writeText(postUrl)
+                            .then(() => {
+                                shareBtn.textContent = 'Copied!';
+                                setTimeout(() => {
+                                    shareBtn.textContent = 'Share';
+                                }, 1200);
+                            })
+                    })
+                // Upvote & Downvote Function)
+                    const voteContainer = post.querySelector('#vote-container');
+                    const upvoteForm = voteContainer.querySelector('form:first-child');
+                    const downvoteForm = voteContainer.querySelector('form:last-child');
+                    const voteCount = voteContainer.querySelector('form:first-child + p');
+
+                    voteContainer.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                    // Upvote Logic
+                        upvoteForm.addEventListener('submit', async(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            try {
+                                const response = await fetch(upvoteForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                credentials: 'same-origin',
+                                body: new URLSearchParams({
+                                    _token: document.querySelector('meta[name="csrf-token"]').content
+                                })
+                            });
+
+                            if(response.ok){
+                                const data = await response.json();
+                                
+                                voteCount.textContent = data.voteCount;
+
+                                const upArrow = upvoteForm.querySelector('img');
+                                upArrow.src = data.voteValue == 1 ?
+                                    "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                    "{{ asset('/icons/up-arrow.png') }}" ;
+                                
+                                const downArrow = downvoteForm.querySelector('img');
+                                if (data.voteValue == 1){
+                                    downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                }
+                            }
+                            } catch(error){
+                                console.error("Error: ", error);
+                            }
+                        })
+                    // Downvote Logic
+                    downvoteForm.addEventListener('submit', async(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                
+                        try {
+                            const response = await fetch(downvoteForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                credentials: 'same-origin',
+                                body: new URLSearchParams({
+                                    _token: document.querySelector('meta[name="csrf-token"]').content
+                                })
+                            });
+                
+                            if(response.ok){
+                                const data = await response.json();
+                
+                                voteCount.textContent = data.voteCount;
+                
+                                const downArrow = downvoteForm.querySelector('img');
+                                downArrow.src = data.voteValue == -1 ?
+                                    "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                    "{{ asset('/icons/down-arrow.png') }}" ;
+                
+                                const upArrow = upvoteForm.querySelector('img');
+                                if(data.voteValue == -1){
+                                    upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                }
+                            }
+                        } catch(error){
+                            console.error('Error:', error);
+                        }
+                    })
+                })
+            }
+                
+            // ACTIVATE!!!
+                addPostEventListeners();
+    //
 </script>
 </html>
