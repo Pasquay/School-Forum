@@ -9,6 +9,7 @@
     <!-- Updated font import to use modern serif font Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -823,7 +824,7 @@
 
         /* Sliding Form Styles */
         .sliding-container {
-            border-radius: 15px;
+            /* border-radius: 15px; */
             position: absolute;
             top: 50%;
             left: 50%;
@@ -1484,6 +1485,94 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
+        /* Spinner wowowowow */
+
+        /* From Uiverse.io by bociKond */
+
+
+        .spinner {
+            width: 70.4px;
+            height: 70.4px;
+            --clr: rgb(247, 197, 159);
+            --clr-alpha: rgb(247, 197, 159, .1);
+            animation: spinner 1.6s infinite ease;
+            transform-style: preserve-3d;
+            margin-bottom: 1rem;
+        }
+
+        /* Loading overlay styles */
+        #loadingOverlay {
+            display: none !important;
+        }
+
+        #loadingOverlay.show {
+            display: flex !important;
+        }
+
+        .spinner>div {
+            background-color: var(--color-green-100);
+            height: 100%;
+            position: absolute;
+            width: 100%;
+            border: 3.5px solid var(--color-sage-green);
+        }
+
+        .spinner div:nth-of-type(1) {
+            transform: translateZ(-35.2px) rotateY(180deg);
+        }
+
+        .spinner div:nth-of-type(2) {
+            transform: rotateY(-270deg) translateX(50%);
+            transform-origin: top right;
+        }
+
+        .spinner div:nth-of-type(3) {
+            transform: rotateY(270deg) translateX(-50%);
+            transform-origin: center left;
+        }
+
+        .spinner div:nth-of-type(4) {
+            transform: rotateX(90deg) translateY(-50%);
+            transform-origin: top center;
+        }
+
+        .spinner div:nth-of-type(5) {
+            transform: rotateX(-90deg) translateY(50%);
+            transform-origin: bottom center;
+        }
+
+        .spinner div:nth-of-type(6) {
+            transform: translateZ(35.2px);
+        }
+
+        @keyframes spinner {
+            0% {
+                transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+            }
+
+            50% {
+                transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+            }
+
+            100% {
+                transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
+            }
+        }
+
+        @keyframes spinner {
+            0% {
+                transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+            }
+
+            50% {
+                transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+            }
+
+            100% {
+                transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
+            }
+        }
+
         /* Added new animations for enhanced visual elements */
 
         @keyframes slideDown {
@@ -1914,6 +2003,8 @@
                 padding: 6px 10px;
                 margin: 3px 0 15px 0;
             }
+
+
         }
     </style>
 </head>
@@ -2027,12 +2118,14 @@
 
                     <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot your password?</a>
                     <button type="submit" class="sliding-btn">Sign In</button>
+
                 </form>
             </div>
 
             <!-- Sign Up Form -->
             <div class="sliding-form-container sign-up-container">
                 <form id="registerForm" action="/register" method="post">
+
                     @csrf
                     <h1>Create Account</h1>
 
@@ -2127,6 +2220,8 @@
         </div>
     </div>
     </div>
+
+
 
     <footer id="contact">
         <div class="container">
@@ -2346,6 +2441,7 @@
 
         // Form submissions with validation and AJAX
         document.getElementById('loginForm').onsubmit = function(e) {
+            document.getElementById('loadingOverlay').classList.add('show');
             e.preventDefault();
             clearErrors();
 
@@ -2370,7 +2466,10 @@
                 hasErrors = true;
             }
 
-            if (hasErrors) return;
+            if (hasErrors) {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                return;
+            }
 
             // Show loading state
             submitBtn.textContent = 'Signing In...';
@@ -2399,7 +2498,7 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        window.location.href = data.redirect || '/home';
+                        animateLoadingTransition(data.redirect || '/home');
                     } else {
                         // Show server errors
                         console.log('Server response:', data); // Debug log
@@ -2415,20 +2514,26 @@
                         } else {
                             showError('', 'loginGeneralError', 'Login failed. Please try again.');
                         }
+                        // Hide loading overlay for errors
+                        document.getElementById('loadingOverlay').classList.remove('show');
                     }
                 })
                 .catch(error => {
                     console.error('Login error:', error);
                     // Show the actual error message from server if available
                     showError('', 'loginGeneralError', error.message || 'Network error. Please try again.');
+                    // Hide loading overlay for errors
+                    document.getElementById('loadingOverlay').classList.remove('show');
                 })
                 .finally(() => {
+                    // Only reset button state, don't hide overlay (animation handles that)
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 });
         }
 
         document.getElementById('registerForm').onsubmit = function(e) {
+            document.getElementById('loadingOverlay').classList.add('show');
             e.preventDefault();
             clearErrors();
 
@@ -2475,7 +2580,10 @@
                 hasErrors = true;
             }
 
-            if (hasErrors) return;
+            if (hasErrors) {
+                document.getElementById('loadingOverlay').classList.remove('show');
+                return;
+            }
 
             // Show loading state
             submitBtn.textContent = 'Creating Account...';
@@ -2500,18 +2608,8 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success message and redirect
-                        document.getElementById('loginModal').style.display = 'none';
-                        // Create a temporary success message
-                        const successDiv = document.createElement('div');
-                        successDiv.className = 'session-message success';
-                        successDiv.textContent = 'Account created successfully! You can now log in.';
-                        document.body.appendChild(successDiv);
-                        setTimeout(() => successDiv.remove(), 3000);
-                        
-                        // Reset the form and switch to sign-in
-                        this.reset();
-                        document.getElementById('slidingContainer').classList.remove('right-panel-active');
+                        // Show success message with animation
+                        animateLoadingTransition('/home');
                     } else {
                         // Show server errors
                         if (data.errors) {
@@ -2527,13 +2625,18 @@
                         } else if (data.message) {
                             showError('', 'registerGeneralError', data.message);
                         }
+                        // Hide loading overlay for errors
+                        document.getElementById('loadingOverlay').classList.remove('show');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     showError('', 'registerGeneralError', 'Wrong Email or Password!');
+                    // Hide loading overlay for errors
+                    document.getElementById('loadingOverlay').classList.remove('show');
                 })
                 .finally(() => {
+                    // Only reset button state, don't hide overlay (animation handles that)
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 });
@@ -2578,38 +2681,38 @@
                 })
                 .then(data => {
                     console.log('Response data:', data); // Debug log
-                    
+
                     // Reset button state first
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
-                    
+
                     if (data.success) {
                         console.log('Success received, switching views...');
-                        
+
                         // Get elements fresh
                         const forgotContainer = document.getElementById('forgotPasswordContainer');
                         const successMessage = document.getElementById('emailSentMessage');
-                        
+
                         console.log('Forgot container found:', !!forgotContainer);
                         console.log('Success message found:', !!successMessage);
-                        
+
                         // Hide forgot password form
                         if (forgotContainer) {
                             forgotContainer.classList.remove('active');
                             console.log('Forgot container hidden');
                         }
-                        
+
                         // Show success message
                         if (successMessage) {
                             successMessage.classList.add('active');
                             console.log('Success message shown');
                         }
-                        
+
                         // Reset form after a small delay
                         setTimeout(() => {
                             formElement.reset();
                         }, 100);
-                        
+
                     } else {
                         console.log('Error in response:', data);
                         // Handle errors
@@ -2632,11 +2735,8 @@
 
         // Google Sign-In callback function
         function handleCredentialResponse(response) {
+            document.getElementById('loadingOverlay').classList.add('show');
             const responsePayload = decodeJwtResponse(response.credential);
-
-            console.log("ID: " + responsePayload.sub);
-            console.log('Full Name: ' + responsePayload.name);
-            console.log("Email: " + responsePayload.email);
 
             // Send the user data to backend
             fetch('/google-login', {
@@ -2652,12 +2752,19 @@
                 })
                 .then(response => {
                     if (response.redirected) {
-                        window.location.href = response.url;
+                        animateLoadingTransition(response.url);
                     } else {
-                        return response.json();
+                        return response.json().then(data => {
+                            if (data.success) {
+                                animateLoadingTransition(data.redirect || '/home');
+                            } else {
+                                throw new Error(data.message || 'Google login failed');
+                            }
+                        });
                     }
                 })
                 .catch(error => {
+                    document.getElementById('loadingOverlay').classList.remove('show');
                     alert('Google login failed.');
                     console.error(error);
                 });
@@ -2684,7 +2791,75 @@
             }).join(''));
             return JSON.parse(jsonPayload);
         }
+
+        function animateLoadingTransition(nextUrl) {
+            // Check if GSAP is available
+            if (typeof gsap === 'undefined') {
+                window.location.href = nextUrl;
+                return;
+            }
+
+            // Make sure overlay is visible
+            const overlay = document.getElementById('loadingOverlay');
+            const spinner = document.querySelector('.spinner');
+            const spinnerDivs = document.querySelectorAll('.spinner > div');
+            const loadingText = overlay.querySelector('p');
+
+            if (!overlay || !spinner || spinnerDivs.length === 0) {
+                window.location.href = nextUrl;
+                return;
+            }
+
+            // Ensure overlay is shown
+            overlay.classList.add('show');
+
+            // Create timeline for smooth sequence
+            const tl = gsap.timeline();
+
+            // First fade out the loading text and stop spinner rotation
+            tl.to(loadingText, {
+                    opacity: 0,
+                    duration: 0.3,
+                    ease: "power2.out"
+                })
+                // Stop the spinner rotation by setting animation-play-state to paused
+                .set('.spinner', {
+                    css: {
+                        animationPlayState: 'paused'
+                    }
+                })
+                // Then animate spinner lines spreading out
+                .to('.spinner > div', {
+                    x: (i) => (i - 2.5) * 80,
+                    y: (i) => Math.sin(i) * 20,
+                    rotation: (i) => i * 30,
+                    opacity: 0.3,
+                    duration: 1.5,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                }, "-=0.1")
+                // Animate overlay background color change
+                .to('#loadingOverlay', {
+                    backgroundColor: "#f5f3f0",
+                    duration: 1.2,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        window.location.href = nextUrl;
+                    }
+                }, "-=1");
+        }
     </script>
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(255,255,255,0.9); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+        <div class="spinner">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <p style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; font-size: 16px; color: #333; margin-top: 20px; font-weight: 500;">Loading...</p>
+    </div>
 </body>
 
 </html>
