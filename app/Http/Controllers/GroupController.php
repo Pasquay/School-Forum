@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Log;
+use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
 use Illuminate\Http\Request;
@@ -263,9 +264,68 @@ class GroupController extends Controller
     }
  
     public function showGroup($id){
-        $group = Group::findOrFail($id);
+        // Return to home page if $id is home group
+            if($id == 1) return app(\App\Http\Controllers\PostController::class)->getLatest(request());
 
-        return view('group', ['group' => $group]);
+        // Load all members
+            $group = Group::with('members')->findOrFail($id);
+
+        // Find the current user's membership (if any)
+            $membership = $group->members->where('id', Auth::id())
+                                        ->first();
+
+        // All members for the member list
+            $memberList = $group->members;
+
+        // Pinned Posts
+            $pinned = $group->pinnedPosts()
+                            ->orderByDesc('pinned_post.created_at')
+                            ->take(5)
+                            ->get();
+            
+            $pinned->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                $post->isPinned = 1;
+                return $post;
+            });
+
+        // First 15 posts in the group
+            $allPosts = Post::where('group_id', $group->id)
+                        ->whereDoesntHave('pinnedInGroups', function($query) use ($group){
+                            $query->where('group_id', $group->id);
+                        })
+                        ->latest()
+                        ->withCount(['votes', 'comments'])
+                        ->get();
+
+            $allPosts->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                return $post;
+            });
+
+            $perPage = 15;
+            $currentPage = request('page', 1);
+            $total = $allPosts->count();
+            $offset = ($currentPage - 1) * $perPage;
+            $items = $allPosts->slice($offset, $perPage)->values();
+
+            $posts = new \Illuminate\Pagination\LengthAwarePaginator(
+                $items,
+                $total,
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
+
+        return view('group', compact(
+            'group',
+            'membership',
+            'memberList',
+            'pinned',
+            'posts',
+        ));
     }
 
     public function toggleStar($id){
@@ -283,6 +343,24 @@ class GroupController extends Controller
         return response()->json([
             'success' => true,
             'starValue' => $newStarState,
+        ]);
+    }
+
+    public function toggleMute($id){
+        $user = User::findOrFail(Auth::id());
+        $group = $user->groups()->where('group_id', $id)->first();
+
+        if(!$group) return back()->with('error', 'You are not a member of that group');
+        
+        $muteState = $group->pivot->is_muted;
+
+        $newMuteState = $muteState ? 0 : 1;
+
+        $user->groups()->updateExistingPivot($id, ['is_muted' => $newMuteState]);
+
+        return response()->json([
+            'success' => true,
+            'muteValue' => $newMuteState,
         ]);
     }
 

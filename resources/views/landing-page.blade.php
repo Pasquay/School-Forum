@@ -2006,6 +2006,172 @@
 
 
         }
+
+        .tc-btn-link {
+            background: transparent;
+            border: 0;
+            padding: 6px 0;
+            font-weight: 600;
+            color: #133C06;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .tc-btn-link:hover {
+            color: #092B00;
+        }
+
+        .tc-error {
+            margin-top: 6px;
+            font-size: .9rem;
+            color: #c0392b;
+        }
+
+        .tc-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .45);
+            z-index: 9999;
+        }
+
+        .tc-modal {
+            width: min(900px, 95vw);
+            background: #ededed;
+            color: #092B00;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+            overflow: hidden;
+            border: 2px solid #6A8E61;
+        }
+
+        .tc-modal-header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #133C06;
+            color: #EDEDED;
+            padding: 16px 20px;
+        }
+
+        .tc-modal-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            text-align: center;
+            flex: none;
+        }
+
+        .tc-close {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: 0;
+            color: #FFFFFF;
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+
+        .tc-modal-body {
+            padding: 18px 20px;
+            background: #EDEDED;
+            max-height: 55vh;
+            overflow: auto;
+        }
+
+        .tc-modal-body p,
+        .tc-modal-body ul {
+            margin: 0 0 12px 0;
+        }
+
+        .tc-modal-body ul {
+            padding-left: 18px;
+        }
+
+        .tc-check {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .tc-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6A8E61;
+        }
+
+        .tc-modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: #FFFFFF;
+            padding: 12px 20px 16px;
+            border-top: 1px solid #EDEDED;
+        }
+
+        .tc-primary,
+        .tc-secondary {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 0;
+        }
+
+        .tc-primary {
+            background: #6A8E61;
+            color: #FFFFFF;
+        }
+
+        .tc-primary:hover {
+            background: #4f6e4b;
+        }
+
+        .tc-secondary {
+            background: #EDEDED;
+            color: #092B00;
+        }
+
+        .tc-secondary:hover {
+            background: #dcdcdc;
+        }
+
+        @keyframes tcshake {
+
+            10%,
+            90% {
+                transform: translateX(-1px);
+            }
+
+            20%,
+            80% {
+                transform: translateX(2px);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translateX(-4px);
+            }
+
+            40%,
+            60% {
+                transform: translateX(4px);
+            }
+        }
+
+        .tc-shake {
+            animation: tcshake .45s;
+        }
     </style>
 </head>
 
@@ -2153,6 +2319,11 @@
                     <input type="password" id="confirmPassword" name="password_confirmation" placeholder="Confirm Password" required />
                     <div class="form-error" id="confirmPasswordError"></div>
                     <div class="form-error" id="registerGeneralError"></div>
+
+                    <div class="mt-3" id="tcSection">
+                        <input type="hidden" name="accepted_terms" id="accepted_terms" value="0">
+                    </div>
+
 
                     <button type="submit" class="sliding-btn">Sign Up</button>
                 </form>
@@ -2715,7 +2886,7 @@
 
                     } else {
                         console.log('Error in response:', data);
-                        // Handle errors
+
                         if (data.errors && data.errors.email) {
                             showError('forgotEmail', 'forgotEmailError', data.errors.email[0]);
                         } else if (data.message) {
@@ -2849,17 +3020,6 @@
                 }, "-=1");
         }
     </script>
-    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color:rgba(255,255,255,0.9); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
-        <div class="spinner">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-        <p style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; font-size: 16px; color: #333; margin-top: 20px; font-weight: 500;">Loading...</p>
-    </div>
 </body>
 
 </html>

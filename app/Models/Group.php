@@ -5,10 +5,7 @@ namespace App\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Group extends Model
 {
@@ -37,21 +34,28 @@ class Group extends Model
      * Relations
      */
 
-    public function owner(): BelongsTo
+    public function owner()
     {
         return $this->belongsTo(User::class);
     } 
 
-    public function members(): BelongsToMany
+    public function members()
     {
         return $this->belongsToMany(User::class, 'group_members')
             ->withPivot(['role', 'is_starred', 'is_muted'])
             ->withTimestamps();
     }
 
-    public function posts(): HasMany
+    public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function pinnedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'pinned_post')
+                    ->withPivot('user_id')
+                    ->withTimestamps();
     }
 
     /**

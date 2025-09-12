@@ -509,7 +509,7 @@
     <main>
         <div class="left-side">
             <div class="create-post-form" id='create-post-form'>
-                <form action="/create-post" method='POST'>
+                <form action="/create-post/1" method='POST'>
                     @csrf
                     <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
                     <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
@@ -728,7 +728,7 @@
             createPostSubmit.style.display = 'block';
         });
         document.addEventListener('click', (e) => {
-            if(!createPostForm.contains(e.target) && createPostTitle.value === ''){
+            if(!createPostForm.contains(e.target) && createPostTitle.value === '' && createPostContent.value === ''){
                 createPostContent.style.display = 'none';
                 createPostSubmit.style.display = 'none';
             }

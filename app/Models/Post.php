@@ -7,7 +7,6 @@ use App\Models\Vote;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model
@@ -17,27 +16,39 @@ class Post extends Model
     protected $fillable = [
         'title',
         'content',
-        'user_id'
+        'user_id',
+        'group_id'
     ];
     
     /**
      * Relations
      */
 
-    public function user(): BelongsTo{
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function votes(){
+    public function votes()
+    {
         return $this->hasMany(Vote::class);
     }
 
-    public function comments(){
+    public function comments()
+    {
         return $this->hasMany(Comment::class);
     }
 
-    public function group(){
+    public function group()
+    {
         return $this->belongsTo(Group::class);
+    }
+
+    public function pinnedInGroups()
+    {
+        return $this->belongsToMany(Group::class, 'pinned_post')
+                    ->withPivot('user_id')
+                    ->withTimestamps();
     }
 
     /**

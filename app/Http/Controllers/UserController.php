@@ -32,17 +32,19 @@ class UserController extends Controller
                 'name' => ['required', Rule::unique('users', 'name')],
                 'email' => ['required', 'email'],
                 'password' => ['required', 'min:8', 'confirmed'],
+                'accepted_terms' => ['required', 'in:1'],
             ]);
             $userData['password'] = bcrypt($userData['password']);
             $userData['role'] = 'student';
 
-            User::create($userData);
+            $user = User::create($userData);
+            Auth::login($user);
 
             if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'message' => 'Account created successfully']);
+                return response()->json(['success' => true, 'message' => 'Account created successfully', 'redirect' => '/home']);
             }
-
-            return redirect('/')->with('success', 'Account created successfully');
+            
+            return redirect('/home')->with('success', 'Account created successfully');
         } catch (ValidationException $e) {
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'errors' => $e->validator->errors()], 422);
@@ -397,6 +399,7 @@ class UserController extends Controller
                 'deletedPosts',
                 'deletedCommentsAndReplies',
                 'createdGroups',
+                'moderatedGroups',
             ));
         } else {
             $createdGroups->transform(function ($group) use ($user) {
@@ -419,6 +422,7 @@ class UserController extends Controller
                 'posts',
                 'comments',
                 'createdGroups',
+                'moderatedGroups',
             ));
         }
     }
@@ -901,6 +905,7 @@ class UserController extends Controller
                 'token' => 'required',
                 'email' => 'required|email',
                 'password' => 'required|min:8|confirmed',
+                'accepted_terms' => 'required|in:1',
             ]);
 
             $status = Password::reset(
