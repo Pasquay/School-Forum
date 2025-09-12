@@ -9,7 +9,6 @@
     <!-- Updated font import to use modern serif font Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -824,7 +823,7 @@
 
         /* Sliding Form Styles */
         .sliding-container {
-            /* border-radius: 15px; */
+            border-radius: 15px;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -1485,94 +1484,6 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Spinner wowowowow */
-
-        /* From Uiverse.io by bociKond */
-
-
-        .spinner {
-            width: 70.4px;
-            height: 70.4px;
-            --clr: rgb(247, 197, 159);
-            --clr-alpha: rgb(247, 197, 159, .1);
-            animation: spinner 1.6s infinite ease;
-            transform-style: preserve-3d;
-            margin-bottom: 1rem;
-        }
-
-        /* Loading overlay styles */
-        #loadingOverlay {
-            display: none !important;
-        }
-
-        #loadingOverlay.show {
-            display: flex !important;
-        }
-
-        .spinner>div {
-            background-color: var(--color-green-100);
-            height: 100%;
-            position: absolute;
-            width: 100%;
-            border: 3.5px solid var(--color-sage-green);
-        }
-
-        .spinner div:nth-of-type(1) {
-            transform: translateZ(-35.2px) rotateY(180deg);
-        }
-
-        .spinner div:nth-of-type(2) {
-            transform: rotateY(-270deg) translateX(50%);
-            transform-origin: top right;
-        }
-
-        .spinner div:nth-of-type(3) {
-            transform: rotateY(270deg) translateX(-50%);
-            transform-origin: center left;
-        }
-
-        .spinner div:nth-of-type(4) {
-            transform: rotateX(90deg) translateY(-50%);
-            transform-origin: top center;
-        }
-
-        .spinner div:nth-of-type(5) {
-            transform: rotateX(-90deg) translateY(50%);
-            transform-origin: bottom center;
-        }
-
-        .spinner div:nth-of-type(6) {
-            transform: translateZ(35.2px);
-        }
-
-        @keyframes spinner {
-            0% {
-                transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
-            }
-
-            50% {
-                transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
-            }
-
-            100% {
-                transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
-            }
-        }
-
-        @keyframes spinner {
-            0% {
-                transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
-            }
-
-            50% {
-                transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
-            }
-
-            100% {
-                transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
-            }
-        }
-
         /* Added new animations for enhanced visual elements */
 
         @keyframes slideDown {
@@ -2003,8 +1914,6 @@
                 padding: 6px 10px;
                 margin: 3px 0 15px 0;
             }
-
-
         }
 
         .tc-btn-link {
@@ -2284,14 +2193,12 @@
 
                     <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot your password?</a>
                     <button type="submit" class="sliding-btn">Sign In</button>
-
                 </form>
             </div>
 
             <!-- Sign Up Form -->
             <div class="sliding-form-container sign-up-container">
                 <form id="registerForm" action="/register" method="post">
-
                     @csrf
                     <h1>Create Account</h1>
 
@@ -2391,8 +2298,6 @@
         </div>
     </div>
     </div>
-
-
 
     <footer id="contact">
         <div class="container">
@@ -2612,7 +2517,6 @@
 
         // Form submissions with validation and AJAX
         document.getElementById('loginForm').onsubmit = function(e) {
-            document.getElementById('loadingOverlay').classList.add('show');
             e.preventDefault();
             clearErrors();
 
@@ -2637,10 +2541,7 @@
                 hasErrors = true;
             }
 
-            if (hasErrors) {
-                document.getElementById('loadingOverlay').classList.remove('show');
-                return;
-            }
+            if (hasErrors) return;
 
             // Show loading state
             submitBtn.textContent = 'Signing In...';
@@ -2669,7 +2570,7 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        animateLoadingTransition(data.redirect || '/home');
+                        window.location.href = data.redirect || '/home';
                     } else {
                         // Show server errors
                         console.log('Server response:', data); // Debug log
@@ -2685,26 +2586,20 @@
                         } else {
                             showError('', 'loginGeneralError', 'Login failed. Please try again.');
                         }
-                        // Hide loading overlay for errors
-                        document.getElementById('loadingOverlay').classList.remove('show');
                     }
                 })
                 .catch(error => {
                     console.error('Login error:', error);
                     // Show the actual error message from server if available
                     showError('', 'loginGeneralError', error.message || 'Network error. Please try again.');
-                    // Hide loading overlay for errors
-                    document.getElementById('loadingOverlay').classList.remove('show');
                 })
                 .finally(() => {
-                    // Only reset button state, don't hide overlay (animation handles that)
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 });
         }
 
         document.getElementById('registerForm').onsubmit = function(e) {
-            document.getElementById('loadingOverlay').classList.add('show');
             e.preventDefault();
             clearErrors();
 
@@ -2751,10 +2646,7 @@
                 hasErrors = true;
             }
 
-            if (hasErrors) {
-                document.getElementById('loadingOverlay').classList.remove('show');
-                return;
-            }
+            if (hasErrors) return;
 
             // Show loading state
             submitBtn.textContent = 'Creating Account...';
@@ -2779,8 +2671,18 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Show success message with animation
-                        animateLoadingTransition('/home');
+                        // Show success message and redirect
+                        document.getElementById('loginModal').style.display = 'none';
+                        // Create a temporary success message
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'session-message success';
+                        successDiv.textContent = 'Account created successfully! You can now log in.';
+                        document.body.appendChild(successDiv);
+                        setTimeout(() => successDiv.remove(), 3000);
+
+                        // Reset the form and switch to sign-in
+                        this.reset();
+                        document.getElementById('slidingContainer').classList.remove('right-panel-active');
                     } else {
                         // Show server errors
                         if (data.errors) {
@@ -2796,18 +2698,13 @@
                         } else if (data.message) {
                             showError('', 'registerGeneralError', data.message);
                         }
-                        // Hide loading overlay for errors
-                        document.getElementById('loadingOverlay').classList.remove('show');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     showError('', 'registerGeneralError', 'Wrong Email or Password!');
-                    // Hide loading overlay for errors
-                    document.getElementById('loadingOverlay').classList.remove('show');
                 })
                 .finally(() => {
-                    // Only reset button state, don't hide overlay (animation handles that)
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 });
@@ -2906,8 +2803,11 @@
 
         // Google Sign-In callback function
         function handleCredentialResponse(response) {
-            document.getElementById('loadingOverlay').classList.add('show');
             const responsePayload = decodeJwtResponse(response.credential);
+
+            console.log("ID: " + responsePayload.sub);
+            console.log('Full Name: ' + responsePayload.name);
+            console.log("Email: " + responsePayload.email);
 
             // Send the user data to backend
             fetch('/google-login', {
@@ -2923,19 +2823,12 @@
                 })
                 .then(response => {
                     if (response.redirected) {
-                        animateLoadingTransition(response.url);
+                        window.location.href = response.url;
                     } else {
-                        return response.json().then(data => {
-                            if (data.success) {
-                                animateLoadingTransition(data.redirect || '/home');
-                            } else {
-                                throw new Error(data.message || 'Google login failed');
-                            }
-                        });
+                        return response.json();
                     }
                 })
                 .catch(error => {
-                    document.getElementById('loadingOverlay').classList.remove('show');
                     alert('Google login failed.');
                     console.error(error);
                 });
@@ -2962,64 +2855,219 @@
             }).join(''));
             return JSON.parse(jsonPayload);
         }
-
-        function animateLoadingTransition(nextUrl) {
-            // Check if GSAP is available
-            if (typeof gsap === 'undefined') {
-                window.location.href = nextUrl;
-                return;
-            }
-
-            // Make sure overlay is visible
-            const overlay = document.getElementById('loadingOverlay');
-            const spinner = document.querySelector('.spinner');
-            const spinnerDivs = document.querySelectorAll('.spinner > div');
-            const loadingText = overlay.querySelector('p');
-
-            if (!overlay || !spinner || spinnerDivs.length === 0) {
-                window.location.href = nextUrl;
-                return;
-            }
-
-            // Ensure overlay is shown
-            overlay.classList.add('show');
-
-            // Create timeline for smooth sequence
-            const tl = gsap.timeline();
-
-            // First fade out the loading text and stop spinner rotation
-            tl.to(loadingText, {
-                    opacity: 0,
-                    duration: 0.3,
-                    ease: "power2.out"
-                })
-                // Stop the spinner rotation by setting animation-play-state to paused
-                .set('.spinner', {
-                    css: {
-                        animationPlayState: 'paused'
-                    }
-                })
-                // Then animate spinner lines spreading out
-                .to('.spinner > div', {
-                    x: (i) => (i - 2.5) * 80,
-                    y: (i) => Math.sin(i) * 20,
-                    rotation: (i) => i * 30,
-                    opacity: 0.3,
-                    duration: 1.5,
-                    stagger: 0.15,
-                    ease: "power2.out"
-                }, "-=0.1")
-                // Animate overlay background color change
-                .to('#loadingOverlay', {
-                    backgroundColor: "#f5f3f0",
-                    duration: 1.2,
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        window.location.href = nextUrl;
-                    }
-                }, "-=1");
-        }
     </script>
+    <div id="tcBackdrop" class="tc-backdrop" role="dialog" aria-modal="true" aria-labelledby="tcTitle" style="display:none;">
+        <div class="tc-modal">
+            <div class="tc-modal-header">
+                <h3 id="tcTitle">Terms &amp; Conditions</h3>
+                <button type="button" id="tcClose" class="tc-close" aria-label="Close">×</button>
+            </div>
+
+            <div class="tc-modal-body">
+                <h3>General Privacy Statement</h3>
+                <p>
+                    The University of San Carlos (USC) values and understands the importance of protecting
+                    the privacy of personal information and the confidentiality of data, information and knowledge
+                    and is committed to the responsible handling of such. This Privacy Policy Statement explains
+                    what information will be gathered and the details how collected information is used without
+                    breaching its privacy and confidentiality.
+                </p>
+
+                <h3>Scope</h3>
+                <p>
+                    This Privacy Policy Statement applies to personal information about applicants, prospective
+                    applicants, students and employees maintained, used, processed and/or kept in custody by the
+                    University of San Carlos.
+                </p>
+
+                <h3>Types of Personal Information</h3>
+                <ul>
+                    <li><strong>Personal information:</strong> Recorded information about a living identifiable or easily identifiable individual.</li>
+                    <li><strong>Sensitive information:</strong> Personal information about a living individual's race or ethnicity, political opinions, religious or philosophical beliefs, sexual preferences or practices, criminal record, or memberships details, such as trade union or professional, political or trade associations, genetic data and biometric data.</li>
+                    <li><strong>Medical information:</strong> Information about a living or deceased individual's physical, mental or psychological health.</li>
+                </ul>
+
+                <h3>1. Information that we collect</h3>
+                <p>USC collects the following information:</p>
+                <ul>
+                    <li><strong>Personal Information:</strong> name, residential address, email address, telephone number, date of birth, passport details (for international applicants) and nationality. USC will also assign you with a unique applicant/student identification number once you apply or are accepted in the University.</li>
+                    <li><strong>Education background &amp; employment history:</strong> schools/universities attended, programs and courses completed, dates of completion, past work history, evaluations, previous employers and service information.</li>
+                    <li>Information about family or personal affiliations, academic and extracurricular interests relevant to scholarships or student financial aid/assistance.</li>
+                    <li>Sensitive personal information such as political affiliations, sexual preferences or practices, criminal record, memberships details, religious or philosophical beliefs, ethnicity.</li>
+                    <li>Information concerning health/medical conditions including history, diagnosis, disability and dietary needs.</li>
+                </ul>
+
+                <h3>2. How we collect your information</h3>
+                <ul>
+                    <li>From the information you provide when you contact USC or express interest in studying.</li>
+                    <li>When applying and completing application/enrollment forms and procedures.</li>
+                    <li>When making inquiries, or communicating via email or USC’s official social media accounts.</li>
+                    <li>From interactions as a student, employee, donor, or third party (e.g., references from previous schools, universities, employers).</li>
+                </ul>
+
+                <h3>3. From whom we collect information</h3>
+                <ul>
+                    <li>Prospective and current students</li>
+                    <li>Exchange students, professors, job applicants, existing employees</li>
+                    <li>Alumni, donors (individual/company), research participants</li>
+                    <li>Industry partners, contractors, suppliers, concessionaires</li>
+                    <li>Civic organization volunteers, other members of the public who interact with USC</li>
+                </ul>
+
+                <h3>4. How we use your information</h3>
+                <p>
+                    USC uses personal and sensitive personal information to perform and fulfill core functions:
+                </p>
+                <ul>
+                    <li><strong>Educational support:</strong> admission, enrollment, assessments, learning, graduation, counselling, library, medical exams, data analysis.</li>
+                    <li><strong>Research:</strong> data analysis, commercialization, administration.</li>
+                    <li><strong>Community extension &amp; industry engagement:</strong> alumni relations, industry partnerships, website operations, events, forums.</li>
+                    <li><strong>Employment:</strong> recruitment, payroll, employee development, HR activities, medical exams.</li>
+                    <li><strong>Operational/infrastructure management:</strong> fees, finance, IT, legal, CCTV, identity management, emergency response.</li>
+                    <li><strong>Non-academic matters:</strong> student accommodation, parking, grievances, disciplinary actions.</li>
+                    <li><strong>Other purposes permitted by law:</strong> information provision to government agencies and legal entities.</li>
+                </ul>
+
+                <h3>5. To whom we share your information</h3>
+                <p>
+                    USC may share personal data with third parties if required by official business, Data Privacy
+                    Act provisions, or legal obligations:
+                </p>
+                <ul>
+                    <li>Employees and administrators</li>
+                    <li>Agencies and partners providing healthcare, insurance, scholarships, education, funding, references, professional certification bodies, government agencies, researchers, survey providers</li>
+                </ul>
+
+                <h3>6. How we store and protect your information</h3>
+                <ul>
+                    <li>Stored information is archived under USC ICT Policy with retention and disposal measures.</li>
+                    <li>Information destroyed upon request unless legally required otherwise; destruction ensures confidentiality.</li>
+                    <li>Personal info stored as hard copies, electronic data, or within USC’s Integrated School Management Information System and related repositories.</li>
+                </ul>
+
+                <h3>7. Rights and Access to Information</h3>
+                <p>Data subjects have rights to access, update, correct, or request deletion where applicable:</p>
+                <ul>
+                    <li>Rectify incorrect or incomplete data (<em>Right to Rectification</em>).</li>
+                    <li>Request deletion if legal grounds exist (<em>Right to Erasure</em>).</li>
+                    <li>Restrict or object to processing (<em>Right to Object/Restrict Processing</em>).</li>
+                    <li>Obtain copies in electronic format or request sharing with authorized persons (<em>Right to Portability</em>).</li>
+                </ul>
+
+                <h3>8. Review</h3>
+                <p>
+                    The Board of Trustees shall review this policy every two (2) years and may amend it as
+                    necessary.
+                </p>
+
+                <h3>9. Effectivity</h3>
+                <p>
+                    This Policy takes effect upon adoption by the Board of Trustees.
+                    <br>Adopted this 11th day of May 2019.
+                </p>
+
+            </div>
+
+            <div class="tc-modal-footer">
+                <button type="button" id="tcAccept" class="tc-primary">Accept &amp; Continue</button>
+                <button type="button" id="tcDismiss" class="tc-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const form = document.getElementById('registerForm');
+            const acceptedField = document.getElementById('accepted_terms');
+            const backdrop = document.getElementById('tcBackdrop');
+            const acceptBtn = document.getElementById('tcAccept');
+
+            if (!form || !acceptedField || !backdrop || !acceptBtn) return;
+
+            const closeBtn = document.getElementById('tcClose');
+            const dismissBtn = document.getElementById('tcDismiss');
+            const confirmErr = document.getElementById('confirmPasswordError');
+            const passInput = document.getElementById('registerPassword');
+            const confirmInput = document.getElementById('confirmPassword');
+
+            // Helpers
+            function lockScroll(lock) {
+                document.documentElement.style.overflow = lock ? 'hidden' : '';
+                document.body.style.overflow = lock ? 'hidden' : '';
+            }
+
+            function openModal() {
+                backdrop.style.display = 'flex';
+                lockScroll(true);
+            }
+
+            function closeModal() {
+                backdrop.style.display = 'none';
+                lockScroll(false);
+            }
+
+            if (confirmInput) {
+                confirmInput.addEventListener('input', () => {
+                    if (confirmErr) confirmErr.textContent = '';
+                });
+            }
+            if (passInput) {
+                passInput.addEventListener('input', () => {
+                    if (confirmErr) confirmErr.textContent = '';
+                });
+            }
+
+            let tcShownForThisAttempt = false;
+
+            form.addEventListener('submit', function(e) {
+
+                if (acceptedField.value === '1') return;
+
+                if (tcShownForThisAttempt) return;
+
+                e.preventDefault();
+
+                const nativeValid = form.checkValidity();
+
+                let customValid = true;
+                if (passInput && confirmInput) {
+                    if (confirmInput.value !== passInput.value) {
+                        customValid = false;
+                        if (confirmErr) confirmErr.textContent = 'Passwords do not match.';
+                    }
+                }
+
+                if (!nativeValid || !customValid) {
+                    form.reportValidity();
+                    return;
+                }
+
+
+                tcShownForThisAttempt = true;
+                openModal();
+            }, true);
+
+
+            acceptBtn.addEventListener('click', function() {
+                acceptedField.value = '1';
+                closeModal();
+
+                requestAnimationFrame(() => form.submit());
+            });
+
+            function handleCancel() {
+                closeModal();
+                tcShownForThisAttempt = false;
+            }
+            if (closeBtn) closeBtn.addEventListener('click', handleCancel);
+            if (dismissBtn) dismissBtn.addEventListener('click', handleCancel);
+
+            backdrop.addEventListener('click', function(e) {
+                if (e.target === backdrop) handleCancel();
+            });
+        })();
+    </script>
+
 </body>
 
 </html>
