@@ -264,6 +264,9 @@ class GroupController extends Controller
     }
  
     public function showGroup($id){
+        // Return to home page if $id is home group
+            if($id == 1) return app(\App\Http\Controllers\PostController::class)->getLatest(request());
+
         // Load all members
             $group = Group::with('members')->findOrFail($id);
 
@@ -274,8 +277,24 @@ class GroupController extends Controller
         // All members for the member list
             $memberList = $group->members;
 
+        // Pinned Posts
+            $pinned = $group->pinnedPosts()
+                            ->orderByDesc('pinned_post.created_at')
+                            ->take(5)
+                            ->get();
+            
+            $pinned->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                $post->isPinned = 1;
+                return $post;
+            });
+
         // First 15 posts in the group
             $allPosts = Post::where('group_id', $group->id)
+                        ->whereDoesntHave('pinnedInGroups', function($query) use ($group){
+                            $query->where('group_id', $group->id);
+                        })
                         ->latest()
                         ->withCount(['votes', 'comments'])
                         ->get();
@@ -304,6 +323,7 @@ class GroupController extends Controller
             'group',
             'membership',
             'memberList',
+            'pinned',
             'posts',
         ));
     }

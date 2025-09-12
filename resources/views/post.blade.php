@@ -227,6 +227,46 @@
             display: block;
         }
 
+        .pin-form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        
+        .pin-post-cancel {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid #e1e1e1;
+            background: white;
+            color: #666;
+            transition: all 0.2s;
+        }
+        
+        .pin-post-cancel:hover {
+            border-color: #ccc;
+            color: #333;
+        }
+        
+        .pin-toggle-confirm-button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: #4a90e2;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .pin-toggle-confirm-button:hover {
+            background: #357abd;
+        }
+
         .delete-form-buttons {
             display: flex;
             gap: 1rem;
@@ -1118,6 +1158,13 @@
             </div>
         </div>
     @endif
+    @if (session()->has('error'))
+        <div class="error-message">
+            <div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
     <div class="post-column">
         <a href="/home" class="back-button">← Return</a>
         <div class="post" id='post-{{ $post->id }}'>
@@ -1130,20 +1177,50 @@
                 </small>
                 @auth
                     @if (Auth::id() === $post->user_id)
-                    <div class="settings-container">
-                        <button class="settings-button" id='settings-button'>
-                            <img src="{{ asset('/icons/dots.png') }}" alt='Settings' id='dots-icon'>
-                        </button>
-                        <div class="dropdown-menu" id='settings-dropdown-menu'>
-                            <button class="dropdown-item" id='edit-post-button'>Edit</button>
-                            <button class="dropdown-item" id='delete-post-button'>Delete</button>
+                        <div class="settings-container">
+                            <button class="settings-button" id='settings-button'>
+                                <img src="{{ asset('/icons/dots.png') }}" alt='Settings' id='dots-icon'>
+                            </button>
+                            <div class="dropdown-menu" id='settings-dropdown-menu'>
+                                @if(Auth::id() === $post->group->owner_id)
+                                    @if($post->isPinned)
+                                        <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
+                                    @else
+                                        <button class="dropdown-item" id="pin-post-toggle-button">Pin</button>
+                                    @endif
+                                @endif
+                                <button class="dropdown-item" id='edit-post-button'>Edit</button>
+                                <button class="dropdown-item" id='delete-post-button'>Delete</button>
+                            </div>
                         </div>
-                    </div>
+                    @elseif($post->group->members->where('id', Auth::id())->first() &&
+                            in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator']))
+                        <div class="settings-container">
+                            <button class="settings-button" id="settings-button">
+                                <img src="{{ asset('/icons/dots.png') }}" alt="Settings" id='dots-icon'>
+                            </button>
+                            <div class="dropdown-menu" id="settings-dropdown-menu">
+                                @if(Auth::id() === $post->group->owner_id)
+                                    @if($post->isPinned)
+                                        <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
+                                    @else
+                                        <button class="dropdown-item" id="pin-post-toggle-button">Pin</button>
+                                    @endif
+                                @endif
+                                </button>
+                                <button class="dropdown-item" id="delete-post-button">Delete</button>
+                            </div>
+                        </div>
                     @endif
                 @endauth
             </div>
             <div id='post-content-container' class="post-content" style='display:block;'>
-                <h2>{{ $post->title }}</h2>
+                <h2>
+                    {{ $post->title }}
+                    @if($post->isPinned)
+                        <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                </h2>
                 <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
                 <div class="post-bottom">
                     <div id="vote-container">
@@ -1166,6 +1243,17 @@
                     @endif
                     <button type="button" class='share-button' id='post-share-button-{{ $post->id }}'>Share</button>
                 </div>
+            </div>
+            <div id="pin-post-form" class="pin-post-form" style="display:none;">
+                <h2>{{ $post->title }}</h2>
+                <p style='white-space:pre-wrap;'>{{ $post->content }}</p>
+                <form action="/pin-post/{{ $post->id }}" method='POST'>
+                    @csrf
+                    <div class="pin-form-buttons">
+                        <button class="pin-post-cancel" id="pin-cancel-button">Cancel</button>
+                        <button type="submit" class="pin-toggle-confirm-button">Pin/Unpin Post</button>
+                    </div>
+                </form>
             </div>
             <div id="edit-post-form" class="edit-post-form" style='display:none;'>
                 <form action="/edit-post/{{ $post->id }}" method='POST'>
@@ -1458,13 +1546,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalSrc = dotsIcon.src;
         const hoverSrc = originalSrc.replace('dots.png', 'dots-alt.png');
         const settingsDropdown = document.getElementById('settings-dropdown-menu');
-        
-        const editPostButton = document.getElementById('edit-post-button'); // Dropdown item
-        const editPostCancel = document.getElementById('edit-post-cancel'); // edit form cancel button
-        const deletePostButton = document.getElementById('delete-post-button'); // Dropdown item
-        const deletePostCancel = document.getElementById('delete-post-cancel'); // delete form cancel button
+
+        const pinPostButton = document.getElementById('pin-post-toggle-button');
+        const pinPostCancel = document.getElementById('pin-cancel-button');
+        const pinPostConfirm = document.querySelector('.pin-toggle-confirm-button');
+        const editPostButton = document.getElementById('edit-post-button'); 
+        const editPostCancel = document.getElementById('edit-post-cancel'); 
+        const deletePostButton = document.getElementById('delete-post-button');
+        const deletePostCancel = document.getElementById('delete-post-cancel');
         
         const postContentContainer = document.getElementById('post-content-container');
+        const pinPostForm = document.getElementById('pin-post-form');
         const editPostForm = document.getElementById('edit-post-form');
         const deletePostForm = document.getElementById('delete-post-form');
 
@@ -1479,42 +1571,74 @@ document.addEventListener('DOMContentLoaded', () => {
                 settingsDropdown.classList.remove('show-dropdown');
             }
         });
+    
+    // Pin post
+        if(pinPostButton){
+            pinPostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostForm.style.display = 'block';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+                if(settingsDropdown.classList.contains('show-dropdown')){
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+                pinPostConfirm.textContent = (parseInt('{{ $post->isPinned }}')) ?
+                    'Unpin Post' : 'Pin Post';
+            });
+            pinPostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
 
     // Edit post
-        editPostButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            postContentContainer.style.display = 'none';
-            editPostForm.style.display = 'block';
-            deletePostForm.style.display = 'none';
-            if(settingsDropdown.classList.contains('show-dropdown')){
-                settingsDropdown.classList.remove('show-dropdown');
-            }
-        });
-        editPostCancel.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            postContentContainer.style.display = 'block';
-            editPostForm.style.display = 'none';
-            deletePostForm.style.display = 'none';
-        });
+        if(editPostButton){
+            editPostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'block';
+                deletePostForm.style.display = 'none';
+                if(settingsDropdown.classList.contains('show-dropdown')){
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+            });
+            editPostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
 
     // Delete post
-        deletePostButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            postContentContainer.style.display = 'none';
-            editPostForm.style.display = 'none';
-            deletePostForm.style.display = 'block';
-            if(settingsDropdown.classList.contains('show-dropdown')){
-                settingsDropdown.classList.remove('show-dropdown');
-            }
-        });
-        deletePostCancel.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            postContentContainer.style.display = 'block';
-            editPostForm.style.display = 'none';
-            deletePostForm.style.display = 'none';
-        });
+        if(deletePostButton){
+            deletePostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'block';
+                if(settingsDropdown.classList.contains('show-dropdown')){
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+            });
+            deletePostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
     
 });
  

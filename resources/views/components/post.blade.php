@@ -159,7 +159,12 @@
             <span class='edit-indicator'>Deleted on {{ $post->updated_at->format('F j, Y \a\t g:i a') }}</span>
         @endif
     </small>
-    <h2>{{ $post->title }}</h2>
+    <h2>
+        {{ $post->title }}
+        @if($post->isPinned)
+            <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+        @endif
+    </h2>
     <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
     <div class="post-bottom">
         <div class='vote-container' id="vote-container">
@@ -175,7 +180,7 @@
                 <button type="submit" {{ $post->deleted_at ? 'disabled' : '' }}>
                     <img src="{{ asset('/icons/down-arrow' . ($post->userVote == -1 ? '-alt' : '') . '.png') }}" alt="downvote">
                 </button>
-            </form>
+            </form> 
         </div>
         @if($post->comments_count > 0)
             <p class="comment-count">{{ $post->comments_count }} Comments</p>

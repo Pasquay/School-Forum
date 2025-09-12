@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Group;
 use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
@@ -12,17 +13,18 @@ use Illuminate\Support\Facades\Auth;
 class PostController extends Controller
 {
     public function getLatest(Request $request){
-        $posts = Post::whereNull('deleted_at')
-            ->latest()
-            ->with(['group'])
-            ->withCount(['votes', 'comments'])
-            ->paginate(15);
-            
-        $posts->getCollection()->transform(function($post){
-            $post->votes = $post->getVoteCountAttribute();
-            $post->userVote = $post->getUserVoteAttribute();
-            return $post;
-        });
+        // Posts
+            $posts = Post::whereNull('deleted_at')
+                ->latest()
+                ->with(['group'])
+                ->withCount(['votes', 'comments'])
+                ->paginate(15);
+                
+            $posts->getCollection()->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                return $post;
+            });
 
         // Right Side Groups
             $user = User::findOrFail(Auth::id());
@@ -57,6 +59,7 @@ class PostController extends Controller
         }
 
         return view('home', compact(
+            'pinned',
             'posts',
             'createdGroups',
             'moderatedGroups',
@@ -139,11 +142,12 @@ class PostController extends Controller
 
     public function getPost($id){
         $post = Post::where('id', $id)
-            ->with(['group'])
+            ->with(['group', 'pinnedInGroups'])
             ->withCount('comments')
             ->firstOrFail();
         $post->votes = $post->getVoteCountAttribute();
         $post->userVote = $post->getUserVoteAttribute();
+        $post->isPinned = $post->pinnedInGroups->contains('id', $post->group->id);
 
         $comments = Comment::where('post_id', $id)
             ->withCount(['votes', 'replies'])
@@ -155,6 +159,7 @@ class PostController extends Controller
                     ->get();
                 return $comment;
             });
+
         return view('post', [
             'post' => $post,
             'comments' => $comments
@@ -178,6 +183,39 @@ class PostController extends Controller
         else return redirect('/group/' . $id)->with('success', 'Post created successfully');
     }
 
+    public function pinHomeToggle($id, Request $request){
+
+    }
+
+    public function pinToggle($id, Request $request){
+        $post = Post::with('group.members')
+                    ->findOrFail($id);
+        
+        $user = Auth::user();
+
+        $membership = $post->group->members->where('id', $user->id)->first();
+        
+        if(!$membership || !in_array($membership->pivot->role, ['owner', 'moderator'])){
+            return redirect('/post/' . $id)->with('error', 'Must be group owner/moderator to perform action');
+        } else {
+            $isPinned = $post->pinnedInGroups->contains('id', $post->group->id);
+
+            if($isPinned){
+                $post->pinnedInGroups()->detach($post->group->id);
+                $status = 'unpinned';
+            } else {
+                if($post->group->pinnedPosts()->count() >= 5){
+                    return redirect('/post/' . $id)->with('error', 'You can only pin up to 5 posts per group.');
+                }
+
+                $post->pinnedInGroups()->attach($post->group->id, ['user_id' => $user->id]);
+                $status = 'pinned';
+            }
+            
+            return redirect('/post/' . $id)->with('success', 'Post ' . $status . ' successfully');
+        }
+    }
+
     public function edit($id, Request $request){
         $postData = $request->validate([
             'edit-post-title' => ['required', 'max:70'],
@@ -196,8 +234,12 @@ class PostController extends Controller
     }
 
     public function delete($id){
-        $post = Post::findOrFail($id);
-        if($post->user_id == Auth::id()){
+        $post = Post::with('group.members')
+                    ->findOrFail($id);
+
+        $membership = $post->group->members->where('id', Auth::id())->first();
+
+        if($post->user_id === Auth::id() || ($membership && in_array($membership->pivot->role, ['owner', 'moderator']))){
             $post->delete();
             return redirect('/home')->with('success', 'Post deleted successfully');    
         } else {

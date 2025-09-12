@@ -328,7 +328,11 @@
                 [POST SEARCH BAR]<br>
                 [POST SEARCH FILTER NAVBAR]<br>
                 @include('components.create-post-form', ['group' => $group])
-                [ANNOUNCEMENTS/PINS GO HERE]<br>
+                @if($pinned->count() > 0)
+                    @foreach($pinned as $post)
+                        @include('components.post', ['post' => $post])
+                    @endforeach
+                @endif
                 @if($posts->count() > 0)
                     @foreach($posts as $post)
                         @include('components.post', ['post' => $post])
