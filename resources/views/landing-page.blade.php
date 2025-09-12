@@ -2155,15 +2155,8 @@
 
                     <div class="mt-3" id="tcSection">
                     <input type="hidden" name="accepted_terms" id="accepted_terms" value="0">
+    </div>
 
-                    <button type="button" id="openTermsBtn" class="tc-btn-link"
-                        aria-haspopup="dialog" aria-controls="tcBackdrop">
-                        View Terms & Conditions
-                    </button>
-                    <p id="tcError" class="tc-error" style="display:none;">
-                    • Must agree to the Terms & Conditions
-                    </p>
-                    </div>
 
                     <button type="submit" class="sliding-btn">Sign Up</button>
                 </form>
@@ -2899,10 +2892,6 @@
             <br>Adopted this 11th day of May 2019.
         </p>
 
-            <label class="tc-check">
-                <input type="checkbox" id="tcAcknowledge">
-                <span>I understand the terms and conditions</span>
-            </label>
             </div>
 
             <div class="tc-modal-footer">
@@ -2911,56 +2900,87 @@
             </div>
         </div>
         </div>
+
         <script>
         (function () {
-        const form = document.getElementById('registerForm');
-        const submitBtn = form ? form.querySelector('button[type="submit"], input[type="submit"]') : null;
-
-        // ---- New T&C elements we added ----
-        const openBtn   = document.getElementById('openTermsBtn');
-        const errorMsg  = document.getElementById('tcError');
+        const form          = document.getElementById('registerForm');
         const acceptedField = document.getElementById('accepted_terms');
+        const backdrop      = document.getElementById('tcBackdrop');
+        const acceptBtn     = document.getElementById('tcAccept');
 
-        const backdrop  = document.getElementById('tcBackdrop');
-        const closeBtn  = document.getElementById('tcClose');
-        const dismissBtn= document.getElementById('tcDismiss');
-        const acceptBtn = document.getElementById('tcAccept');
-        const checkbox  = document.getElementById('tcAcknowledge');
+        if (!form || !acceptedField || !backdrop || !acceptBtn) return;
 
-        if (!form || !submitBtn || !openBtn || !backdrop) return; // failsafe: don't break anything
+        const closeBtn   = document.getElementById('tcClose');
+        const dismissBtn = document.getElementById('tcDismiss');
+        const confirmErr = document.getElementById('confirmPasswordError');
+        const passInput    = document.getElementById('registerPassword');
+        const confirmInput = document.getElementById('confirmPassword');
 
-        const openModal  = () => { backdrop.style.display = 'flex'; checkbox.focus(); };
-        const closeModal = () => { backdrop.style.display = 'none'; };
+        // Helpers
+        function lockScroll(lock){
+            document.documentElement.style.overflow = lock ? 'hidden' : '';
+            document.body.style.overflow = lock ? 'hidden' : '';
+        }
+        function openModal() { backdrop.style.display = 'flex'; lockScroll(true); }
+        function closeModal(){ backdrop.style.display = 'none'; lockScroll(false); }
 
-        openBtn.addEventListener('click', openModal);
-        closeBtn.addEventListener('click', closeModal);
-        dismissBtn.addEventListener('click', closeModal);
-        backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) closeModal(); // click on overlay closes
-        });
+        if (confirmInput) {
+            confirmInput.addEventListener('input', () => { if (confirmErr) confirmErr.textContent = ''; });
+        }
+        if (passInput) {
+            passInput.addEventListener('input', () => { if (confirmErr) confirmErr.textContent = ''; });
+        }
 
-        acceptBtn.addEventListener('click', () => {
-            if (!checkbox.checked) {
-            checkbox.focus();
-            checkbox.classList.add('tc-shake');
-            setTimeout(() => checkbox.classList.remove('tc-shake'), 450);
+        let tcShownForThisAttempt = false;
+
+        form.addEventListener('submit', function (e) {
+
+            if (acceptedField.value === '1') return;
+
+            if (tcShownForThisAttempt) return;
+
+            e.preventDefault();
+
+            const nativeValid = form.checkValidity();
+
+            let customValid = true;
+            if (passInput && confirmInput) {
+            if (confirmInput.value !== passInput.value) {
+                customValid = false;
+                if (confirmErr) confirmErr.textContent = 'Passwords do not match.';
+            }
+            }
+
+            if (!nativeValid || !customValid) {
+            form.reportValidity();
             return;
             }
+
+
+            tcShownForThisAttempt = true;
+            openModal();
+        }, true);
+
+
+        acceptBtn.addEventListener('click', function(){
             acceptedField.value = '1';
-            errorMsg.style.display = 'none';
-            openBtn.textContent = 'Terms & Conditions ✓ Accepted';
             closeModal();
+
+            requestAnimationFrame(() => form.submit());
         });
 
-        form.addEventListener('submit', (e) => {
-            if (acceptedField.value !== '1') {
-            e.preventDefault();
-            errorMsg.style.display = 'block';
-            openModal();
-            }
+        function handleCancel(){
+            closeModal();
+            tcShownForThisAttempt = false;
+        }
+        if (closeBtn)   closeBtn.addEventListener('click', handleCancel);
+        if (dismissBtn) dismissBtn.addEventListener('click', handleCancel);
+
+        backdrop.addEventListener('click', function(e){
+            if (e.target === backdrop) handleCancel();
         });
         })();
-    </script>
+        </script>
 
 </body>
 
