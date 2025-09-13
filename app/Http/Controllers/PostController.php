@@ -77,7 +77,7 @@ class PostController extends Controller
         }
 
         return view('home', compact(
-            //'pinned',
+            'pinned',
             'posts',
             'createdGroups',
             'moderatedGroups',
