@@ -1194,7 +1194,10 @@
                                         <button class="dropdown-item" id="pin-post-home-toggle-button">Pin Home</button>
                                     @endif
                                 @endif
-                                @if(Auth::id() === $post->group->owner_id)
+                                @if(
+                                    $post->group->members->where('id', Auth::id())->first() &&
+                                    in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator'])
+                                )
                                     @if($post->isPinned)
                                         <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
                                     @else
@@ -1205,9 +1208,10 @@
                                 <button class="dropdown-item" id='delete-post-button'>Delete</button>
                             </div>
                         </div>
-                    @elseif($post->group->members->where('id', Auth::id())->first() &&
-                            in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator']) 
-                            ||
+                    @elseif((
+                                $post->group->members->where('id', Auth::id())->first() &&
+                                in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator']) 
+                            ) ||
                             $homeAdmin->pluck('id')->contains(Auth::id()))
                         <div class="settings-container">
                             <button class="settings-button" id="settings-button">
@@ -1221,7 +1225,10 @@
                                         <button class="dropdown-item" id="pin-post-home-toggle-button">Pin Home</button>
                                     @endif
                                 @endif
-                                @if(Auth::id() === $post->group->owner_id)
+                                @if(
+                                    $post->group->members->where('id', Auth::id())->first() &&
+                                    in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator'])
+                                )
                                     @if($post->isPinned)
                                         <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
                                     @else
