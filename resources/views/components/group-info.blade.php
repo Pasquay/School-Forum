@@ -38,8 +38,10 @@
                 <button type="submit" class="manage-button">Manage</button>
             @elseif($userMembership)
                 <button type="submit" class="leave-button">Leave</button>
-            @else
+            @elseif(!$group->is_private)
                 <button type="submit" class="join-button">Join</button>
+            @else
+                <button type="submit" class="request-button">Request to Join</button>
             @endif
         </form>
     </div>
@@ -122,7 +124,7 @@
             margin: 0;
         }
 
-    /* Join/Leave/Manage Button */
+    /* Join/Leave/Manage/Request Button */
         .group-info .join-leave {
             flex-shrink: 0;
             display: flex;
@@ -186,5 +188,27 @@
 
         .group-info .manage-button:hover {
             background-color: #357abd;
+        }
+
+        .group-info .request-button {
+            background-color: #f57c00;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            width: 68px;
+            min-width: 68px;
+            max-width: 120px;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            line-height: 1.2;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .group-info .request-button:hover {
+            background-color: #ef6c00;
         }
 </style>
