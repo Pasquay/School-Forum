@@ -227,14 +227,16 @@
             display: block;
         }
 
-        .pin-form-buttons {
+        .pin-form-buttons,
+        .pin-home-form-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
             width: 100%;
         }
         
-        .pin-post-cancel {
+        .pin-post-cancel,
+        .pin-post-home-cancel {
             flex: 1;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -246,12 +248,14 @@
             transition: all 0.2s;
         }
         
-        .pin-post-cancel:hover {
+        .pin-post-cancel:hover,
+        .pin-post-home-cancel:hover {
             border-color: #ccc;
             color: #333;
         }
         
-        .pin-toggle-confirm-button {
+        .pin-toggle-confirm-button,
+        .pin-home-toggle-confirm-button {
             flex: 1;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -263,7 +267,8 @@
             transition: background-color 0.2s;
         }
         
-        .pin-toggle-confirm-button:hover {
+        .pin-toggle-confirm-button:hover,
+        .pin-home-toggle-confirm-button:hover {
             background: #357abd;
         }
 

@@ -517,6 +517,11 @@
                 </form>
             </div>
             <div class="posts-column" id='posts-column'>
+                <!-- PINNED POSTS -->
+                @foreach($pinned as $post)
+                    @include('components.post', ['post' => $post])
+                @endforeach
+                <!-- POSTS -->
                 @foreach($posts as $post)
                     @include('components.post', ['post' => $post])
                 @endforeach

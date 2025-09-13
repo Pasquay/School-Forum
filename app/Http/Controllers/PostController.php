@@ -14,8 +14,24 @@ use Illuminate\Support\Facades\Auth;
 class PostController extends Controller
 {
     public function getLatest(Request $request){
+        // Pinned
+            $pinned = PinnedHomePost::with('post')
+                ->latest()
+                ->take(5)
+                ->get()
+                ->pluck('post')
+                ->filter();
+                
+            $pinned->transform(function($post){
+                $post->votes = $post->getVoteCountAttribute();
+                $post->userVote = $post->getUserVoteAttribute();
+                $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
+                return $post;
+            });
+
         // Posts
             $posts = Post::whereNull('deleted_at')
+                ->whereNotIn('id', $pinned->pluck('id')->all())
                 ->latest()
                 ->with(['group'])
                 ->withCount(['votes', 'comments'])
@@ -61,7 +77,7 @@ class PostController extends Controller
         }
 
         return view('home', compact(
-            // 'pinned',
+            'pinned',
             'posts',
             'createdGroups',
             'moderatedGroups',
@@ -191,6 +207,14 @@ class PostController extends Controller
 
         if((int)$id === 1) return redirect('/home')->with('success', 'Post created successfully');
         else return redirect('/group/' . $id)->with('success', 'Post created successfully');
+    }
+
+    public function pinToggleRouter($id, Request $request){
+        $post = Post::findOrFail($id);
+
+        return ($post->group_id == 1) ?
+            $this->pinHomeToggle($id, $request) :
+            $this->pinToggle($id, $request) ;
     }
 
     public function pinHomeToggle($id, Request $request){
