@@ -1915,41 +1915,48 @@
                 margin: 3px 0 15px 0;
             }
         }
-            .tc-btn-link {
-                background: transparent;
-                border: 0;
-                padding: 6px 0;
-                font-weight: 600;
-                color: #133C06;
-                cursor: pointer;
-                text-decoration: underline;
-            }
-            .tc-btn-link:hover { color: #092B00; }
 
-            .tc-error {
-                margin-top: 6px;
-                font-size: .9rem;
-                color: #c0392b;
-            }
+        .tc-btn-link {
+            background: transparent;
+            border: 0;
+            padding: 6px 0;
+            font-weight: 600;
+            color: #133C06;
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
-            .tc-backdrop {
-                position: fixed; inset: 0;
-                display: none; align-items: center; justify-content: center;
-                background: rgba(0,0,0,.45);
-                z-index: 9999;
-            }
+        .tc-btn-link:hover {
+            color: #092B00;
+        }
 
-            .tc-modal {
-                width: min(900px, 95vw);
-                background: #ededed;
-                color: #092B00;
-                border-radius: 16px;
-                box-shadow: 0 20px 50px rgba(0,0,0,.25);
-                overflow: hidden;
-                border: 2px solid #6A8E61;
-            }
+        .tc-error {
+            margin-top: 6px;
+            font-size: .9rem;
+            color: #c0392b;
+        }
 
-            .tc-modal-header {
+        .tc-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, .45);
+            z-index: 9999;
+        }
+
+        .tc-modal {
+            width: min(900px, 95vw);
+            background: #ededed;
+            color: #092B00;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+            overflow: hidden;
+            border: 2px solid #6A8E61;
+        }
+
+        .tc-modal-header {
             position: relative;
             display: flex;
             justify-content: center;
@@ -1957,16 +1964,16 @@
             background: #133C06;
             color: #EDEDED;
             padding: 16px 20px;
-            }
+        }
 
-            .tc-modal-header h3 {
+        .tc-modal-header h3 {
             margin: 0;
             font-size: 1.15rem;
             text-align: center;
             flex: none;
-            }
+        }
 
-            .tc-close {
+        .tc-close {
             position: absolute;
             right: 20px;
             top: 50%;
@@ -1977,36 +1984,103 @@
             font-size: 20px;
             cursor: pointer;
             line-height: 1;
-            }
+        }
 
 
-            .tc-modal-body {
-                padding: 18px 20px;
-                background: #EDEDED;
-                max-height: 55vh; overflow: auto;
-            }
-            .tc-modal-body p, .tc-modal-body ul { margin: 0 0 12px 0; }
-            .tc-modal-body ul { padding-left: 18px; }
-            .tc-check { display:flex; gap:10px; align-items:center; margin-top: 10px; justify-content: center; width: 100%;}
-            .tc-check input[type="checkbox"] {
-                width: 18px; height: 18px; accent-color: #6A8E61;
+        .tc-modal-body {
+            padding: 18px 20px;
+            background: #EDEDED;
+            max-height: 55vh;
+            overflow: auto;
+        }
+
+        .tc-modal-body p,
+        .tc-modal-body ul {
+            margin: 0 0 12px 0;
+        }
+
+        .tc-modal-body ul {
+            padding-left: 18px;
+        }
+
+        .tc-check {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .tc-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6A8E61;
+        }
+
+        .tc-modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            background: #FFFFFF;
+            padding: 12px 20px 16px;
+            border-top: 1px solid #EDEDED;
+        }
+
+        .tc-primary,
+        .tc-secondary {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 0;
+        }
+
+        .tc-primary {
+            background: #6A8E61;
+            color: #FFFFFF;
+        }
+
+        .tc-primary:hover {
+            background: #4f6e4b;
+        }
+
+        .tc-secondary {
+            background: #EDEDED;
+            color: #092B00;
+        }
+
+        .tc-secondary:hover {
+            background: #dcdcdc;
+        }
+
+        @keyframes tcshake {
+
+            10%,
+            90% {
+                transform: translateX(-1px);
             }
 
-            .tc-modal-footer {
-                display:flex; gap:10px; justify-content: center;
-                background: #FFFFFF; padding: 12px 20px 16px;
-                border-top: 1px solid #EDEDED;
+            20%,
+            80% {
+                transform: translateX(2px);
             }
-            .tc-primary, .tc-secondary {
-                padding: 10px 14px; border-radius: 10px; font-weight: 600; cursor: pointer; border: 0;
-            }
-            .tc-primary { background: #6A8E61; color: #FFFFFF; }
-            .tc-primary:hover { background: #4f6e4b; }
-            .tc-secondary { background: #EDEDED; color: #092B00; }
-            .tc-secondary:hover { background: #dcdcdc; }
 
-            @keyframes tcshake { 10%, 90% {transform: translateX(-1px);} 20%, 80% {transform: translateX(2px);} 30%, 50%, 70% {transform: translateX(-4px);} 40%, 60% {transform: translateX(4px);} }
-            .tc-shake { animation: tcshake .45s; }
+            30%,
+            50%,
+            70% {
+                transform: translateX(-4px);
+            }
+
+            40%,
+            60% {
+                transform: translateX(4px);
+            }
+        }
+
+        .tc-shake {
+            animation: tcshake .45s;
+        }
     </style>
 </head>
 
@@ -2154,16 +2228,9 @@
                     <div class="form-error" id="registerGeneralError"></div>
 
                     <div class="mt-3" id="tcSection">
-                    <input type="hidden" name="accepted_terms" id="accepted_terms" value="0">
-
-                    <button type="button" id="openTermsBtn" class="tc-btn-link"
-                        aria-haspopup="dialog" aria-controls="tcBackdrop">
-                        View Terms & Conditions
-                    </button>
-                    <p id="tcError" class="tc-error" style="display:none;">
-                    • Must agree to the Terms & Conditions
-                    </p>
+                        <input type="hidden" name="accepted_terms" id="accepted_terms" value="0">
                     </div>
+
 
                     <button type="submit" class="sliding-btn">Sign Up</button>
                 </form>
@@ -2612,7 +2679,7 @@
                         successDiv.textContent = 'Account created successfully! You can now log in.';
                         document.body.appendChild(successDiv);
                         setTimeout(() => successDiv.remove(), 3000);
-                        
+
                         // Reset the form and switch to sign-in
                         this.reset();
                         document.getElementById('slidingContainer').classList.remove('right-panel-active');
@@ -2682,38 +2749,38 @@
                 })
                 .then(data => {
                     console.log('Response data:', data); // Debug log
-                    
+
                     // Reset button state first
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
-                    
+
                     if (data.success) {
                         console.log('Success received, switching views...');
-                        
+
                         // Get elements fresh
                         const forgotContainer = document.getElementById('forgotPasswordContainer');
                         const successMessage = document.getElementById('emailSentMessage');
-                        
+
                         console.log('Forgot container found:', !!forgotContainer);
                         console.log('Success message found:', !!successMessage);
-                        
+
                         // Hide forgot password form
                         if (forgotContainer) {
                             forgotContainer.classList.remove('active');
                             console.log('Forgot container hidden');
                         }
-                        
+
                         // Show success message
                         if (successMessage) {
                             successMessage.classList.add('active');
                             console.log('Success message shown');
                         }
-                        
+
                         // Reset form after a small delay
                         setTimeout(() => {
                             formElement.reset();
                         }, 100);
-                        
+
                     } else {
                         console.log('Error in response:', data);
 
@@ -2789,176 +2856,215 @@
             return JSON.parse(jsonPayload);
         }
     </script>
-        <div id="tcBackdrop" class="tc-backdrop" role="dialog" aria-modal="true" aria-labelledby="tcTitle" style="display:none;">
+    <div id="tcBackdrop" class="tc-backdrop" role="dialog" aria-modal="true" aria-labelledby="tcTitle" style="display:none;">
         <div class="tc-modal">
             <div class="tc-modal-header">
-            <h3 id="tcTitle">Terms &amp; Conditions</h3>
-            <button type="button" id="tcClose" class="tc-close" aria-label="Close">×</button>
+                <h3 id="tcTitle">Terms &amp; Conditions</h3>
+                <button type="button" id="tcClose" class="tc-close" aria-label="Close">×</button>
             </div>
 
             <div class="tc-modal-body">
-            <h3>General Privacy Statement</h3>
-        <p>
-            The University of San Carlos (USC) values and understands the importance of protecting
-            the privacy of personal information and the confidentiality of data, information and knowledge
-            and is committed to the responsible handling of such. This Privacy Policy Statement explains
-            what information will be gathered and the details how collected information is used without
-            breaching its privacy and confidentiality.
-        </p>
+                <h3>General Privacy Statement</h3>
+                <p>
+                    The University of San Carlos (USC) values and understands the importance of protecting
+                    the privacy of personal information and the confidentiality of data, information and knowledge
+                    and is committed to the responsible handling of such. This Privacy Policy Statement explains
+                    what information will be gathered and the details how collected information is used without
+                    breaching its privacy and confidentiality.
+                </p>
 
-        <h3>Scope</h3>
-        <p>
-            This Privacy Policy Statement applies to personal information about applicants, prospective
-            applicants, students and employees maintained, used, processed and/or kept in custody by the
-            University of San Carlos.
-        </p>
+                <h3>Scope</h3>
+                <p>
+                    This Privacy Policy Statement applies to personal information about applicants, prospective
+                    applicants, students and employees maintained, used, processed and/or kept in custody by the
+                    University of San Carlos.
+                </p>
 
-        <h3>Types of Personal Information</h3>
-        <ul>
-            <li><strong>Personal information:</strong> Recorded information about a living identifiable or easily identifiable individual.</li>
-            <li><strong>Sensitive information:</strong> Personal information about a living individual's race or ethnicity, political opinions, religious or philosophical beliefs, sexual preferences or practices, criminal record, or memberships details, such as trade union or professional, political or trade associations, genetic data and biometric data.</li>
-            <li><strong>Medical information:</strong> Information about a living or deceased individual's physical, mental or psychological health.</li>
-        </ul>
+                <h3>Types of Personal Information</h3>
+                <ul>
+                    <li><strong>Personal information:</strong> Recorded information about a living identifiable or easily identifiable individual.</li>
+                    <li><strong>Sensitive information:</strong> Personal information about a living individual's race or ethnicity, political opinions, religious or philosophical beliefs, sexual preferences or practices, criminal record, or memberships details, such as trade union or professional, political or trade associations, genetic data and biometric data.</li>
+                    <li><strong>Medical information:</strong> Information about a living or deceased individual's physical, mental or psychological health.</li>
+                </ul>
 
-        <h3>1. Information that we collect</h3>
-        <p>USC collects the following information:</p>
-        <ul>
-            <li><strong>Personal Information:</strong> name, residential address, email address, telephone number, date of birth, passport details (for international applicants) and nationality. USC will also assign you with a unique applicant/student identification number once you apply or are accepted in the University.</li>
-            <li><strong>Education background &amp; employment history:</strong> schools/universities attended, programs and courses completed, dates of completion, past work history, evaluations, previous employers and service information.</li>
-            <li>Information about family or personal affiliations, academic and extracurricular interests relevant to scholarships or student financial aid/assistance.</li>
-            <li>Sensitive personal information such as political affiliations, sexual preferences or practices, criminal record, memberships details, religious or philosophical beliefs, ethnicity.</li>
-            <li>Information concerning health/medical conditions including history, diagnosis, disability and dietary needs.</li>
-        </ul>
+                <h3>1. Information that we collect</h3>
+                <p>USC collects the following information:</p>
+                <ul>
+                    <li><strong>Personal Information:</strong> name, residential address, email address, telephone number, date of birth, passport details (for international applicants) and nationality. USC will also assign you with a unique applicant/student identification number once you apply or are accepted in the University.</li>
+                    <li><strong>Education background &amp; employment history:</strong> schools/universities attended, programs and courses completed, dates of completion, past work history, evaluations, previous employers and service information.</li>
+                    <li>Information about family or personal affiliations, academic and extracurricular interests relevant to scholarships or student financial aid/assistance.</li>
+                    <li>Sensitive personal information such as political affiliations, sexual preferences or practices, criminal record, memberships details, religious or philosophical beliefs, ethnicity.</li>
+                    <li>Information concerning health/medical conditions including history, diagnosis, disability and dietary needs.</li>
+                </ul>
 
-        <h3>2. How we collect your information</h3>
-        <ul>
-            <li>From the information you provide when you contact USC or express interest in studying.</li>
-            <li>When applying and completing application/enrollment forms and procedures.</li>
-            <li>When making inquiries, or communicating via email or USC’s official social media accounts.</li>
-            <li>From interactions as a student, employee, donor, or third party (e.g., references from previous schools, universities, employers).</li>
-        </ul>
+                <h3>2. How we collect your information</h3>
+                <ul>
+                    <li>From the information you provide when you contact USC or express interest in studying.</li>
+                    <li>When applying and completing application/enrollment forms and procedures.</li>
+                    <li>When making inquiries, or communicating via email or USC’s official social media accounts.</li>
+                    <li>From interactions as a student, employee, donor, or third party (e.g., references from previous schools, universities, employers).</li>
+                </ul>
 
-        <h3>3. From whom we collect information</h3>
-        <ul>
-            <li>Prospective and current students</li>
-            <li>Exchange students, professors, job applicants, existing employees</li>
-            <li>Alumni, donors (individual/company), research participants</li>
-            <li>Industry partners, contractors, suppliers, concessionaires</li>
-            <li>Civic organization volunteers, other members of the public who interact with USC</li>
-        </ul>
+                <h3>3. From whom we collect information</h3>
+                <ul>
+                    <li>Prospective and current students</li>
+                    <li>Exchange students, professors, job applicants, existing employees</li>
+                    <li>Alumni, donors (individual/company), research participants</li>
+                    <li>Industry partners, contractors, suppliers, concessionaires</li>
+                    <li>Civic organization volunteers, other members of the public who interact with USC</li>
+                </ul>
 
-        <h3>4. How we use your information</h3>
-        <p>
-            USC uses personal and sensitive personal information to perform and fulfill core functions:
-        </p>
-        <ul>
-            <li><strong>Educational support:</strong> admission, enrollment, assessments, learning, graduation, counselling, library, medical exams, data analysis.</li>
-            <li><strong>Research:</strong> data analysis, commercialization, administration.</li>
-            <li><strong>Community extension &amp; industry engagement:</strong> alumni relations, industry partnerships, website operations, events, forums.</li>
-            <li><strong>Employment:</strong> recruitment, payroll, employee development, HR activities, medical exams.</li>
-            <li><strong>Operational/infrastructure management:</strong> fees, finance, IT, legal, CCTV, identity management, emergency response.</li>
-            <li><strong>Non-academic matters:</strong> student accommodation, parking, grievances, disciplinary actions.</li>
-            <li><strong>Other purposes permitted by law:</strong> information provision to government agencies and legal entities.</li>
-        </ul>
+                <h3>4. How we use your information</h3>
+                <p>
+                    USC uses personal and sensitive personal information to perform and fulfill core functions:
+                </p>
+                <ul>
+                    <li><strong>Educational support:</strong> admission, enrollment, assessments, learning, graduation, counselling, library, medical exams, data analysis.</li>
+                    <li><strong>Research:</strong> data analysis, commercialization, administration.</li>
+                    <li><strong>Community extension &amp; industry engagement:</strong> alumni relations, industry partnerships, website operations, events, forums.</li>
+                    <li><strong>Employment:</strong> recruitment, payroll, employee development, HR activities, medical exams.</li>
+                    <li><strong>Operational/infrastructure management:</strong> fees, finance, IT, legal, CCTV, identity management, emergency response.</li>
+                    <li><strong>Non-academic matters:</strong> student accommodation, parking, grievances, disciplinary actions.</li>
+                    <li><strong>Other purposes permitted by law:</strong> information provision to government agencies and legal entities.</li>
+                </ul>
 
-        <h3>5. To whom we share your information</h3>
-        <p>
-            USC may share personal data with third parties if required by official business, Data Privacy
-            Act provisions, or legal obligations:
-        </p>
-        <ul>
-            <li>Employees and administrators</li>
-            <li>Agencies and partners providing healthcare, insurance, scholarships, education, funding, references, professional certification bodies, government agencies, researchers, survey providers</li>
-        </ul>
+                <h3>5. To whom we share your information</h3>
+                <p>
+                    USC may share personal data with third parties if required by official business, Data Privacy
+                    Act provisions, or legal obligations:
+                </p>
+                <ul>
+                    <li>Employees and administrators</li>
+                    <li>Agencies and partners providing healthcare, insurance, scholarships, education, funding, references, professional certification bodies, government agencies, researchers, survey providers</li>
+                </ul>
 
-        <h3>6. How we store and protect your information</h3>
-        <ul>
-            <li>Stored information is archived under USC ICT Policy with retention and disposal measures.</li>
-            <li>Information destroyed upon request unless legally required otherwise; destruction ensures confidentiality.</li>
-            <li>Personal info stored as hard copies, electronic data, or within USC’s Integrated School Management Information System and related repositories.</li>
-        </ul>
+                <h3>6. How we store and protect your information</h3>
+                <ul>
+                    <li>Stored information is archived under USC ICT Policy with retention and disposal measures.</li>
+                    <li>Information destroyed upon request unless legally required otherwise; destruction ensures confidentiality.</li>
+                    <li>Personal info stored as hard copies, electronic data, or within USC’s Integrated School Management Information System and related repositories.</li>
+                </ul>
 
-        <h3>7. Rights and Access to Information</h3>
-        <p>Data subjects have rights to access, update, correct, or request deletion where applicable:</p>
-        <ul>
-            <li>Rectify incorrect or incomplete data (<em>Right to Rectification</em>).</li>
-            <li>Request deletion if legal grounds exist (<em>Right to Erasure</em>).</li>
-            <li>Restrict or object to processing (<em>Right to Object/Restrict Processing</em>).</li>
-            <li>Obtain copies in electronic format or request sharing with authorized persons (<em>Right to Portability</em>).</li>
-        </ul>
+                <h3>7. Rights and Access to Information</h3>
+                <p>Data subjects have rights to access, update, correct, or request deletion where applicable:</p>
+                <ul>
+                    <li>Rectify incorrect or incomplete data (<em>Right to Rectification</em>).</li>
+                    <li>Request deletion if legal grounds exist (<em>Right to Erasure</em>).</li>
+                    <li>Restrict or object to processing (<em>Right to Object/Restrict Processing</em>).</li>
+                    <li>Obtain copies in electronic format or request sharing with authorized persons (<em>Right to Portability</em>).</li>
+                </ul>
 
-        <h3>8. Review</h3>
-        <p>
-            The Board of Trustees shall review this policy every two (2) years and may amend it as
-            necessary.
-        </p>
+                <h3>8. Review</h3>
+                <p>
+                    The Board of Trustees shall review this policy every two (2) years and may amend it as
+                    necessary.
+                </p>
 
-        <h3>9. Effectivity</h3>
-        <p>
-            This Policy takes effect upon adoption by the Board of Trustees.
-            <br>Adopted this 11th day of May 2019.
-        </p>
+                <h3>9. Effectivity</h3>
+                <p>
+                    This Policy takes effect upon adoption by the Board of Trustees.
+                    <br>Adopted this 11th day of May 2019.
+                </p>
 
-            <label class="tc-check">
-                <input type="checkbox" id="tcAcknowledge">
-                <span>I understand the terms and conditions</span>
-            </label>
             </div>
 
             <div class="tc-modal-footer">
                 <button type="button" id="tcAccept" class="tc-primary">Accept &amp; Continue</button>
-            <button type="button" id="tcDismiss" class="tc-secondary">Close</button>
+                <button type="button" id="tcDismiss" class="tc-secondary">Close</button>
             </div>
         </div>
-        </div>
-        <script>
-        (function () {
-        const form = document.getElementById('registerForm');
-        const submitBtn = form ? form.querySelector('button[type="submit"], input[type="submit"]') : null;
+    </div>
 
-        // ---- New T&C elements we added ----
-        const openBtn   = document.getElementById('openTermsBtn');
-        const errorMsg  = document.getElementById('tcError');
-        const acceptedField = document.getElementById('accepted_terms');
+    <script>
+        (function() {
+            const form = document.getElementById('registerForm');
+            const acceptedField = document.getElementById('accepted_terms');
+            const backdrop = document.getElementById('tcBackdrop');
+            const acceptBtn = document.getElementById('tcAccept');
 
-        const backdrop  = document.getElementById('tcBackdrop');
-        const closeBtn  = document.getElementById('tcClose');
-        const dismissBtn= document.getElementById('tcDismiss');
-        const acceptBtn = document.getElementById('tcAccept');
-        const checkbox  = document.getElementById('tcAcknowledge');
+            if (!form || !acceptedField || !backdrop || !acceptBtn) return;
 
-        if (!form || !submitBtn || !openBtn || !backdrop) return; // failsafe: don't break anything
+            const closeBtn = document.getElementById('tcClose');
+            const dismissBtn = document.getElementById('tcDismiss');
+            const confirmErr = document.getElementById('confirmPasswordError');
+            const passInput = document.getElementById('registerPassword');
+            const confirmInput = document.getElementById('confirmPassword');
 
-        const openModal  = () => { backdrop.style.display = 'flex'; checkbox.focus(); };
-        const closeModal = () => { backdrop.style.display = 'none'; };
-
-        openBtn.addEventListener('click', openModal);
-        closeBtn.addEventListener('click', closeModal);
-        dismissBtn.addEventListener('click', closeModal);
-        backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) closeModal(); // click on overlay closes
-        });
-
-        acceptBtn.addEventListener('click', () => {
-            if (!checkbox.checked) {
-            checkbox.focus();
-            checkbox.classList.add('tc-shake');
-            setTimeout(() => checkbox.classList.remove('tc-shake'), 450);
-            return;
+            // Helpers
+            function lockScroll(lock) {
+                document.documentElement.style.overflow = lock ? 'hidden' : '';
+                document.body.style.overflow = lock ? 'hidden' : '';
             }
-            acceptedField.value = '1';
-            errorMsg.style.display = 'none';
-            openBtn.textContent = 'Terms & Conditions ✓ Accepted';
-            closeModal();
-        });
 
-        form.addEventListener('submit', (e) => {
-            if (acceptedField.value !== '1') {
-            e.preventDefault();
-            errorMsg.style.display = 'block';
-            openModal();
+            function openModal() {
+                backdrop.style.display = 'flex';
+                lockScroll(true);
             }
-        });
+
+            function closeModal() {
+                backdrop.style.display = 'none';
+                lockScroll(false);
+            }
+
+            if (confirmInput) {
+                confirmInput.addEventListener('input', () => {
+                    if (confirmErr) confirmErr.textContent = '';
+                });
+            }
+            if (passInput) {
+                passInput.addEventListener('input', () => {
+                    if (confirmErr) confirmErr.textContent = '';
+                });
+            }
+
+            let tcShownForThisAttempt = false;
+
+            form.addEventListener('submit', function(e) {
+
+                if (acceptedField.value === '1') return;
+
+                if (tcShownForThisAttempt) return;
+
+                e.preventDefault();
+
+                const nativeValid = form.checkValidity();
+
+                let customValid = true;
+                if (passInput && confirmInput) {
+                    if (confirmInput.value !== passInput.value) {
+                        customValid = false;
+                        if (confirmErr) confirmErr.textContent = 'Passwords do not match.';
+                    }
+                }
+
+                if (!nativeValid || !customValid) {
+                    form.reportValidity();
+                    return;
+                }
+
+
+                tcShownForThisAttempt = true;
+                openModal();
+            }, true);
+
+
+            acceptBtn.addEventListener('click', function() {
+                acceptedField.value = '1';
+                closeModal();
+
+                requestAnimationFrame(() => form.submit());
+            });
+
+            function handleCancel() {
+                closeModal();
+                tcShownForThisAttempt = false;
+            }
+            if (closeBtn) closeBtn.addEventListener('click', handleCancel);
+            if (dismissBtn) dismissBtn.addEventListener('click', handleCancel);
+
+            backdrop.addEventListener('click', function(e) {
+                if (e.target === backdrop) handleCancel();
+            });
         })();
     </script>
 
