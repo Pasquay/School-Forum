@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media | Groups</title>
+    <title>CAROLINK | Groups</title>
     <meta name='csrf-token' content='{{ csrf_token() }}'>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <style>
     /* MAIN */
         * {
@@ -17,72 +19,6 @@
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             padding-top: 72px;
-        }
-
-        .navbar {
-            background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4a90e2;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .brand:hover {
-            color: #357abd;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: #666;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-link:hover {
-            color: #4a90e2;
-        }
-
-        #groups-nav-link {
-            color: #4a90e2;
-        }
-
-        #groups-nav-link:hover {
-            color: #357abd;
-        }
-
-        .logout-btn {
-            background-color: #4a90e2;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #357abd;
         }
 
         main {
@@ -500,7 +436,8 @@
     </style>
 </head>
 <body>
-    @include('components.navbar')
+    
+    @include('components.navbar', ['active' => 'groups'])
     @include('components.success-header')
     @include('components.error-header')
     <main>
@@ -941,6 +878,8 @@
                                     e.stopPropagation();
                                 })
                             }
+                        // Request Button
+                            
                     // Mark Listener
                         group.setAttribute('data-listeners-attached', '1');
                     }

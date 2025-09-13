@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media | Post</title>
+    <title>CAROLINK | Post</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <style>
         * {
             margin: 0;
@@ -16,64 +18,6 @@
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             padding-top: 72px;
-        }
-
-        .navbar {
-            background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4a90e2;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .brand:hover {
-            color: #357abd;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: #666;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-link:hover {
-            color: #4a90e2;
-        }
-
-        .logout-btn {
-            background-color: #4a90e2;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #357abd;
         }
 
         .post-column {
@@ -227,14 +171,16 @@
             display: block;
         }
 
-        .pin-form-buttons {
+        .pin-form-buttons,
+        .pin-home-form-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 1rem;
             width: 100%;
         }
         
-        .pin-post-cancel {
+        .pin-post-cancel,
+        .pin-post-home-cancel {
             flex: 1;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -246,12 +192,14 @@
             transition: all 0.2s;
         }
         
-        .pin-post-cancel:hover {
+        .pin-post-cancel:hover,
+        .pin-post-home-cancel:hover {
             border-color: #ccc;
             color: #333;
         }
         
-        .pin-toggle-confirm-button {
+        .pin-toggle-confirm-button,
+        .pin-home-toggle-confirm-button {
             flex: 1;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -263,7 +211,8 @@
             transition: background-color 0.2s;
         }
         
-        .pin-toggle-confirm-button:hover {
+        .pin-toggle-confirm-button:hover,
+        .pin-home-toggle-confirm-button:hover {
             background: #357abd;
         }
 
@@ -1139,18 +1088,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <a href="/home" class="brand">Social Media</a>
-        <div class="nav-links">
-            <a href="/home" class="nav-link">Home</a>
-            <a href="/groups" class="nav-link">Groups</a>
-            <a href="/user/{{ Auth::id() }}" class="nav-link">Profile</a>
-            <form action="/logout" method="POST" style="margin: 0">
-                @csrf
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
-    </nav>
+    @include('components.navbar', ['active' => ''])
     @if(session()->has('success'))
         <div class="success-message">
             <div style="background-color: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;">
@@ -1182,7 +1120,17 @@
                                 <img src="{{ asset('/icons/dots.png') }}" alt='Settings' id='dots-icon'>
                             </button>
                             <div class="dropdown-menu" id='settings-dropdown-menu'>
-                                @if(Auth::id() === $post->group->owner_id)
+                                @if($post->group->id != 1 && $homeAdmin->pluck('id')->contains(Auth::id()))
+                                    @if($post->isPinnedHome)
+                                        <button class="dropdown-item" id="pin-post-home-toggle-button">Unpin Home</button>
+                                    @else
+                                        <button class="dropdown-item" id="pin-post-home-toggle-button">Pin Home</button>
+                                    @endif
+                                @endif
+                                @if(
+                                    $post->group->members->where('id', Auth::id())->first() &&
+                                    in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator'])
+                                )
                                     @if($post->isPinned)
                                         <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
                                     @else
@@ -1193,14 +1141,27 @@
                                 <button class="dropdown-item" id='delete-post-button'>Delete</button>
                             </div>
                         </div>
-                    @elseif($post->group->members->where('id', Auth::id())->first() &&
-                            in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator']))
+                    @elseif((
+                                $post->group->members->where('id', Auth::id())->first() &&
+                                in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator']) 
+                            ) ||
+                            $homeAdmin->pluck('id')->contains(Auth::id()))
                         <div class="settings-container">
                             <button class="settings-button" id="settings-button">
                                 <img src="{{ asset('/icons/dots.png') }}" alt="Settings" id='dots-icon'>
                             </button>
                             <div class="dropdown-menu" id="settings-dropdown-menu">
-                                @if(Auth::id() === $post->group->owner_id)
+                                @if($post->group->id != 1 && $homeAdmin->pluck('id')->contains(Auth::id()))
+                                    @if($post->isPinnedHome)
+                                        <button class="dropdown-item" id="pin-post-home-toggle-button">Unpin Home</button>
+                                    @else
+                                        <button class="dropdown-item" id="pin-post-home-toggle-button">Pin Home</button>
+                                    @endif
+                                @endif
+                                @if(
+                                    $post->group->members->where('id', Auth::id())->first() &&
+                                    in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator'])
+                                )
                                     @if($post->isPinned)
                                         <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
                                     @else
@@ -1219,6 +1180,9 @@
                     {{ $post->title }}
                     @if($post->isPinned)
                         <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                    @if($post->isPinnedHome)
+                        <img src="{{ asset('/icons/pin-home.png') }}" alt="Pinned Home" title="Pinned Home" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
                     @endif
                 </h2>
                 <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
@@ -1244,8 +1208,35 @@
                     <button type="button" class='share-button' id='post-share-button-{{ $post->id }}'>Share</button>
                 </div>
             </div>
+            <div id="pin-home-post-form" class="pin-home-post-form" style="display:none;">
+                <h2>
+                    {{ $post->title }}
+                    @if($post->isPinned)
+                        <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                    @if($post->isPinnedHome)
+                        <img src="{{ asset('/icons/pin-home.png') }}" alt="Pinned Home" title="Pinned Home" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                </h2>
+                <p style='white-space:pre-wrap;'>{{ $post->content }}</p>
+                <form action="/pin-post-home/{{ $post->id }}", method="POST">
+                    @csrf
+                    <div class="pin-home-form-buttons">
+                        <button class="pin-post-home-cancel" id="pin-home-cancel-button">Cancel</button>
+                        <button type="submit" class="pin-home-toggle-confirm-button">Pin/Unpin Home</button>
+                    </div>
+                </form>
+            </div>
             <div id="pin-post-form" class="pin-post-form" style="display:none;">
-                <h2>{{ $post->title }}</h2>
+                <h2>
+                    {{ $post->title }}
+                    @if($post->isPinned)
+                        <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                    @if($post->isPinnedHome)
+                        <img src="{{ asset('/icons/pin-home.png') }}" alt="Pinned Home" title="Pinned Home" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                </h2>
                 <p style='white-space:pre-wrap;'>{{ $post->content }}</p>
                 <form action="/pin-post/{{ $post->id }}" method='POST'>
                     @csrf
@@ -1279,7 +1270,15 @@
                 </form>
             </div>
             <div id="delete-post-form" style='display:none;'>
-                <h2>{{ $post->title }}</h2>
+                <h2>
+                    {{ $post->title }}
+                    @if($post->isPinned)
+                        <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                    @if($post->isPinnedHome)
+                        <img src="{{ asset('/icons/pin-home.png') }}" alt="Pinned Home" title="Pinned Home" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+                    @endif
+                </h2>
                 <p style='white-space:pre-wrap'>{{ $post->content }}</p>
                 <form action="/delete-post/{{ $post->id }}" method='POST'>
                     @csrf
@@ -1547,6 +1546,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const hoverSrc = originalSrc.replace('dots.png', 'dots-alt.png');
         const settingsDropdown = document.getElementById('settings-dropdown-menu');
 
+        const pinPostHomeButton = document.getElementById('pin-post-home-toggle-button');
+        const pinPostHomeCancel = document.getElementById('pin-home-cancel-button');
+        const pinPostHomeConfirm = document.querySelector('.pin-home-toggle-confirm-button');
         const pinPostButton = document.getElementById('pin-post-toggle-button');
         const pinPostCancel = document.getElementById('pin-cancel-button');
         const pinPostConfirm = document.querySelector('.pin-toggle-confirm-button');
@@ -1556,6 +1558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const deletePostCancel = document.getElementById('delete-post-cancel');
         
         const postContentContainer = document.getElementById('post-content-container');
+        const pinPostHomeForm = document.getElementById('pin-home-post-form');
         const pinPostForm = document.getElementById('pin-post-form');
         const editPostForm = document.getElementById('edit-post-form');
         const deletePostForm = document.getElementById('delete-post-form');
@@ -1571,12 +1574,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 settingsDropdown.classList.remove('show-dropdown');
             }
         });
+
+    // Pin post home
+        if(pinPostHomeButton){
+            pinPostHomeButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'block'
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+                if(settingsDropdown.classList.contains('show-dropdown')){
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+                pinPostHomeConfirm.textContent = (parseInt('{{ $post->isPinnedHome }}')) ?
+                    'Unpin From Home' : 'Pin To Home';
+            })
+            pinPostHomeCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
     
     // Pin post
         if(pinPostButton){
             pinPostButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
                 pinPostForm.style.display = 'block';
                 editPostForm.style.display = 'none';
                 deletePostForm.style.display = 'none';
@@ -1590,6 +1620,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 e.stopPropagation();
                 postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
                 pinPostForm.style.display = 'none';
                 editPostForm.style.display = 'none';
                 deletePostForm.style.display = 'none';
@@ -1601,6 +1632,7 @@ document.addEventListener('DOMContentLoaded', () => {
             editPostButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
                 pinPostForm.style.display = 'none';
                 editPostForm.style.display = 'block';
                 deletePostForm.style.display = 'none';
@@ -1612,6 +1644,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 e.stopPropagation();
                 postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
                 pinPostForm.style.display = 'none';
                 editPostForm.style.display = 'none';
                 deletePostForm.style.display = 'none';
@@ -1623,6 +1656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deletePostButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
                 pinPostForm.style.display = 'none';
                 editPostForm.style.display = 'none';
                 deletePostForm.style.display = 'block';
@@ -1634,6 +1668,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 e.stopPropagation();
                 postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
                 pinPostForm.style.display = 'none';
                 editPostForm.style.display = 'none';
                 deletePostForm.style.display = 'none';
