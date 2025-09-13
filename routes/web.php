@@ -33,7 +33,7 @@ Route::controller(PostController::class)->group(function () {
     Route::get('/home', 'getLatest')->middleware('auth'); // load home page
     Route::get('/post/{id}', 'getPost')->middleware('auth'); // load post page
     Route::post('/create-post/{id}', 'create')->middleware('auth'); // create post
-    Route::post('/pin-post-home', 'pinHomeToggle')->middleware('auth'); // pin post to home
+    Route::post('/pin-post-home/{id}', 'pinHomeToggle')->middleware('auth'); // pin post to home
     Route::post('/pin-post/{id}', 'pinToggle')->middleware('auth'); // pin post
     Route::post('/edit-post/{id}', 'edit')->middleware('auth'); // edit post
     Route::post('/delete-post/{id}', 'delete')->middleware('auth'); // delete post

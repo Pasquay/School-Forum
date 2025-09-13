@@ -164,6 +164,9 @@
         @if($post->isPinned)
             <img src="{{ asset('/icons/pin.png') }}" alt="Pinned" title="Pinned" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
         @endif
+        @if($post->isPinnedHome)
+            <img src="{{ asset('/icons/pin-home.png') }}" alt="Pinned Home" title="Pinned Home" style="width: 20px; height: 20px; vertical-align: middle; margin-left: 2px; margin-bottom: 4px">
+        @endif
     </h2>
     <p style='white-space: pre-wrap;'>{{ $post->content }}</p>
     <div class="post-bottom">

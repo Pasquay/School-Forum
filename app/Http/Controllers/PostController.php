@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Models\PinnedHomePost;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
@@ -23,6 +24,7 @@ class PostController extends Controller
             $posts->getCollection()->transform(function($post){
                 $post->votes = $post->getVoteCountAttribute();
                 $post->userVote = $post->getUserVoteAttribute();
+                $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
                 return $post;
             });
 
@@ -59,7 +61,7 @@ class PostController extends Controller
         }
 
         return view('home', compact(
-            'pinned',
+            // 'pinned',
             'posts',
             'createdGroups',
             'moderatedGroups',
@@ -148,6 +150,13 @@ class PostController extends Controller
         $post->votes = $post->getVoteCountAttribute();
         $post->userVote = $post->getUserVoteAttribute();
         $post->isPinned = $post->pinnedInGroups->contains('id', $post->group->id);
+        $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
+
+        $homeGroup = Group::with(['members' => function($query){
+            $query->wherePivotIn('role', ['owner', 'moderator']);
+        }])->find(1);
+
+        $homeAdmin = $homeGroup ? $homeGroup->members : collect();
 
         $comments = Comment::where('post_id', $id)
             ->withCount(['votes', 'replies'])
@@ -160,10 +169,11 @@ class PostController extends Controller
                 return $comment;
             });
 
-        return view('post', [
-            'post' => $post,
-            'comments' => $comments
-        ]);
+        return view('post', compact(
+            'post',
+            'homeAdmin',
+            'comments',
+        ));
     }
 
     public function create(Request $request, $id){
@@ -184,7 +194,39 @@ class PostController extends Controller
     }
 
     public function pinHomeToggle($id, Request $request){
+        $post = Post::findOrFail($id);
 
+        $user = Auth::user();
+        
+        $homeGroup = \App\Models\Group::with(['members' => function($q) {
+            $q->wherePivotIn('role', ['owner', 'moderator']);
+        }])->find(1);
+
+        $isHomeAdmin = $homeGroup && $homeGroup->members->pluck('id')->contains($user->id);
+
+        if (!$isHomeAdmin) {
+            return redirect('/post/' . $id)->with('error', 'Must be Home owner/moderator to perform action');
+        } else {
+            $isPinned = PinnedHomePost::where('post_id', $post->id)->exists();
+
+            if($isPinned){
+                PinnedHomePost::where('post_id', $post->id)->delete();
+                $status = 'unpinned from home';
+            } else {
+                // check if less than 5 posts in home
+                if(PinnedHomePost::count() >= 5){
+                    return redirect('/post/' . $id)->with('error', 'You can only pin up to 5 posts in Home.');
+                }
+
+                PinnedHomePost::create([
+                    'post_id' => $post->id,
+                    'user_id' => $user->id,
+                ]);
+                $status = 'pinned to home';
+            }
+
+            return redirect('/post/' . $id)->with('success', 'Post ' . $status . ' successfully');
+        }
     }
 
     public function pinToggle($id, Request $request){
