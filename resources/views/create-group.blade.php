@@ -150,6 +150,12 @@
                     transition: all 0.2s ease;
                     font-size: 0.9rem;
                     min-height: 50px;
+                    width: 100%;             
+                    max-width: 100%;         
+                    word-break: break-all;   
+                    white-space: normal;     
+                    text-align: center;      
+                    flex-direction: column;  
                 }
 
                 .file-input-label:hover {
@@ -171,10 +177,14 @@
 
                 .file-name {
                     font-weight: 500;
-                    max-width: 200px;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                    word-break: break-all;
+                    white-space: normal;
+                    overflow-wrap: break-word;
+                    width: 100%;
+                    /* max-width: 200px; */
+                    text-align: center;
+                    /* overflow: hidden; */
+                    /* text-overflow: ellipsis; */
                 }
 
                 .file-size {
@@ -194,7 +204,7 @@
                     margin-bottom: 0;
                 }
                 
-                .row-4 .form-field p {
+                .row-6 .form-field p {
                     margin-bottom: 0.3rem;
                 }
 
@@ -262,7 +272,7 @@
                     background-color: #218838;
                 }
 
-                .row-5 .form-field p {
+                .row-7 .form-field p {
                     margin-bottom: 0.3rem;
                 }
 
@@ -385,7 +395,7 @@
                     cursor: pointer;
                 }
 
-                .row-7 button[type="submit"] {
+                .row-8 button[type="submit"] {
                     background-color: #4a90e2;
                     color: white;
                     border: none;
@@ -397,7 +407,7 @@
                     width: 100%;
                 }
                 
-                .row-7 button[type="submit"]:hover {
+                .row-8 button[type="submit"]:hover {
                     background-color: #357abd;
                 }
 
@@ -435,8 +445,21 @@
                     margin-top: 1.5rem;
                 }
 
-                .row-4,
+                .row-4 {
+                    margin-top: 1.5rem;
+                    margin-bottom: 0;
+                }
+
+                .row-4 .form-field {
+                    width: 100%;
+                }
+
                 .row-5 {
+                    margin-top: -1rem;
+                }
+                
+                .row-6,
+                .row-7 {
                     display: flex;
                     flex-direction: column;
                     width: 100%;
@@ -447,8 +470,8 @@
                     margin-bottom: 1rem;
                 }
 
-                .row-4 .form-field,
-                .row-5 .form-field {
+                .row-6 .form-field,
+                .row-7 .form-field {
                     width: 100%;
                     margin-bottom: 0;
                 }
@@ -498,14 +521,6 @@
                     background-color: #218838;
                 }
 
-                .row-6 {
-                    margin-top: 1.5rem;
-                }
-
-                .row-6 .form-field {
-                    width: 100%;
-                }
-                
                 .switch-container {
                     display: flex;
                     align-items: center;
@@ -515,11 +530,11 @@
                     margin-top: 0.5rem;
                 }
 
-                .row-7 {
+                .row-8 {
                     margin-top: 0rem;
                 }
 
-                .row-7 .form-field {
+                .row-8 .form-field {
                     width: 100%;
                     margin-bottom: 0;
                 }
@@ -826,7 +841,7 @@
                         </div>
                     </div>
 
-                    <div class="row-6 form-row">
+                    <div class="row-4 form-row">
                         <div class="form-field">
                             <div class="switch-container">
                                 <label for="is_private" class="switch-label">Private Group</label>
@@ -838,7 +853,21 @@
                         </div>
                     </div>
 
-                    <div class="row-4 form-row">
+                    @if(Auth::user()->role === 'staff')
+                        <div class="row-5 from-row">
+                            <div class="form-field">
+                                <div class="switch-container">
+                                    <label for="type" class="switch-label">Group Type: Social/Academic</label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="type" id="type" value="1">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="row-6 form-row">
                         <div class="form-field">
                             <p>Group Rules:</p>
                             <div class="rules-container">
@@ -853,7 +882,7 @@
                         </div>
                     </div>
 
-                    <div class="row-5 form-row">
+                    <div class="row-7 form-row">
                         <div class="form-field">
                             <p>Group Resources:</p>
                             <div class="resources-container">
@@ -862,7 +891,7 @@
                         </div>
                     </div>
 
-                    <div class="row-7 form-row">
+                    <div class="row-8 form-row">
                         <div class="form-field">
                             <button type="submit">Create Group</button>
                         </div>
