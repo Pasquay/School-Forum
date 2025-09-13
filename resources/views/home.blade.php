@@ -437,13 +437,18 @@
         <div class="left-side">
             <div class="create-post-form" id='create-post-form'>
                 <form action="/create-post/1" method='POST'>
-                    @csrf
+                    @csrf 
                     <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
                     <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
                     <button type="submit" id='create-post-submit' style='display:none;'>Post</button>
                 </form>
             </div>
             <div class="posts-column" id='posts-column'>
+                <!-- PINNED POSTS -->
+                @foreach($pinned as $post)
+                    @include('components.post', ['post' => $post])
+                @endforeach
+                <!-- POSTS -->
                 @foreach($posts as $post)
                     @include('components.post', ['post' => $post])
                 @endforeach

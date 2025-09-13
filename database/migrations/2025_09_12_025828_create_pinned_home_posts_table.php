@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pinned_post', function (Blueprint $table) {
-            $table->boolean('is_home')->default(false);
+        Schema::create('pinned_home_posts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pinned_post', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('pinned_home_posts');
     }
 };

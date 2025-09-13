@@ -44,6 +44,11 @@ class Post extends Model
         return $this->belongsTo(Group::class);
     }
 
+    public function pinnedInHome()
+    {
+        return $this->hasMany(PinnedHomePost::class, 'post_id');
+    }
+
     public function pinnedInGroups()
     {
         return $this->belongsToMany(Group::class, 'pinned_post')
