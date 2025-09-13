@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media | Home</title>
+    <title>CAROLINK | Home</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <style>
         * {
             margin: 0;
@@ -17,73 +19,7 @@
             background-color: #f5f5f5;
             padding-top: 72px;
         }
-
-        .navbar {
-            background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4a90e2; 
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .brand:hover {
-            color: #357abd;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: #666;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav-link:hover {
-            color: #4a90e2;
-        }
-
-        .nav-link.active {
-            color: #4a90e2;
-        }
-
-        .nav-link.active:hover {
-            color: #357abd;
-        }
-
-        .logout-btn {
-            background-color: #4a90e2;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-
-        .logout-btn:hover {
-            background-color: #357abd;
-        }
-
+        
         main {
             display: flex;
             flex-direction: row;
@@ -463,18 +399,9 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <a href="/home" class="brand">Social Media</a>
-        <div class="nav-links">
-            <a href="/home" class="nav-link active">Home</a>
-            <a href="/groups" class="nav-link">Groups</a>
-            <a href="/user/{{ Auth::id() }}" class="nav-link">Profile</a>
-            <form action="/logout" method="POST" style="margin: 0">
-                @csrf
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
-    </nav>
+
+    @include('components.navbar', ['active' => 'home'])
+
     @if (session()->has('success'))
         <div class="success-message">
             <div 
