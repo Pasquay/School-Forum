@@ -67,8 +67,8 @@ tl2.from(".feature-icon.academic", {
         transformOrigin: "top",
         overflow: "hidden"
     }, {
-        scaleX: 2,
-        scaleY: 2,
+        scaleX: 1.7,
+        scaleY: 1.7,
         duration: 1,
         ease: "power2.inOut"
     }, "-=0.3")
@@ -110,8 +110,8 @@ tl2.from(".feature-icon.academic", {
         transformOrigin: "top",
         overflow: "hidden"
     }, {
-        scaleX: 2,
-        scaleY: 2,
+        scaleX: 1.7,
+        scaleY: 1.7,
         duration: 1,
         ease: "power2.inOut"
     }, "-=0.3")
@@ -153,8 +153,8 @@ tl2.from(".feature-icon.academic", {
         transformOrigin: "top",
         overflow: "hidden"
     }, {
-        scaleX: 2,
-        scaleY: 2,
+        scaleX: 1.7,
+        scaleY: 1.7,
         duration: 1,
         ease: "power2.inOut"
     }, "-=0.3")
@@ -240,18 +240,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+const modal = document.getElementById('loginModal');
+const heroLoginBtn = document.getElementById('heroLoginBtn');
+const closeBtn = document.getElementsByClassName('modal-close')[0];
+
 // Modal controls
-heroLoginBtn.onclick = function(e) {
-    e.preventDefault();
-    modal.style.display = 'block';
-    // Pause smoother 
-    if (smoother) {
-        smoother.paused(true);
+if (heroLoginBtn && modal) {
+    heroLoginBtn.onclick = function(e) {
+        e.preventDefault();
+        modal.style.display = 'block';
+        // Pause smoother 
+        if (smoother) {
+            smoother.paused(true);
+        }
+        document.body.style.overflow = 'hidden';
     }
-    document.body.style.overflow = 'hidden';
 }
 
-if (closeBtn) {
+if (closeBtn && modal) {
     closeBtn.onclick = function() {
         modal.style.display = 'none';
         // Resume smoother 
@@ -263,7 +269,7 @@ if (closeBtn) {
 }
 
 window.onclick = function(event) {
-    if (event.target == modal) {
+    if (modal && event.target == modal) {
         modal.style.display = 'none';
         // Resume smoother 
         if (smoother) {
