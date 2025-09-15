@@ -63,6 +63,7 @@ tl2.from(".feature-icon.academic", {
     })
     .fromTo(".box2", {
         scaleY: 0,
+        scaleX: 0,
         y: -200,
         transformOrigin: "top",
         overflow: "hidden"
@@ -75,6 +76,7 @@ tl2.from(".feature-icon.academic", {
     .to(".box2", {
         delay: 2,
         scaleY: 0,
+        scaleX: 0,
         opacity: 0,
         duration: 0.5,
         transformOrigin: "top",
@@ -106,6 +108,7 @@ tl2.from(".feature-icon.academic", {
     })
     .fromTo(".box3", {
         scaleY: 0,
+        scaleX: 0,
         y: -200,
         transformOrigin: "top",
         overflow: "hidden"
@@ -149,6 +152,7 @@ tl2.from(".feature-icon.academic", {
     })
     .fromTo(".box4", {
         scaleY: 0,
+        scaleX: 0,
         y: -200,
         transformOrigin: "top",
         overflow: "hidden"
