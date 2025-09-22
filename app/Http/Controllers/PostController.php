@@ -13,66 +13,67 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    public function getLatest(Request $request){
+    public function getLatest(Request $request)
+    {
         // Pinned
-            $pinned = PinnedHomePost::with('post')
-                ->latest()
-                ->take(5)
-                ->get()
-                ->pluck('post')
-                ->filter();
-                
-            $pinned->transform(function($post){
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
-                return $post;
-            });
+        $pinned = PinnedHomePost::with('post')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->pluck('post')
+            ->filter();
+
+        $pinned->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
+            return $post;
+        });
 
         // Posts
-            $posts = Post::whereNull('deleted_at')
-                ->whereNotIn('id', $pinned->pluck('id')->all())
-                ->latest()
-                ->with(['group'])
-                ->withCount(['votes', 'comments'])
-                ->paginate(15);
-                
-            $posts->getCollection()->transform(function($post){
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
-                return $post;
-            });
+        $posts = Post::whereNull('deleted_at')
+            ->whereNotIn('id', $pinned->pluck('id')->all())
+            ->latest()
+            ->with(['group'])
+            ->withCount(['votes', 'comments'])
+            ->paginate(15);
+
+        $posts->getCollection()->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
+            return $post;
+        });
 
         // Right Side Groups
-            $user = User::findOrFail(Auth::id());
+        $user = User::findOrFail(Auth::id());
 
-            $createdGroups = $user->groups()
-                                  ->wherePivot('role', 'owner')
-                                  ->orderBy('is_starred', 'desc')
-                                  ->orderBy('name', 'asc')
-                                  ->get();
+        $createdGroups = $user->groups()
+            ->wherePivot('role', 'owner')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
-            $moderatedGroups = $user->groups()
-                                    ->wherePivot('role', 'moderator')
-                                    ->orderBy('is_starred', 'desc')
-                                    ->orderBy('name', 'asc')
-                                    ->get();
+        $moderatedGroups = $user->groups()
+            ->wherePivot('role', 'moderator')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
-            $joinedGroups = $user->groups()
-                                 ->wherePivot('role', 'member')
-                                 ->orderBy('is_starred', 'desc')
-                                 ->orderBy('name', 'asc')
-                                 ->get();
+        $joinedGroups = $user->groups()
+            ->wherePivot('role', 'member')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        if($request->ajax()){
+        if ($request->ajax()) {
             $html = '';
-            foreach($posts as $post){
+            foreach ($posts as $post) {
                 $html .= view('components.post', compact('post'))->render();
             }
             return response()->json([
                 'html' => $html,
-                'next_page' => $posts->currentPage() < $posts->lastPage() ? $posts->currentPage()+1 : NULL,
+                'next_page' => $posts->currentPage() < $posts->lastPage() ? $posts->currentPage() + 1 : NULL,
             ]);
         }
 
@@ -85,44 +86,46 @@ class PostController extends Controller
         ));
     }
 
-    public function getUserPost(Request $request, $userId){
+    public function getUserPost(Request $request, $userId)
+    {
         $posts = Post::where([
             'deleted_at' => NULL,
-            'user_id' => $userId 
+            'user_id' => $userId
         ])->latest()
-            ->with(['group' => function($query){
+            ->with(['group' => function ($query) {
                 $query->withTrashed();
             }])
             ->withCount(['votes', 'comments'])
             ->paginate(15);
-     
-        $posts->getCollection()->transform(function($post) {
+
+        $posts->getCollection()->transform(function ($post) {
             $post->votes = $post->getVoteCountAttribute();
             $post->userVote = $post->getUserVoteAttribute();
             return $post;
         });
 
         $html = '';
-        foreach($posts as $post){
+        foreach ($posts as $post) {
             $html .= view('components.post', compact('post'))->render();
         }
         return response()->json([
             'html' => $html,
-            'next_page' => $posts->currentPage() < $posts->lastPage() ? $posts->currentPage()+1 : NULL,
+            'next_page' => $posts->currentPage() < $posts->lastPage() ? $posts->currentPage() + 1 : NULL,
         ]);
     }
 
-    public function getUserDeletedPostsData($userId){
+    public function getUserDeletedPostsData($userId)
+    {
         $deletedPosts = Post::onlyTrashed()
             ->where(['user_id' => $userId])
             ->latest()
-            ->with(['group' => function($query){
+            ->with(['group' => function ($query) {
                 $query->withTrashed();
             }])
             ->withCount(['votes'])
             ->get();
 
-        return $deletedPosts->transform(function($post){
+        return $deletedPosts->transform(function ($post) {
             $post->votes = $post->getVoteCountAttribute();
             $post->userVote = $post->getUserVoteAttribute();
             $post->type = 'post';
@@ -130,35 +133,38 @@ class PostController extends Controller
         });
     }
 
-    public function getUserDeletedPosts(Request $request, $userId){
+    public function getUserDeletedPosts(Request $request, $userId)
+    {
         $deletedPosts = Post::onlyTrashed()
             ->where(['user_id' => $userId])
             ->latest()
-            ->with(['group' => function($query){
+            ->with(['group' => function ($query) {
                 $query->withTrashed();
             }])
             ->withCount(['votes', 'comments'])
             ->paginate(15, ['*'], 'page', $request->get('page', 1));
 
-        $deletedPosts->getCollection()->transform(function($post) {
+        $deletedPosts->getCollection()->transform(function ($post) {
             $post->votes = $post->getVoteCountAttribute();
             $post->userVote = $post->getUserVoteAttribute();
             return $post;
         });
 
         $html = '';
-        foreach($deletedPosts as $deletedPost){
-            $html .= view('components.post', 
+        foreach ($deletedPosts as $deletedPost) {
+            $html .= view(
+                'components.post',
                 ['post' => $deletedPost]
             )->render();
         }
         return response()->json([
             'html' => $html,
-            'next_page' => $deletedPosts->currentPage() < $deletedPosts->lastPage() ? $deletedPosts->currentPage()+1 : NULL,
+            'next_page' => $deletedPosts->currentPage() < $deletedPosts->lastPage() ? $deletedPosts->currentPage() + 1 : NULL,
         ]);
     }
 
-    public function getPost($id){
+    public function getPost($id)
+    {
         $post = Post::where('id', $id)
             ->with(['group', 'pinnedInGroups'])
             ->withCount('comments')
@@ -168,7 +174,7 @@ class PostController extends Controller
         $post->isPinned = $post->pinnedInGroups->contains('id', $post->group->id);
         $post->isPinnedHome = $post->pinnedInHome()->exists() ? 1 : 0;
 
-        $homeGroup = Group::with(['members' => function($query){
+        $homeGroup = Group::with(['members' => function ($query) {
             $query->wherePivotIn('role', ['owner', 'moderator']);
         }])->find(1);
 
@@ -177,7 +183,7 @@ class PostController extends Controller
         $comments = Comment::where('post_id', $id)
             ->withCount(['votes', 'replies'])
             ->get()
-            ->map(function($comment){
+            ->map(function ($comment) {
                 $comment->votes = $comment->getVoteCountAttribute();
                 $comment->userVote = $comment->getUserVoteAttribute();
                 $comment->replies = Reply::where('comment_id', $comment->id)
@@ -192,7 +198,8 @@ class PostController extends Controller
         ));
     }
 
-    public function create(Request $request, $id){
+    public function create(Request $request, $id)
+    {
         $postData = $request->validate([
             'create-post-title' => ['required', 'max:70'],
             'create-post-content' => ['required', 'max:2000'],
@@ -205,41 +212,43 @@ class PostController extends Controller
             'group_id' => $id,
         ]);
 
-        if((int)$id === 1) return redirect('/home')->with('success', 'Post created successfully');
-        else return redirect('/group/' . $id)->with('success', 'Post created successfully');
+        if ((int)$id === 1) return redirect()->back()->with('success', 'Post created successfully');
+        else return redirect()->back()->with('success', 'Post created successfully');
     }
 
-    public function pinToggleRouter($id, Request $request){
+    public function pinToggleRouter($id, Request $request)
+    {
         $post = Post::findOrFail($id);
 
         return ($post->group_id == 1) ?
             $this->pinHomeToggle($id, $request) :
-            $this->pinToggle($id, $request) ;
+            $this->pinToggle($id, $request);
     }
 
-    public function pinHomeToggle($id, Request $request){
+    public function pinHomeToggle($id, Request $request)
+    {
         $post = Post::findOrFail($id);
 
         $user = Auth::user();
-        
-        $homeGroup = \App\Models\Group::with(['members' => function($q) {
+
+        $homeGroup = \App\Models\Group::with(['members' => function ($q) {
             $q->wherePivotIn('role', ['owner', 'moderator']);
         }])->find(1);
 
         $isHomeAdmin = $homeGroup && $homeGroup->members->pluck('id')->contains($user->id);
 
         if (!$isHomeAdmin) {
-            return redirect('/post/' . $id)->with('error', 'Must be Home owner/moderator to perform action');
+            return redirect()->back()->with('error', 'Must be Home owner/moderator to perform action');
         } else {
             $isPinned = PinnedHomePost::where('post_id', $post->id)->exists();
 
-            if($isPinned){
+            if ($isPinned) {
                 PinnedHomePost::where('post_id', $post->id)->delete();
                 $status = 'unpinned from home';
             } else {
                 // check if less than 5 posts in home
-                if(PinnedHomePost::count() >= 5){
-                    return redirect('/post/' . $id)->with('error', 'You can only pin up to 5 posts in Home.');
+                if (PinnedHomePost::count() >= 5) {
+                    return redirect()->back()->with('error', 'You can only pin up to 5 posts in Home.');
                 }
 
                 PinnedHomePost::create([
@@ -249,79 +258,81 @@ class PostController extends Controller
                 $status = 'pinned to home';
             }
 
-            return redirect('/post/' . $id)->with('success', 'Post ' . $status . ' successfully');
+            return redirect()->back()->with('success', 'Post ' . $status . ' successfully');
         }
     }
 
-    public function pinToggle($id, Request $request){
+    public function pinToggle($id, Request $request)
+    {
         $post = Post::with('group.members')
-                    ->findOrFail($id);
-        
+            ->findOrFail($id);
+
         $user = Auth::user();
 
         $membership = $post->group->members->where('id', $user->id)->first();
-        
-        if(!$membership || !in_array($membership->pivot->role, ['owner', 'moderator'])){
-            return redirect('/post/' . $id)->with('error', 'Must be group owner/moderator to perform action');
+
+        if (!$membership || !in_array($membership->pivot->role, ['owner', 'moderator'])) {
+            return redirect()->back()->with('error', 'Must be group owner/moderator to perform action');
         } else {
             $isPinned = $post->pinnedInGroups->contains('id', $post->group->id);
 
-            if($isPinned){
+            if ($isPinned) {
                 $post->pinnedInGroups()->detach($post->group->id);
                 $status = 'unpinned';
             } else {
-                if($post->group->pinnedPosts()->count() >= 5){
-                    return redirect('/post/' . $id)->with('error', 'You can only pin up to 5 posts per group.');
+                if ($post->group->pinnedPosts()->count() >= 5) {
+                    return redirect()->back()->with('error', 'You can only pin up to 5 posts per group.');
                 }
 
                 $post->pinnedInGroups()->attach($post->group->id, ['user_id' => $user->id]);
                 $status = 'pinned';
             }
-            
-            return redirect('/post/' . $id)->with('success', 'Post ' . $status . ' successfully');
+
+            return redirect()->back()->with('success', 'Post ' . $status . ' successfully');
         }
     }
 
-    public function edit($id, Request $request){
+    public function edit($id, Request $request)
+    {
         $postData = $request->validate([
             'edit-post-title' => ['required', 'max:70'],
             'edit-post-content' => ['required', 'max:2000'],
         ]);
         $post = Post::findOrFail($id);
-        if ($post->user_id === Auth::id()){
+        if ($post->user_id === Auth::id()) {
             $post->update([
                 'title' => $postData['edit-post-title'],
                 'content' => $postData['edit-post-content'],
             ]);
-            return redirect('/post/' . $id)->with('success', 'Post edited successfully');
+            return redirect()->back()->with('success', 'Post edited successfully');
         } else {
-            return redirect('/post/' . $id)->with('error', 'Invalid credentials');
+            return redirect()->back()->with('error', 'Invalid credentials');
         }
     }
 
-    public function delete($id){
+    public function delete($id)
+    {
         $post = Post::with('group.members')
-                    ->findOrFail($id);
+            ->findOrFail($id);
 
         $membership = $post->group->members->where('id', Auth::id())->first();
 
-        if($post->user_id === Auth::id() || ($membership && in_array($membership->pivot->role, ['owner', 'moderator']))){
+        if ($post->user_id === Auth::id() || ($membership && in_array($membership->pivot->role, ['owner', 'moderator']))) {
             $post->delete();
-            return redirect('/home')->with('success', 'Post deleted successfully');    
+            return redirect()->back()->with('success', 'Post deleted successfully!');
         } else {
-            return redirect('/home')->with('error', 'Invalid credentials');
+            return redirect()->back()->with('error', 'Invalid credentials');
         }
     }
 
-    public function restore($id){
+    public function restore($id)
+    {
         $post = Post::onlyTrashed()->findOrFail($id);
-        if ($post->user_id === Auth::id() && $post->deleted_at){
+        if ($post->user_id === Auth::id()) {
             $post->restore();
-            return redirect('/post/' . $id)->with('success', 'Post restored successfully');
-        } else if ($post->user_id != Auth::id()){
-            return redirect('/user/' . Auth::id())->with('error', 'Invalid Credentials');
+            return redirect()->back()->with('success', 'Post restored successfully');
         } else {
-            return redirect('/user/' . Auth::id())->with('error', 'Post must be deleted to be restored');
+            return redirect()->back()->with('error', 'Invalid Credentials');
         }
     }
 }
