@@ -9,6 +9,7 @@ use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReplyVoteController;
 use App\Http\Controllers\CommentVoteController;
+use App\Http\Controllers\InboxMessageController;
  
 Route::controller(UserController::class)->group(function() {
     Route::get('/', 'showLanding'); // load login page
@@ -51,7 +52,6 @@ Route::controller(VoteController::class)->group(function () {
     Route::post('/post/downvote/{id}', 'togglePostDownvote')->middleware('auth'); // downvote post
 });
 
-
 Route::controller(CommentController::class)->group(function () {
     Route::post('/post/{postId}/create-comment', 'create')->middleware('auth'); // create comment
     Route::post('/post/{postId}/edit-comment/{commentId}', 'edit')->middleware('auth'); // edit comment
@@ -93,4 +93,8 @@ Route::controller(GroupController::class)->group(function () {
     Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth'); // leave a group
     Route::get('/group/{id}/settings', 'showGroupSettings')->middleware('auth'); // manage a group/go to group settings
     Route::get('/group/{id}', 'showGroup')->middleware('auth'); // show a group's page
+});
+
+Route::controller(InboxMessageController::class)->group(function () {
+    Route::get('/inbox', 'showInbox')->middleware('auth'); // show inbox page
 });
