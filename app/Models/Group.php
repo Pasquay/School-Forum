@@ -93,6 +93,26 @@ class Group extends Model
         return array_unique($ids);
     }
 
+    public function getModeratorIds(): array
+    {
+        $moderatorIds = $this->members()
+                             ->wherePivot('role', 'moderator')
+                             ->pluck('users.id')
+                             ->toArray();
+
+        return array_unique($moderatorIds);
+    }
+
+    public function getMemberIds(): array
+    {
+        $memberIds = $this->members()
+                          ->wherePivot('role', 'member')
+                          ->pluck('users.id')
+                          ->toArray();
+                        
+        return array_unique($memberIds);
+    }
+
     public function getPhotoUrl(): ?string
     {
         return $this->photo ? asset('storage/' . $this->photo) : null;

@@ -477,11 +477,75 @@ class GroupController extends Controller
         $user = User::findOrFail(Auth::id());
 
         if($group->isOwner($user) || $group->isModerator($user)){
-            return view('group-settings', ['group' => $group]);
+            $moderatorIds = $group->getModeratorIds();
+            $moderators = User::whereIn('id', $moderatorIds)
+                              ->get();
+
+            $memberIds = $group->getMemberIds();
+            $members = User::whereIn('id', $memberIds)
+                           ->get();
+
+            return view('group-settings', compact(
+                'group',
+                'moderators',
+                'members',
+            ));
         } else {
             return $this->showGroups($request)->with('error', 'Must be moderator or owner to access group settings');
         }
         
+    }
+
+    public function addModerators($id, Request $request){
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        if($group->isOwner($user) || $group->isModerator($user)){
+            $data = $request->validate([
+                'moderators' => 'required|array|min:1',
+                'moderators.*' => 'exists:users,id',
+            ]);
+
+            foreach($data['moderators'] as $moderatorId){
+                $group->members()->updateExistingPivot($moderatorId, ['role' => 'moderator']);
+
+                InboxMessage::create([
+                    'sender_id' => $user->id,
+                    'recipient_id' => $moderatorId,
+                    'type' => 'moderator_action',
+                    'title' => "You have been made a moderator for {$group->name}",
+                    'body' => "You have been promoted to moderator in the group \"{$group->name}\" by {$user->name}.",
+                    'group_id' => $group->id,
+                ]);
+            }
+
+            return back()->with('success', 'Member(s) promoted to moderator.');
+        } else {
+            return back()->with('error', 'Must be a group moderator/owner to access that feature.');
+        }
+    }
+
+    public function demoteModerator($groupId, $userId){
+        $group = Group::findOrFail($groupId);
+        $user = User::findOrFail(Auth::id());
+        
+        if($group->isOwner($user) || $group->isModerator($user)){
+            $member = User::findOrFail($userId);
+            $group->members()->updateExistingPivot($member->id, ['role' => 'member']);
+
+            InboxMessage::create([
+                'sender_id' => $user->id,
+                'recipient_id' => $member->id,
+                'type' => 'moderator_action',
+                'title' => "You have been made a member for {$group->name}",
+                'body' => "You have been demoted to member in the group \"{$group->name}\" by {$user->name}.",
+                'group_id' => $group->id,
+            ]);
+
+            return back()->with('success', 'Member demoted to member.');
+        } else {
+            return back()->with('error', 'Must be a group moderator/owner to access that feature.');
+        }
     }
 
     public function requestToJoinGroup($id){

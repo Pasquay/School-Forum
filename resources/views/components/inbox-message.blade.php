@@ -1,11 +1,15 @@
 <div class="inbox-message-row {{ $message->read_at ? 'read' : 'unread' }}">
     <div class="inbox-message-content">
         <div class="inbox-message-actions">
-            @if($message->type === 'group_join_request')
-                <button type="submit" class="action-btn accept">Accept</button>
-                <button type="submit" class="action-btn reject">Reject</button>
-            @endif
-            {{-- Add more actions for other types as needed --}}
+            <form action="#" method="POST">
+                @csrf
+                @if($message->type === 'group_join_request')
+                    <button type="submit" class="action-btn accept">Accept</button>
+                    <button type="submit" class="action-btn reject">Reject</button>
+                @else if($message->type === 'moderator_action')
+                    <button type="submit" class="acknowledge-btn">Acknowledge</button>
+                @endif
+            </form>
         </div>
         <div class="inbox-message-main">
             <div class="inbox-message-header">
