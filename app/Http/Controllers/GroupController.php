@@ -6,6 +6,7 @@ use Log;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
+use App\Models\InboxMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGroupRequest;
@@ -86,6 +87,10 @@ class GroupController extends Controller
             ['path' => request()->url()]
         );
 
+        foreach($groups as $group){
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
+
         // Right Side Groups    
         $createdGroups = $user->groups()
                               ->wherePivot('role', 'owner')
@@ -108,7 +113,9 @@ class GroupController extends Controller
         if($request->ajax()){
             $html = '';
             foreach($groups as $group){
-                $html .= view('components.group-info', ['group' => $group])->render();
+                $html .= view('components.group-info', [
+                            'group' => $group,
+                        ])->render();
             }
             $html .= '<p class="empty"></p>';
 
@@ -134,6 +141,10 @@ class GroupController extends Controller
         $user = User::findOrFail(Auth::id());
 
         $groups = Group::query();
+
+        foreach($groups as $group){
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
 
         if($search){
             $groups->where('name', 'like', '%' . $search . '%')
@@ -271,6 +282,7 @@ class GroupController extends Controller
 
         // Load all members
             $group = Group::with('members')->findOrFail($id);
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest(Auth::id(), $group->id);
 
         // Find the current user's membership (if any)
             $membership = $group->members->where('id', Auth::id())
@@ -329,6 +341,8 @@ class GroupController extends Controller
             'posts',
         ));
     }
+
+    // SHOW GROUP PAGINATED
 
     public function toggleStar($id){
         $user = User::findOrFail(Auth::id());
@@ -468,5 +482,43 @@ class GroupController extends Controller
             return $this->showGroups($request)->with('error', 'Must be moderator or owner to access group settings');
         }
         
+    }
+
+    public function requestToJoinGroup($id){
+        $user = User::findOrFail(Auth::id());
+        $membership = $user->groups()
+                           ->where('groups.id', $id)
+                           ->exists();
+
+        $requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $id);
+        
+        if(!$membership && !$requested){
+            $group = Group::findOrFail($id);
+            foreach($group->getModeratorAndOwnerIds() as $recipientId){
+                InboxMessage::create([
+                    'sender_id' => $user->id,
+                    'recipient_id' => $recipientId,
+                    'group_id' => $group->id,
+                    'type' => 'group_join_request',
+                    'title' => $user->name . ' requests to join ' . $group->name,
+                    'body' => "{$user->name} has requested to join a group you created/moderated, \"{$group->name}\". Accept or reject this request?"
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'requested' => true,
+                'message' => 'Requested to join ' . $group->name,
+            ]);
+        } else {
+            $message = $membership ? 
+                'You are already a member.' : 
+                'You already requested to join.';
+            return response()->json([
+                'success' => false,
+                'requested' => $requested,
+                'message' => $message,
+            ]);
+        }
     }
 }

@@ -72,6 +72,7 @@
 .nav-link.inbox-link img {
     transition: opacity 0.2s;
     position: relative;
+    margin-top: 4px;
     z-index: 1;
     width: 20px;
     height: 20px;

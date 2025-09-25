@@ -257,7 +257,11 @@
                         @elseif(!$membership && !$group->is_private)
                             <button type="submit" class="join-button">Join</button>
                         @else
-                            <button type="submit" disabled>Invite only</button>
+                            <button type="submit" class="request-button"
+                                @if($group->requested)
+                                    disabled
+                                @endif
+                            >Request to Join</button>
                         @endif
                     </form>
                 </div>
@@ -567,6 +571,40 @@
                         e.preventDefault();
                         e.stopPropagation();
                         window.location.href = `/group/{{ $group->id }}/settings`;
+                    })
+                }
+            // Request Button
+                if(JLBtn.classList.contains('request-button')){
+                    newJLForm.action = `/group/{{ $group->id }}/request`;
+                    newJLForm.addEventListener('submit', async(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        try {
+                            const response = await fetch(newJLForm.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                credentials: 'same-origin',
+                                body: new URLSearchParams({
+                                    _token: document.querySelector('meta[name="csrf-token"]').content,
+                                })
+                            });
+
+                            if(response.ok){
+                                const data = await response.json();
+                                if(data.requested){
+                                    newJLForm.innerHTML = 
+                                        `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
+                                        <button type="submit" class="request-button" disabled>Request to Join</button>`;
+                                        addJoinLeaveEventListeners();
+                                }
+                            }
+                        } catch(error){
+                            console.error("Error: ", error);
+                        }
                     })
                 }
         }

@@ -80,6 +80,19 @@ class Group extends Model
             ->exists();
     }
 
+    public function getModeratorAndOwnerIds(): array
+    {
+        $moderatorIds = $this->members()
+                             ->wherePivot('role', 'moderator')
+                             ->pluck('users.id')
+                             ->toArray();
+
+        $ids = $moderatorIds;
+        if($this->owner_id) $ids[] = $this->owner_id;
+
+        return array_unique($ids);
+    }
+
     public function getPhotoUrl(): ?string
     {
         return $this->photo ? asset('storage/' . $this->photo) : null;

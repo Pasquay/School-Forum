@@ -41,7 +41,11 @@
             @elseif(!$group->is_private)
                 <button type="submit" class="join-button">Join</button>
             @else
-                <button type="submit" class="request-button">Request to Join</button>
+                <button type="submit" class="request-button"
+                    @if($group->requested)
+                        disabled
+                    @endif
+                >Request to Join</button>
             @endif
         </form>
     </div>

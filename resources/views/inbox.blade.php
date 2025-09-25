@@ -23,9 +23,9 @@
 
         main {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             padding: 2rem;
             gap: 2rem;
         } 
@@ -35,6 +35,16 @@
     @include('components.navbar', ['active' => 'inbox'])
     @include('components.success-header')
     @include('components.error-header')
-    
+    <main>
+        <div class="">
+            NAVBAR FOR SORTING MESSAGE TYPES HERE
+        </div>
+        <div class="message-container">
+            WHERE MESSAGES ARE STORED
+            @foreach($messages as $message)
+                @include('components.inbox-message', ['message' => $message])
+            @endforeach
+        </div>
+    </main>
 </body>
 </html>
