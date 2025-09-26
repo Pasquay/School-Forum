@@ -60,6 +60,18 @@ class InboxMessageController extends Controller
                         $responseSuccess = true;
                     }
                     break;
+                case 'moderator_action':
+                    $group = Group::findOrFail($message->group_id);
+                    
+                    $responseMessage = "Group \"{$group->name}\" moderator promotion accepted.";
+                    $responseSuccess = true;
+                    break;
+                case '':
+                    break;
+                case '':
+                    break;
+                case '':
+                    break;
                 case '':
                     break;
             }
