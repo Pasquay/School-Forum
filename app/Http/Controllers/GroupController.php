@@ -585,4 +585,401 @@ class GroupController extends Controller
             ]);
         }
     }
+
+    // Group Settings Modal Methods
+    public function update(Request $request, $id)
+    {
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        // Check if user has permission to update group
+        if (!$group->isOwner($user) && !$group->isModerator($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to update this group.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You do not have permission to update this group.');
+        }
+
+        try {
+            $validatedData = $request->validate([
+                'name' => 'sometimes|required|string|min:3|max:50',
+                'description' => 'sometimes|required|string|min:10|max:500',
+                'is_private' => 'sometimes|in:0,1',
+                'type' => 'sometimes|in:academic,social',
+                'rules' => 'sometimes|array',
+                'rules.*.title' => 'required_with:rules|string|max:60',
+                'rules.*.description' => 'required_with:rules|string|max:500',
+                'resources' => 'sometimes|array',
+                'resources.*.title' => 'required_with:resources|string|max:60',
+                'resources.*.description' => 'required_with:resources|string|max:500',
+            ]);
+
+            // Convert is_private string to boolean
+            if (isset($validatedData['is_private'])) {
+                $validatedData['is_private'] = (bool) $validatedData['is_private'];
+            }
+
+            $group->update($validatedData);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Group updated successfully!'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Group updated successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while updating the group.'
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'An error occurred while updating the group.');
+        }
+    }
+
+    public function promote(Request $request, $groupId, $userId)
+    {
+        $group = Group::findOrFail($groupId);
+        $user = User::findOrFail(Auth::id());
+        $targetUser = User::findOrFail($userId);
+
+        // Only owners can promote members
+        if (!$group->isOwner($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only group owners can promote members.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only group owners can promote members.');
+        }
+
+        // Check if target user is a member
+        $membership = $group->members()->where('user_id', $userId)->first();
+        if (!$membership) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not a member of this group.'
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'User is not a member of this group.');
+        }
+
+        // Check if user is already a moderator or owner
+        if ($membership->pivot->role !== 'member') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is already a moderator or owner.'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'User is already a moderator or owner.');
+        }
+
+        // Promote to moderator
+        $group->members()->updateExistingPivot($userId, ['role' => 'moderator']);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $targetUser->name . ' has been promoted to moderator.'
+            ]);
+        }
+
+        return redirect()->back()->with('success', $targetUser->name . ' has been promoted to moderator.');
+    }
+
+    public function demote(Request $request, $groupId, $userId)
+    {
+        $group = Group::findOrFail($groupId);
+        $user = User::findOrFail(Auth::id());
+        $targetUser = User::findOrFail($userId);
+
+        // Only owners can demote moderators
+        if (!$group->isOwner($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only group owners can demote moderators.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only group owners can demote moderators.');
+        }
+
+        // Check if target user is a member
+        $membership = $group->members()->where('user_id', $userId)->first();
+        if (!$membership) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not a member of this group.'
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'User is not a member of this group.');
+        }
+
+        // Check if user is a moderator
+        if ($membership->pivot->role !== 'moderator') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not a moderator.'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'User is not a moderator.');
+        }
+
+        // Demote to member
+        $group->members()->updateExistingPivot($userId, ['role' => 'member']);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $targetUser->name . ' has been demoted to member.'
+            ]);
+        }
+
+        return redirect()->back()->with('success', $targetUser->name . ' has been demoted to member.');
+    }
+
+    public function removeMember(Request $request, $groupId, $userId)
+    {
+        $group = Group::findOrFail($groupId);
+        $user = User::findOrFail(Auth::id());
+        $targetUser = User::findOrFail($userId);
+
+        // Owners and moderators can remove members, but only owners can remove moderators
+        $membership = $group->members()->where('user_id', $userId)->first();
+        if (!$membership) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is not a member of this group.'
+                ], 404);
+            }
+            return redirect()->back()->with('error', 'User is not a member of this group.');
+        }
+
+        $targetRole = $membership->pivot->role;
+        $userRole = $group->members()->where('user_id', Auth::id())->first()->pivot->role;
+
+        // Cannot remove owners
+        if ($targetRole === 'owner') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot remove group owner.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Cannot remove group owner.');
+        }
+
+        // Only owners can remove moderators
+        if ($targetRole === 'moderator' && $userRole !== 'owner') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only owners can remove moderators.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only owners can remove moderators.');
+        }
+
+        // Moderators and owners can remove regular members
+        if (!$group->isOwner($user) && !$group->isModerator($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to remove members.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You do not have permission to remove members.');
+        }
+
+        // Remove the member
+        $group->members()->detach($userId);
+        $group->update(['member_count' => $group->getMemberCount()]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $targetUser->name . ' has been removed from the group.'
+            ]);
+        }
+
+        return redirect()->back()->with('success', $targetUser->name . ' has been removed from the group.');
+    }
+
+    public function updatePermissions(Request $request, $id)
+    {
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        // Only owners can update permissions
+        if (!$group->isOwner($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only group owners can update permissions.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only group owners can update permissions.');
+        }
+
+        try {
+            $validatedData = $request->validate([
+                'members_can_post' => 'sometimes|boolean',
+                'members_can_comment' => 'sometimes|boolean',
+                'members_can_invite' => 'sometimes|boolean',
+                'auto_approve_posts' => 'sometimes|boolean',
+            ]);
+
+            $group->update($validatedData);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Permissions updated successfully!'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Permissions updated successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while updating permissions.'
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'An error occurred while updating permissions.');
+        }
+    }
+
+    public function transferOwnership(Request $request, $id)
+    {
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        // Only current owner can transfer ownership
+        if (!$group->isOwner($user)) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the current owner can transfer ownership.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Only the current owner can transfer ownership.');
+        }
+
+        try {
+            $request->validate([
+                'new_owner_id' => 'required|exists:users,id'
+            ]);
+
+            $newOwnerId = $request->new_owner_id;
+            $newOwner = User::findOrFail($newOwnerId);
+
+            // Check if new owner is a member of the group
+            $membership = $group->members()->where('user_id', $newOwnerId)->first();
+            if (!$membership) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'The selected user is not a member of this group.'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'The selected user is not a member of this group.');
+            }
+
+            // Transfer ownership
+            $group->members()->updateExistingPivot(Auth::id(), ['role' => 'moderator']);
+            $group->members()->updateExistingPivot($newOwnerId, ['role' => 'owner']);
+            $group->update(['owner_id' => $newOwnerId]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Ownership has been transferred to ' . $newOwner->name . '.'
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Ownership has been transferred to ' . $newOwner->name . '.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while transferring ownership.'
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'An error occurred while transferring ownership.');
+        }
+    }
+
+    public function destroy($id)
+    {
+        $group = Group::findOrFail($id);
+        $user = User::findOrFail(Auth::id());
+
+        // Only owners can delete groups
+        if (!$group->isOwner($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only group owners can delete groups.'
+            ], 403);
+        }
+
+        try {
+            // Delete associated data first
+            $group->members()->detach(); // Remove all members
+            $group->posts()->delete(); // Delete all posts (you might want to soft delete instead)
+
+            // Delete the group
+            $group->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Group has been deleted successfully.',
+                'redirect' => '/groups'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the group.'
+            ], 500);
+        }
+    }
 }

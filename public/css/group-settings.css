@@ -1,0 +1,524 @@
+/* Group Settings Modal Styles */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.settings-modal {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background: var(--color-pakistan-green);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+
+/* Navigation Tabs */
+
+.settings-nav {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    background: #f8f9fa;
+    padding: 0 20px;
+    margin: 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    color: var(--color-pakistan-green);
+    border-bottom-color: var(--color-pakistan-green);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+
+/* Tab Content */
+
+.tab-content {
+    display: none;
+    padding: 30px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h3 {
+    margin-top: 0;
+    color: var(--color-pakistan-green);
+    font-size: 20px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.tab-content h4 {
+    color: var(--color-pakistan-green);
+    margin: 25px 0 15px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* Form Styles */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-pakistan-green);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+
+/* Button Styles */
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    font-family: inherit;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: var(--color-pakistan-green);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--color-dark-green);
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+
+/* Member Management */
+
+.members-section {
+    margin-bottom: 30px;
+}
+
+.members-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.member-list {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    transition: box-shadow 0.3s;
+}
+
+.member-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.member-item:last-child {
+    margin-bottom: 0;
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.member-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 15px;
+    background: var(--color-pakistan-green);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.member-info div {
+    flex: 1;
+}
+
+.member-info h5 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+}
+
+.member-info p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.member-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-badge.owner {
+    background: #6f42c1;
+    color: white;
+}
+
+.role-badge.moderator {
+    background: #17a2b8;
+    color: white;
+}
+
+.role-badge.member {
+    background: #6c757d;
+    color: white;
+}
+
+.inline-form {
+    display: inline-block;
+    margin: 0;
+}
+
+.no-moderators {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin: 20px 0;
+}
+
+
+/* Permission Groups */
+
+.permission-group {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.permission-group h4 {
+    margin-top: 0;
+    color: var(--color-pakistan-green);
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.permission-group label {
+    display: flex !important;
+    align-items: center;
+    margin-bottom: 12px !important;
+    cursor: pointer;
+    font-weight: normal !important;
+    padding: 8px 0;
+    transition: background 0.3s;
+    border-radius: 4px;
+    padding-left: 8px;
+}
+
+.permission-group label:hover {
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.permission-group input[type="checkbox"],
+.permission-group input[type="radio"] {
+    width: auto !important;
+    margin-right: 12px !important;
+    margin-bottom: 0 !important;
+    transform: scale(1.2);
+}
+
+
+/* Danger Zone */
+
+.danger-actions {
+    background: #fff5f5;
+    border: 2px solid #fed7d7;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.danger-item {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #fed7d7;
+}
+
+.danger-item:last-child {
+    margin-bottom: 0;
+}
+
+.danger-item h4 {
+    color: #e53e3e !important;
+    margin: 0 0 10px 0 !important;
+    font-size: 18px;
+}
+
+.danger-item p {
+    color: #666;
+    margin: 0 0 15px 0;
+    font-size: 14px;
+}
+
+
+/* Loading and Success States */
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #c3e6cb;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c6cb;
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .settings-modal {
+        width: 95%;
+        margin: 20px;
+        max-height: 95vh;
+    }
+    .modal-header {
+        padding: 15px;
+    }
+    .modal-header h2 {
+        font-size: 20px;
+    }
+    .settings-nav {
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+    .tab-btn {
+        padding: 12px 15px;
+        font-size: 13px;
+        flex: 1;
+        min-width: 80px;
+    }
+    .tab-content {
+        padding: 20px;
+    }
+    .member-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .member-actions {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+    }
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    .tab-content {
+        padding: 15px;
+    }
+    .member-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    .member-info h5 {
+        font-size: 14px;
+    }
+    .member-info p {
+        font-size: 12px;
+    }
+}

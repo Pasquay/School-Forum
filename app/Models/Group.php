@@ -21,13 +21,21 @@ class Group extends Model
         'owner_id',
         'member_count',
         'is_private',
-        'type'
+        'type',
+        'members_can_post',
+        'members_can_comment',
+        'members_can_invite',
+        'auto_approve_posts'
     ];
 
     protected $casts = [
         'rules' => 'array',
         'resources' => 'array',
         'is_private' => 'boolean',
+        'members_can_post' => 'boolean',
+        'members_can_comment' => 'boolean',
+        'members_can_invite' => 'boolean',
+        'auto_approve_posts' => 'boolean',
     ];
 
     /**

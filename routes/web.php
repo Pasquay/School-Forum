@@ -10,8 +10,8 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ReplyVoteController;
 use App\Http\Controllers\CommentVoteController;
 use App\Http\Controllers\InboxMessageController;
- 
-Route::controller(UserController::class)->group(function() {
+
+Route::controller(UserController::class)->group(function () {
     Route::get('/', 'showLanding'); // load login page
     Route::post('/login', 'login'); // user login
     Route::post('/google-login', 'googleLogin'); // google login
@@ -23,7 +23,7 @@ Route::controller(UserController::class)->group(function() {
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
     Route::get('/user/{id}/deleted-overview', 'getUserDeletedOverview')->middleware('auth'); // load page 2+ deleted user overview
     Route::get('/user/{id}/deleted-comments-and-replies', 'getUserDeletedCommentsAndReplies')->middleware('auth'); // load page 2+ deleted user comments and replies
-    
+
     // Password reset routes
     Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
     Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
@@ -88,13 +88,19 @@ Route::controller(GroupController::class)->group(function () {
     Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star/unstar a group
     Route::post('/group/toggleMute/{id}', 'toggleMute')->middleware('auth'); // mute/unmute a group
-    Route::post('/group/{groupId}/demote-moderator/{userId}', 'demoteModerator')->middleware('auth'); // demote moderators
-    Route::post('/group/{id}/add-moderators', 'addModerators')->middleware('auth'); // add moderators
     Route::post('/group/{id}/request', 'requestToJoinGroup')->middleware('auth'); // request to join a group
     Route::post('/group/{id}/join', 'joinGroup')->middleware('auth'); // join a group
-    Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth'); // leave a group
+    Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth')->name('group.leave'); // leave a group
     Route::get('/group/{id}/settings', 'showGroupSettings')->middleware('auth'); // manage a group/go to group settings
-    Route::get('/group/{id}', 'showGroup')->middleware('auth'); // show a group's page
+    Route::get('/group/{id}', 'showGroup')->middleware('auth')->name('group.show'); // show a group's page
+    // Group management routes
+    Route::put('/group/{id}', 'update')->middleware('auth')->name('group.update'); // update group settings
+    Route::post('/group/{groupId}/promote/{userId}', 'promote')->middleware('auth')->name('group.promote'); // promote member to moderator
+    Route::post('/group/{groupId}/demote/{userId}', 'demote')->middleware('auth')->name('group.demote'); // demote moderator to member
+    Route::delete('/group/{groupId}/remove/{userId}', 'removeMember')->middleware('auth')->name('group.removeMember'); // remove member
+    Route::put('/group/{id}/permissions', 'updatePermissions')->middleware('auth')->name('group.updatePermissions'); // update permissions
+    Route::post('/group/{id}/transfer', 'transferOwnership')->middleware('auth')->name('group.transferOwnership'); // transfer ownership
+    Route::delete('/group/{id}', 'destroy')->middleware('auth')->name('group.destroy'); // delete group
 });
 
 Route::controller(InboxMessageController::class)->group(function () {
