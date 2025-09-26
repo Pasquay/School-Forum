@@ -394,7 +394,7 @@ class GroupController extends Controller
                  ]);
 
             $group = Group::findOrFail($id);
-            $group->update(['member_count', $group->getMemberCount()]);
+            $group->update(['member_count' => $group->getMemberCount()]);
 
             $joinedGroups = $user->groups()
                                  ->wherePivot('role', 'member')

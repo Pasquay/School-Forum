@@ -99,4 +99,5 @@ Route::controller(GroupController::class)->group(function () {
 
 Route::controller(InboxMessageController::class)->group(function () {
     Route::get('/inbox', 'showInbox')->middleware('auth'); // show inbox page
+    Route::post('/inbox/{id}/respond/{type}', 'respond')->middleware('auth'); // respond to inbox message
 });
