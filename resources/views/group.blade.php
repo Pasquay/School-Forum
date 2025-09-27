@@ -250,9 +250,10 @@
                     </div>
                     <form action="" method="POST" id="join-leave-form">
                         @csrf
-                        @if($group->owner_id === Auth::id())
+                        @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
                             <button type="submit" class="manage-button">Manage</button>
-                        @elseif($membership)
+                        @endif
+                        @if($membership)
                             <button type="submit" class="leave-button">Leave</button>
                         @elseif(!$membership && !$group->is_private)
                             <button type="submit" class="join-button">Join</button>

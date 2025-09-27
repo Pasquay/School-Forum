@@ -513,8 +513,8 @@ class GroupController extends Controller
                     'sender_id' => $user->id,
                     'recipient_id' => $moderatorId,
                     'type' => 'moderator_action',
-                    'title' => "You have been made a moderator for {$group->name}",
-                    'body' => "You have been promoted to moderator in the group \"{$group->name}\" by {$user->name}.",
+                    'title' => "You have been made a moderator for <a href='/group/$group->id'>$group->name</a>",
+                    'body' => "You have been promoted to moderator in the group <a href='/group/$group->id'>$group->name</a> by <a href='/user/$user->id'>$user->name</a>.",
                     'group_id' => $group->id,
                 ]);
             }
@@ -534,11 +534,11 @@ class GroupController extends Controller
             $group->members()->updateExistingPivot($member->id, ['role' => 'member']);
 
             InboxMessage::create([
-                'sender_id' => $user->id,
+                'sender_id' => $user->id, 
                 'recipient_id' => $member->id,
                 'type' => 'moderator_action',
-                'title' => "You have been made a member for {$group->name}",
-                'body' => "You have been demoted to member in the group \"{$group->name}\" by {$user->name}.",
+                'title' => "You have been made a member for <a href='/group/$group->id'>$group->name</a>",
+                'body' => "You have been demoted to member in the group <a href='/group/$group->id'>$group->name</a> by <a href='/user/$user->id'>$user->name</a>.",
                 'group_id' => $group->id,
             ]);
 
@@ -564,8 +564,8 @@ class GroupController extends Controller
                     'recipient_id' => $recipientId,
                     'group_id' => $group->id,
                     'type' => 'group_join_request',
-                    'title' => $user->name . ' requests to join ' . $group->name,
-                    'body' => "{$user->name} has requested to join a group you created/moderated, \"{$group->name}\". Accept or reject this request?"
+                    'title' => "<a href='/user/$user->id'>$user->name</a> requests to join <a href='/group/$group->id'>$group->name</a>",
+                    'body' => "<a href='/user/$user->id'>$user->name</a> has requested to join a group you created/moderated, <a href='/group/$group->id'>$group->name</a>. Accept or reject this request?"
                 ]);
             }
 

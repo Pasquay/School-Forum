@@ -24,7 +24,7 @@ class InboxMessageController extends Controller
         ));
     }
 
-    public function respond($id, $type, Request $request){
+    public function respond($id, Request $request){
         $message = InboxMessage::findOrFail($id);
         $action = $request->input('action');
 
@@ -33,9 +33,9 @@ class InboxMessageController extends Controller
 
             switch($message->type){
                 case 'group_join_request':
+                    $user = User::findOrFail($message->sender_id);
+                    $group = Group::findOrFail($message->group_id);
                     if($action === 'accept'){
-                        $user = User::findOrFail($message->sender_id);
-                        $group = Group::findOrFail($message->group_id);
                         $membership = $user->groups()
                                            ->where('groups.id', $group->id)
                                            ->exists();
@@ -51,6 +51,7 @@ class InboxMessageController extends Controller
                             
                             $responseMessage = "Group join request accepted." ;
                             $responseSuccess = true;
+                            $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been accepted"; 
                         } else {
                             $responseMessage = "Failed to add user to group." ;
                             $responseSuccess = false;
@@ -58,7 +59,24 @@ class InboxMessageController extends Controller
                     } else {
                         $responseMessage = "Group join request rejected.";
                         $responseSuccess = true;
+                        $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been rejected"; 
                     }
+
+                    InboxMessage::where('sender_id', $message->sender_id)
+                                ->where('group_id', $message->group_id)
+                                ->where('type', 'group_join_request')
+                                ->where('responded', false)
+                                ->update(['responded' => true]);
+
+                    InboxMessage::create([
+                        'sender_id' => $message->recipient_id,
+                        'recipient_id' => $message->sender_id,
+                        'group_id' => $message->group_id,
+                        'type' => 'moderator_action',
+                        'title' => "<a href='/group/$group->id'>$group->name</a> join request response",
+                        'body' => $responseBody,
+                    ]);
+
                     break;
                 case 'moderator_action':
                     $group = Group::findOrFail($message->group_id);
