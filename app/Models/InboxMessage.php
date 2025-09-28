@@ -17,10 +17,11 @@ class InboxMessage extends Model
             // 'assignment_post',         4. Assignment post notification (academic)
             // 'group_post_notification', 5. Teacher/staff post in group/class you joined (academic)
             // 'group_request_status',    6. Your request to join a group accepted/denied (academic)
-            // 'group_join_request',      7. Someone requests to join your group (academic)
+            // 'group_join_request',      7. Someone requests to join your group
             // 'reply_notification',      8. Replies to your posts/comments (social)
             // 'friend_notification',     9. Friend request sent/accepted/rejected (social)
             // 'follow_notification',     10. Someone follows you (social)
+            // 'group_invite',            11. You are invited to a group
         'title',
         'body',
         'read_at', 

@@ -164,6 +164,16 @@ main {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+.modal-content.add-members-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px; 
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -173,6 +183,19 @@ main {
 }
 
 .modal-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.add-members-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.add-members-modal .modal-header h2 {
     margin: 0;
     color: #333;
 }
@@ -192,6 +215,10 @@ main {
 
 .modal-body {
     padding: 2rem;
+}
+
+.add-members-modal .modal-body {
+    padding: 1.5rem 2rem; /* Reduced top/bottom padding from 2rem to 1.5rem */
 }
 
 
@@ -279,17 +306,18 @@ main {
 }
 
 .member-list {
-    margin-bottom: 2rem;
+    margin: 0 0.5rem 1rem 0.5rem; /* Added left/right margins to align with search bar */
+    padding: 0; /* Remove default padding */
 }
 
 .member-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem;
+    padding: 0.75rem 1rem; /* Reduced from 1rem to 0.75rem */
     border: 1px solid #eee;
     border-radius: 8px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem; /* Reduced from 0.5rem to 0.4rem */
 }
 
 .member-info {
@@ -526,7 +554,350 @@ main {
 }
 
 
-/*  */
+/* Member Search Bar - Full Width */
+.member-search-bar {
+    margin-bottom: 1rem;
+    display: flex;
+    width: 100%;
+}
+
+.member-search-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 100%; 
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+    flex: 1; 
+}
+
+.member-search-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    background: #fff;
+}
+
+.member-search-input::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Hide members when searching */
+.member-item.hidden {
+    display: none !important;
+}
+
+/* No results message */
+.no-search-results {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 1rem 0;
+    display: none;
+}
+
+.no-search-results.show {
+    display: block;
+}
+
+/* Member item data attributes for better searching */
+.member-item[data-member-name*="search-term"] {
+    /* This will be handled by JavaScript */
+}
+
+/* Responsive adjustments for search bar */
+@media (max-width: 768px) {
+    .member-search-bar {
+        justify-content: stretch;
+    }
+    
+    .member-search-input {
+        width: 100%;
+    }
+}
+
+.members-header-with-invite {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.members-header-with-invite h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.invite-members-btn {
+    background: #4a90e2;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.invite-members-btn:hover {
+    background: #357abd;
+}
+
+/* User Search Bar - Centered with smaller width */
+.user-search-bar {
+    margin-bottom: 1rem;
+    display: flex;
+    width: 100%;
+    justify-content: center; 
+}
+
+.user-search-input {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 95%; 
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+}
+
+.user-search-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    background: #fff;
+}
+
+.user-search-input::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Responsive adjustments for user search bar */
+@media (max-width: 768px) {
+    .user-search-bar {
+        justify-content: center; /* Keep centered on mobile */
+    }
+    
+    .user-search-input {
+        width: 95%; /* Wider on mobile for better usability */
+        max-width: none;
+    }
+}
+
+/* Search and Invite States */
+.search-prompt, .loading-state, .error-message, .no-users-found {
+    text-align: center;
+    padding: 2rem 1rem; /* Reduced from 3rem 2rem to 2rem 1rem */
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 0.5rem 0.5rem 1rem 0.5rem; /* Added left/right margins to match */
+}
+
+.loading-state {
+    color: #4a90e2;
+    background: #f0f7ff;
+}
+
+.error-message {
+    color: #dc3545;
+    background: #fdf2f2;
+}
+
+.search-prompt {
+    border: 2px dashed #dee2e6;
+}
 
 
-/*  */
+/* User Item Styles */
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem; /* Reduced from 1rem to 0.75rem */
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 0.4rem; /* Reduced from 0.5rem to 0.4rem */
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.user-item:hover {
+    background: #f8f9fa;
+}
+
+.user-item.selected {
+    background: #e3f2fd;
+    border-color: #4a90e2;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #4a90e2;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+
+/* Checkbox User Items - Updated */
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 0.4rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.user-item:hover {
+    background: #f8f9fa;
+}
+
+.user-item.selected {
+    background: #e3f2fd;
+    border-color: #4a90e2;
+}
+
+/* User Checkbox - Larger size on the right */
+.user-checkbox {
+    width: 24px; /* Increased from 20px to 24px */
+    height: 24px; /* Increased from 20px to 24px */
+    appearance: none;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0; /* Prevent shrinking */
+    margin-left: auto; /* Push to the right */
+}
+
+.user-checkbox:checked {
+    background: #4a90e2;
+    border-color: #4a90e2;
+}
+
+.user-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 16px; /* Increased checkmark size */
+}
+
+.user-checkbox:hover {
+    border-color: #4a90e2;
+}
+
+/* Remove the old checkbox label styling */
+.checkbox-label {
+    display: none;
+}
+
+/* User info takes up remaining space */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1; /* Take up remaining space */
+}
+
+
+/* Invite User Button */
+
+.invite-user-btn {
+    background: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    min-width: 80px;
+}
+
+.invite-user-btn:hover {
+    background: #218838;
+}
+
+.invite-user-btn.selected {
+    background: #6c757d;
+}
+
+.invite-user-btn.selected:hover {
+    background: #5a6268;
+}
+
+/* Add Member Form Buttons */
+.add-member-form-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem;
+}
+
+.add-member-form-buttons button {
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    width: 49%;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-member-form-buttons button[type="button"] {
+    background: #6c757d;
+    color: white;
+}
+
+.add-member-form-buttons button[type="button"]:hover {
+    background: #5a6268;
+}
+
+.add-member-form-buttons button[type="submit"] {
+    background: #4a90e2;
+    color: white;
+}
+
+.add-member-form-buttons button[type="submit"]:hover {
+    background: #357abd;
+}

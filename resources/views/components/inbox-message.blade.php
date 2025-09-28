@@ -210,7 +210,7 @@
                         data-message-id="{{ $message->id }}"
                     >
                         @csrf
-                        @if($message->type === 'group_join_request')
+                        @if($message->type === 'group_join_request' || $message->type === 'group_invitation')
                             <button type="submit" class="action-btn accept">Accept</button>
                             <button type="submit" class="action-btn reject">Reject</button>
                         @elseif($message->type === 'moderator_action')

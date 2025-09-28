@@ -42,16 +42,16 @@ class InboxMessageController extends Controller
                         
                         if(!$membership){
                             $user->groups()
-                                ->attach($group->id, [
+                                 ->attach($group->id, [
                                     'role' => 'member',
                                     'is_starred' => false,
                                     'is_muted' => false,
-                                ]);
+                                 ]);
                             $group->update(['member_count' => $group->getMemberCount()]);
                             
                             $responseMessage = "Group join request accepted." ;
                             $responseSuccess = true;
-                            $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been accepted"; 
+                            $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been accepted."; 
                         } else {
                             $responseMessage = "Failed to add user to group." ;
                             $responseSuccess = false;
@@ -59,7 +59,7 @@ class InboxMessageController extends Controller
                     } else {
                         $responseMessage = "Group join request rejected.";
                         $responseSuccess = true;
-                        $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been rejected"; 
+                        $responseBody = "Your join request to <a href='/group/$group->id'>$group->name</a> has been rejected."; 
                     }
 
                     InboxMessage::where('sender_id', $message->sender_id)
@@ -74,6 +74,52 @@ class InboxMessageController extends Controller
                         'group_id' => $message->group_id,
                         'type' => 'moderator_action',
                         'title' => "<a href='/group/$group->id'>$group->name</a> join request response",
+                        'body' => $responseBody,
+                    ]);
+
+                    break;
+                case 'group_invitation':
+                    $user = User::findOrFail($message->recipient_id);
+                    $group = Group::findOrFail($message->group_id);
+                    if($action === 'accept'){
+                        $membership = $user->groups()
+                                           ->where('groups.id', $group->id)
+                                           ->exists();
+
+                        if(!$membership){
+                            $user->groups()
+                                 ->attach($group->id, [
+                                    'role' => 'member',
+                                    'is_starred' => false,
+                                    'is_muted' => false,
+                                 ]);
+                            $group->update(['member_count' => $group->getMemberCount()]);
+
+                            $responseMessage = "Group invite accepted.";
+                            $responseSuccess = true;
+                            $responseBody = "Your invite to <a href='/group/$group->id'>$group->name</a> has been accepted.";
+                        } else {
+                            $responseMessage = "Failed to add your account to group.";
+                            $responseSuccess = false;
+                        }
+                    } else {
+                        $responseMessage = "Group invite rejected.";
+                        $responseSuccess = true;
+                        $responseBody = "Your invite to <a href='/group/$group->id'>$group->name</a> has been rejected.";
+                    }
+
+                    InboxMessage::where('sender_id', $message->sender_id)
+                                ->where('group_id', $message->group_id)
+                                ->where('type', 'group_invitation')
+                                ->where('responded', false)
+                                ->update(['responded' => true]);
+
+                    InboxMessage::create([
+                        'sender_id' => $message->recipient_id,
+                        'recipient_id' => $message->sender_id,
+                        'group_id' => $message->group_id,
+                        'type' => 'moderator_action',
+                        'title' => "<a href='/group/$group->id'>$group->name</a> invite response",
                         'body' => $responseBody,
                     ]);
 

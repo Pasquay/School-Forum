@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('title')->nullable()->after('type');
             $table->boolean('responded')->default(false)->after('read_at');
             $table->unsignedBigInteger('group_id')->nullable()->after('recipient_id');
-        });
+        }); 
     }
 
     /**

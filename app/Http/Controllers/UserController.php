@@ -4,19 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Group;
 use App\Models\Reply;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Container\Attributes\DB;
+use Illuminate\Support\Facades\Password;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -703,7 +704,6 @@ class UserController extends Controller
         }
     }
 
-
     public function getUserCommentsAndReplies($id)
     {
         $perPage = 15;
@@ -924,6 +924,46 @@ class UserController extends Controller
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput($request->except('password', 'password_confirmation'));
+        }
+    }
+
+    public function searchUsers(Request $request, $groupId = null){
+        $query = trim($request->get('q'));
+
+        if(!$query || $query==' ' || strlen($query) < 2){
+            return response()->json([
+                'success' => false,
+                'message' => 'Search term must be at least 2 characters',
+                'users' => []
+            ]);
+        }
+
+        try {
+            $usersQuery = User::where('name', 'LIKE', "%{$query}%")
+                              ->select('id', 'name', 'email')
+                              ->limit(20);
+            
+            if($groupId){
+                $group = Group::findOrFail($groupId);
+                if($group){
+                    $existingMemberIds = $group->members()->pluck('users.id')->toArray();
+                    $usersQuery->whereNotIn('id', $existingMemberIds);
+                }
+            }
+
+            $users = $usersQuery->get();
+
+            return response()->json([
+                'success' => true,
+                'users' => $users,
+                'count' => $users->count()
+            ]);
+        } catch(\Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occured while searching users',
+                'users' => [],
+            ], 500);
         }
     }
 }

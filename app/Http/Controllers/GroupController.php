@@ -587,8 +587,7 @@ class GroupController extends Controller
     }
 
     // Group Settings Modal Methods
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id){
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -652,8 +651,36 @@ class GroupController extends Controller
         }
     }
 
-    public function promote(Request $request, $groupId, $userId)
-    {
+    public function invite(Request $request, $groupId){
+        $group = Group::findOrFail($groupId);
+        $user = User::findOrFail(Auth::id());
+
+
+        if(!$group->isOwner($user) && !$group->isModerator($user)){
+            return redirect()->back()->with('error', 'Unauthorized');
+        } else {
+            $userIds = $request->input('user_ids', []);
+
+            foreach($userIds as $userId){
+                if($group->isMember(User::findOrFail($userId))){
+                    return redirect()->back()->with('error', 'Already member of group');
+                } else {
+                    InboxMessage::create([
+                        'sender_id' => $user->id,
+                        'recipient_id' => $userId,
+                        'group_id' => $group->id,
+                        'type' => 'group_invitation',
+                        'title' => "Invitation to join <a href='/group/{$group->id}'>{$group->name}</a>",
+                        'body' => "{$user->name} has invited you to to join <a href='/group/{$group->id}'>{$group->name}</a>.",
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Invitations sent successfully');
+        }
+    }
+
+    public function promote(Request $request, $groupId, $userId){
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -695,6 +722,15 @@ class GroupController extends Controller
         // Promote to moderator
         $group->members()->updateExistingPivot($userId, ['role' => 'moderator']);
 
+        InboxMessage::create([
+            'sender_id' => $user->id,
+            'recipient_id' => $targetUser->id,
+            'group_id' => $group->id,
+            'type' => 'moderator_action',
+            'title' => "You have been promoted to moderator in <a href='/group/{$group->id}'>{$group->name}</a>",
+            'body' => "{$user->name} has promoted you to moderator in <a href='/group/{$group->id}'>{$group->name}</a>.",
+        ]);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -705,8 +741,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been promoted to moderator.');
     }
 
-    public function demote(Request $request, $groupId, $userId)
-    {
+    public function demote(Request $request, $groupId, $userId){
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -747,6 +782,15 @@ class GroupController extends Controller
 
         // Demote to member
         $group->members()->updateExistingPivot($userId, ['role' => 'member']);
+        
+        InboxMessage::create([
+            'sender_id' => $user->id,
+            'recipient_id' => $targetUser->id,
+            'group_id' => $group->id,
+            'type' => 'moderator_action',
+            'title' => "You have been demoted to member in <a href='/group/{$group->id}'>{$group->name}</a>",
+            'body' => "{$user->name} has demoted you to member in <a href='/group/{$group->id}'>{$group->name}</a>.",
+        ]);
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -758,8 +802,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been demoted to member.');
     }
 
-    public function removeMember(Request $request, $groupId, $userId)
-    {
+    public function removeMember(Request $request, $groupId, $userId){
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -816,6 +859,15 @@ class GroupController extends Controller
         $group->members()->detach($userId);
         $group->update(['member_count' => $group->getMemberCount()]);
 
+        InboxMessage::create([
+            'sender_id' => $user->id,
+            'recipient_id' => $targetUser->id,
+            'group_id' => $group->id,
+            'type' => 'moderator_action',
+            'title' => "You have been kicked out of <a href='/group/{$group->id}'>{$group->name}</a>",
+            'body' => "{$user->name} has kicked you out of <a href='/group/{$group->id}'>{$group->name}</a>.",
+        ]);
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
@@ -826,8 +878,7 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been removed from the group.');
     }
 
-    public function updatePermissions(Request $request, $id)
-    {
+    public function updatePermissions(Request $request, $id){
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -880,8 +931,7 @@ class GroupController extends Controller
         }
     }
 
-    public function transferOwnership(Request $request, $id)
-    {
+    public function transferOwnership(Request $request, $id){
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -949,8 +999,7 @@ class GroupController extends Controller
         }
     }
 
-    public function destroy($id)
-    {
+    public function destroy($id){
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 

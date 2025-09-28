@@ -23,11 +23,12 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
     Route::get('/user/{id}/deleted-overview', 'getUserDeletedOverview')->middleware('auth'); // load page 2+ deleted user overview
     Route::get('/user/{id}/deleted-comments-and-replies', 'getUserDeletedCommentsAndReplies')->middleware('auth'); // load page 2+ deleted user comments and replies
-
     // Password reset routes
     Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
     Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
     Route::post('/password/reset', 'resetPassword')->name('password.update'); // update password
+    
+    Route::get('/groups/{groupId}/search-users', 'searchUsers')->middleware('auth')->name('group.searchUsers'); // search for users by name
 });
 
 Route::controller(PostController::class)->group(function () {
@@ -95,6 +96,7 @@ Route::controller(GroupController::class)->group(function () {
     Route::get('/group/{id}', 'showGroup')->middleware('auth')->name('group.show'); // show a group's page
     // Group management routes
     Route::put('/group/{id}', 'update')->middleware('auth')->name('group.update'); // update group settings
+    Route::post('/group/{groupId}/invite', 'invite')->middleware('auth')->name('group.invite'); // invite user to group
     Route::post('/group/{groupId}/promote/{userId}', 'promote')->middleware('auth')->name('group.promote'); // promote member to moderator
     Route::post('/group/{groupId}/demote/{userId}', 'demote')->middleware('auth')->name('group.demote'); // demote moderator to member
     Route::delete('/group/{groupId}/remove/{userId}', 'removeMember')->middleware('auth')->name('group.removeMember'); // remove member

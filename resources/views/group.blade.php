@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +9,6 @@
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/group-styles.css') }}">
 </head>
-
 <body>
     @include('components.navbar', ['active' => 'groups'])
     @include('components.success-header')
@@ -66,8 +64,7 @@
                         @csrf
                         @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
                             <button type="submit" class="manage-button">Manage</button>
-                        @endif
-                        @if($membership)
+                        @elseif($membership)
                             <button type="submit" class="leave-button">Leave</button>
                         @elseif(!$membership && !$group->is_private)
                         <button type="submit" class="join-button">Join</button>
@@ -276,7 +273,15 @@
                             @endforelse
                         </div>
 
-                        <h4>Members</h4>
+                        <div class="members-header-with-invite">
+                            <h4>Members</h4>
+                            <button type="button" class="invite-members-btn" onclick="showAddMembersModal()">
+                                Invite Members
+                            </button>
+                        </div>
+                        <div class="member-search-bar">
+                            <input type="text" id="memberSearch" placeholder="Search members..." class="member-search-input">
+                        </div>
                         <div class="member-list">
                             @foreach($memberList->where('pivot.role', 'member') as $member)
                             <div class="member-item">
@@ -357,8 +362,31 @@
             </div>
         </div>
     </div>
+
+        <!-- Add Members Modal -->
+    <div class="modal" id="addMembersModal" style="display:none;">
+        <div class="modal-content add-members-modal">
+            <div class="modal-header">
+                <h2>Invite members</h2>
+                <button class="close-modal" onclick="closeAddMembersModal()">&times;</button>
+            </div>
+            <div class="user-search-bar">
+                <input type="text" id="userSearch" placeholder="Search users..." class="user-search-input">
+            </div>
+            <!-- {{ route('group.removeMember', [$group->id, $member->id]) }} -->
+            <form action="{{ route('group.invite', [$group->id]) }}" method="post">
+                @csrf
+                <div class="member-list">
+                    <!-- Users will be loaded here with checkboxes -->
+                </div>
+                <div class="add-member-form-buttons">
+                    <button type="button" onclick="closeAddMembersModal()">Cancel</button>
+                    <button type="submit" id="inviteSubmitBtn" disabled>Invite Selected</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>
-
 </html>
