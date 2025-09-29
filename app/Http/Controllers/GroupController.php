@@ -6,11 +6,13 @@ use Log;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
+use App\Models\Assignment;
 use App\Models\InboxMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
+use Illuminate\Validation\ValidationException;
 
 class GroupController extends Controller
 {
@@ -1029,6 +1031,99 @@ class GroupController extends Controller
                 'success' => false,
                 'message' => 'An error occurred while deleting the group.'
             ], 500);
+        }
+    }
+
+    public function createAssignment(Request $request, $id)
+    {
+        try {
+            $group = Group::findOrFail($id);
+
+            $validatedData = $request->validate([
+                'assignment_name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'max_points' => 'required|integer|min:0',
+                'assignment_type' => 'required|in:assignment,quiz,essay,discussion,exam,project',
+                'submission_type' => 'required|in:text,file,external_link',
+                'visibility' => 'required|in:draft,published',
+                'date_assigned' => 'nullable|date',
+                'date_due' => 'required|date|after_or_equal:date_assigned',
+                'close_date' => 'nullable|date|after_or_equal:date_due',
+            ]);
+
+            $validatedData['created_by'] = Auth::id();
+            $validatedData['group_id'] = $group->id;
+
+            $assignment = Assignment::create($validatedData);
+
+            // Future: Add rubrics and notifications
+
+            return response()->json([
+                'message' => 'Assignment created successfully!',
+                'assignment' => $assignment
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to create assignment', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAssignments(Request $request, $id)
+    {
+        try {
+            $group = Group::findOrFail($id);
+            $user = Auth::user();
+
+            // Check if user is a member of the group
+            if (!$user->isMemberOf($group)) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            // Get assignments based on user role
+            $query = $group->assignments()->with(['creator']);
+
+            // If user is not owner/moderator, only show published assignments
+            if (!$user->isOwnerOf($group) && !$user->isModeratorOf($group)) {
+                $query->published();
+            }
+
+            // Get assignments with pagination
+            $assignments = $query->orderBy('date_due', 'asc')
+                               ->orderBy('created_at', 'desc')
+                               ->get();
+
+            // Format assignments for frontend
+            $formattedAssignments = $assignments->map(function ($assignment) {
+                return [
+                    'id' => $assignment->id,
+                    'assignment_name' => $assignment->assignment_name,
+                    'description' => $assignment->description,
+                    'assignment_type' => $assignment->assignment_type,
+                    'submission_type' => $assignment->submission_type,
+                    'max_points' => $assignment->max_points,
+                    'visibility' => $assignment->visibility,
+                    'date_assigned' => $assignment->date_assigned ? $assignment->date_assigned->format('M j, Y g:i A') : null,
+                    'date_due' => $assignment->date_due->format('M j, Y g:i A'),
+                    'close_date' => $assignment->close_date ? $assignment->close_date->format('M j, Y g:i A') : null,
+                    'creator_name' => $assignment->creator->name,
+                    'is_overdue' => $assignment->is_overdue,
+                    'is_closed' => $assignment->is_closed,
+                    'created_at' => $assignment->created_at->format('M j, Y g:i A'),
+                ];
+            });
+
+            return response()->json([
+                'assignments' => $formattedAssignments,
+                'group' => [
+                    'id' => $group->id,
+                    'name' => $group->name
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to fetch assignments', 'error' => $e->getMessage()], 500);
         }
     }
 }

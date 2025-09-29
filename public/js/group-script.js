@@ -359,7 +359,160 @@
              }
          })
      })
+
+
+     document.addEventListener('DOMContentLoaded', function() {
+         const addBtn = document.getElementById('add-btn');
+         const searchBtn = document.getElementById('search-btn');
+         const filterBtn = document.getElementById('filter-btn');
+
+         const createPostContainer = document.getElementById('create-post-container');
+         const searchContainer = document.getElementById('search-container');
+         const filterContainer = document.getElementById('filter-container');
+
+         const postSearch = document.getElementById('post-search');
+         const searchSubmit = document.getElementById('search-submit');
+         const clearSearch = document.getElementById('clear-search');
+
+         const applyFilter = document.getElementById('apply-filter');
+         const clearFilter = document.getElementById('clear-filter');
+         const sortBy = document.getElementById('sort-by');
+         const filterBy = document.getElementById('filter-by');
+
+         // Hide all containers
+         function hideAllContainers() {
+             createPostContainer.style.display = 'none';
+             searchContainer.style.display = 'none';
+             filterContainer.style.display = 'none';
+         }
+
+         // Add button functionality
+         addBtn.addEventListener('click', function(e) {
+             e.preventDefault();
+             hideAllContainers();
+             createPostContainer.style.display = createPostContainer.style.display === 'none' ? 'block' : 'none';
+         });
+
+         // Search button functionality
+         searchBtn.addEventListener('click', function(e) {
+             e.preventDefault();
+             hideAllContainers();
+             searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+         });
+
+         // Filter button functionality
+         filterBtn.addEventListener('click', function(e) {
+             e.preventDefault();
+             hideAllContainers();
+             filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
+         });
+
+         // Search functionality
+         function performSearch() {
+             const searchTerm = postSearch.value.toLowerCase().trim();
+             const posts = document.querySelectorAll('.post');
+
+             posts.forEach(post => {
+                 const title = post.querySelector('h2');
+                 if (title) {
+                     const titleText = title.textContent.toLowerCase();
+                     if (searchTerm === '' || titleText.includes(searchTerm)) {
+                         post.style.display = 'block';
+                     } else {
+                         post.style.display = 'none';
+                     }
+                 }
+             });
+         }
+
+         searchSubmit.addEventListener('click', performSearch);
+         postSearch.addEventListener('keyup', function(e) {
+             if (e.key === 'Enter') {
+                 performSearch();
+             }
+         });
+
+         clearSearch.addEventListener('click', function() {
+             postSearch.value = '';
+             const posts = document.querySelectorAll('.post');
+             posts.forEach(post => {
+                 post.style.display = 'block';
+             });
+         });
+
+         // Filter functionality
+         function applyFilters() {
+             const sortValue = sortBy.value;
+             const filterValue = filterBy.value;
+             const postsContainer = document.querySelector('.content');
+             const posts = Array.from(document.querySelectorAll('.post'));
+
+             // Filter posts
+             posts.forEach(post => {
+                 if (filterValue === 'all') {
+                     post.style.display = 'block';
+                 } else if (filterValue === 'pinned') {
+                     // Check if post is pinned (you may need to adjust this selector)
+                     const isPinned = post.classList.contains('pinned') || post.dataset.pinned === 'true';
+                     post.style.display = isPinned ? 'block' : 'none';
+                 } else if (filterValue === 'regular') {
+                     const isPinned = post.classList.contains('pinned') || post.dataset.pinned === 'true';
+                     post.style.display = !isPinned ? 'block' : 'none';
+                 }
+             });
+
+             // Sort posts
+             const visiblePosts = posts.filter(post => post.style.display !== 'none');
+
+             /* prettier-ignore */
+             if (sortValue === 'newest') {
+                 // Default order, no sorting needed
+             } else if (sortValue === 'oldest') {
+                 visiblePosts.reverse();
+             } else if (sortValue === 'most-voted') {
+                 visiblePosts.sort((a, b) => {
+                     const aVoteEl = a.querySelector('.vote-count');
+                     const bVoteEl = b.querySelector('.vote-count');
+                     const aVotes = parseInt(aVoteEl ? aVoteEl.textContent : '0') || 0;
+                     const bVotes = parseInt(bVoteEl ? bVoteEl.textContent : '0') || 0;
+                     return bVotes - aVotes;
+                 });
+             } else if (sortValue === 'most-commented') {
+                 visiblePosts.sort((a, b) => {
+                     const aCommentEl = a.querySelector('.comment-count');
+                     const bCommentEl = b.querySelector('.comment-count');
+                     const aComments = parseInt(aCommentEl ? aCommentEl.textContent : '0') || 0;
+                     const bComments = parseInt(bCommentEl ? bCommentEl.textContent : '0') || 0;
+                     return bComments - aComments;
+                 });
+             }
+             // Re-append sorted posts
+             const pinnedPosts = document.querySelectorAll('.post.pinned, [data-pinned="true"]');
+             pinnedPosts.forEach(post => postsContainer.appendChild(post));
+
+             visiblePosts.forEach(post => {
+                 if (!post.classList.contains('pinned') && post.dataset.pinned !== 'true') {
+                     postsContainer.appendChild(post);
+                 }
+             });
+         }
+
+         applyFilter.addEventListener('click', applyFilters);
+
+         clearFilter.addEventListener('click', function() {
+             sortBy.value = 'newest';
+             filterBy.value = 'all';
+             const posts = document.querySelectorAll('.post');
+             posts.forEach(post => {
+                 post.style.display = 'block';
+             });
+         });
+     });
  }
+
+ // ACTIVATE!!!
+ addPostEventListeners();
+ //
 
  // ACTIVATE!!!
  addPostEventListeners();

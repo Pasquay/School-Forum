@@ -103,6 +103,9 @@ Route::controller(GroupController::class)->group(function () {
     Route::put('/group/{id}/permissions', 'updatePermissions')->middleware('auth')->name('group.updatePermissions'); // update permissions
     Route::post('/group/{id}/transfer', 'transferOwnership')->middleware('auth')->name('group.transferOwnership'); // transfer ownership
     Route::delete('/group/{id}', 'destroy')->middleware('auth')->name('group.destroy'); // delete group
+    //ASSignments
+    Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth'); // create assignment
+    Route::get('/group/{id}/assignments', 'getAssignments')->middleware('auth'); // get assignments for a group
 });
 
 Route::controller(InboxMessageController::class)->group(function () {

@@ -91,6 +91,16 @@ class User extends Authenticatable
             ->withTimestamps(); 
     }
 
+    public function createdAssignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class, 'created_by');
+    }
+
+    public function assignmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class, 'student_id');
+    }
+
     /**
      * Group Helper Functions
      */

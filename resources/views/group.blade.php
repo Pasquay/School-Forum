@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,147 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/group-styles.css') }}">
+    <style>
+        /* Tab Styles */
+        .content-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+            gap: 20px;
+        }
+
+        .main-tab-btn,
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .main-tab-btn.active,
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .main-tab-btn:hover,
+        .tab-btn:hover {
+            color: #2563eb;
+        }
+
+        .main-tab-content,
+        .tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active,
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Assignment Styles */
+        .assignments-container {
+            min-height: 300px;
+        }
+
+        .assignment-card {
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: white;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .assignment-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .assignment-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .assignment-type {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .assignment-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .assignment-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .assignment-description {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .assignment-status {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-published {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+    </style>
 </head>
+
 <body>
     @include('components.navbar', ['active' => 'groups'])
     @include('components.success-header')
@@ -63,9 +204,9 @@
                     <form action="" method="POST" id="join-leave-form">
                         @csrf
                         @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
-                            <button type="submit" class="manage-button">Manage</button>
+                        <button type="submit" class="manage-button">Manage</button>
                         @elseif($membership)
-                            <button type="submit" class="leave-button">Leave</button>
+                        <button type="submit" class="leave-button">Leave</button>
                         @elseif(!$membership && !$group->is_private)
                         <button type="submit" class="join-button">Join</button>
                         @else
@@ -82,24 +223,166 @@
 
         <div class="center">
             <div class="left">
+                @if($group->owner_id === Auth::id())
+                <button>Create Assignment</button>
+                @endif
                 [LEFT NAV GOES HERE]
             </div>
             <div class="content">
-                [POST SEARCH BAR]<br>
-                [POST SEARCH FILTER NAVBAR]<br>
-                @include('components.create-post-form', ['group' => $group])
-                @if($pinned->count() > 0)
-                @foreach($pinned as $post)
-                @include('components.post', ['post' => $post])
-                @endforeach
-                @endif
-                @if($posts->count() > 0)
-                @foreach($posts as $post)
-                @include('components.post', ['post' => $post])
-                @endforeach
-                @else
-                <p class="empty">No posts yet...</p>
-                @endif
+                <div class="menu">
+                    <a href="#" class="link" id="add-btn">
+                        <span class="link-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="192"
+                                height="192"
+                                fill="currentColor"
+                                viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <line
+                                    x1="128"
+                                    y1="40"
+                                    x2="128"
+                                    y2="216"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></line>
+                                <line
+                                    x1="40"
+                                    y1="128"
+                                    x2="216"
+                                    y2="128"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></line>
+                            </svg>
+                        </span>
+                        <span class="link-title">Add</span>
+                    </a>
+                    <a href="#" class="link" id="search-btn">
+                        <span class="link-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="192"
+                                height="192"
+                                fill="currentColor"
+                                viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <circle
+                                    cx="116"
+                                    cy="116"
+                                    r="84"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></circle>
+                                <line
+                                    x1="175.39356"
+                                    y1="175.40039"
+                                    x2="223.99414"
+                                    y2="224.00098"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></line>
+                            </svg>
+                        </span>
+                        <span class="link-title">Search</span>
+                    </a>
+                    <a href="#" class="link" id="filter-btn">
+                        <span class="link-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="192"
+                                height="192"
+                                fill="currentColor"
+                                viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path
+                                    d="M200,128a8,8,0,0,1-8,8H64a8,8,0,0,1,0-16H192A8,8,0,0,1,200,128ZM64,72H192a8,8,0,0,0,0-16H64a8,8,0,0,0,0,16ZM192,184H64a8,8,0,0,0,0,16H192a8,8,0,0,0,0-16Z"
+                                    fill="currentColor"></path>
+                                <path
+                                    d="M192,64H64a8,8,0,0,0-8,8V184a8,8,0,0,0,8,8H192a8,8,0,0,0,8-8V72A8,8,0,0,0,192,64ZM184,176H72V80H184Z"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="16"></path>
+                            </svg>
+                        </span>
+                        <span class="link-title">Filter</span>
+                    </a>
+                </div>
+
+                <!-- Create Post Form (Initially Hidden) -->
+                <div id="create-post-container" style="display: none;">
+                    @include('components.create-post-form', ['group' => $group])
+                </div>
+
+                <!-- Search Form (Initially Hidden) -->
+                <div id="search-container" style="display: none;">
+                    <div class="search-form">
+                        <input type="text" id="post-search" placeholder="Search posts by title..." />
+                        <button id="search-submit">Search</button>
+                        <button id="clear-search">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Filter Form (Initially Hidden) -->
+                <div id="filter-container" style="display: none;">
+                    <div class="filter-form">
+                        <select id="sort-by">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="most-voted">Most Voted</option>
+                            <option value="most-commented">Most Commented</option>
+                        </select>
+                        <select id="filter-by">
+                            <option value="all">All Posts</option>
+                            <option value="pinned">Pinned Only</option>
+                            <option value="regular">Regular Posts Only</option>
+                        </select>
+                        <button id="apply-filter">Apply</button>
+                        <button id="clear-filter">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Content Tabs -->
+                <div class="content-tabs">
+                    <button class="main-tab-btn active" data-tab="posts">Posts</button>
+                    <button class="main-tab-btn" data-tab="assignments">Assignments</button>
+                </div>
+
+                <!-- Posts Tab Content -->
+                <div id="posts-content" class="main-tab-content active">
+                    @if($pinned->count() > 0)
+                    @foreach($pinned as $post)
+                    @include('components.post', ['post' => $post])
+                    @endforeach
+                    @endif
+                    @if($posts->count() > 0)
+                    @foreach($posts as $post)
+                    @include('components.post', ['post' => $post])
+                    @endforeach
+                    @else
+                    <p class="empty">No posts yet...</p>
+                    @endif
+                </div>
+
+                <!-- Assignments Tab Content -->
+                <div id="assignments-content" class="main-tab-content">
+                    <div class="assignments-container">
+                        <div class="loading" id="assignments-loading">Loading assignments...</div>
+                        <div class="assignments-list" id="assignments-list"></div>
+                        <div class="no-assignments" id="no-assignments" style="display: none;">
+                            <p class="empty">No assignments yet...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="group-info right">
                 <div class="rules">
@@ -363,7 +646,7 @@
         </div>
     </div>
 
-        <!-- Add Members Modal -->
+    <!-- Add Members Modal -->
     <div class="modal" id="addMembersModal" style="display:none;">
         <div class="modal-content add-members-modal">
             <div class="modal-header">
@@ -387,6 +670,152 @@
         </div>
     </div>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Main content tab functionality
+        const mainTabBtns = document.querySelectorAll('.main-tab-btn');
+        const mainTabContents = document.querySelectorAll('.main-tab-content');
+        let assignmentsLoaded = false;
+
+        mainTabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+
+                // Remove active class from all main tabs and contents
+                mainTabBtns.forEach(b => b.classList.remove('active'));
+                mainTabContents.forEach(c => c.classList.remove('active'));
+
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(targetTab + '-content').classList.add('active');
+
+                // Load assignments if assignments tab is clicked and not loaded yet
+                if (targetTab === 'assignments' && !assignmentsLoaded) {
+                    loadAssignments();
+                }
+            });
+        });
+
+        function loadAssignments() {
+            const assignmentsContent = document.getElementById('assignments-content');
+
+            // Show loading state
+            assignmentsContent.innerHTML = `
+            <div class="assignments-container">
+                <div class="loading" style="text-align: center; padding: 40px; color: #6b7280;">
+                    Loading assignments...
+                </div>
+            </div>
+        `;
+
+            fetch(`/group/{{ $group->id }}/assignments`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                            throw new Error('You do not have permission to view assignments in this group.');
+                        } else if (response.status === 404) {
+                            throw new Error('Group not found.');
+                        } else {
+                            throw new Error(`Server error: ${response.status}`);
+                        }
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    assignmentsLoaded = true;
+                    console.log('Assignments data:', data); // Debug log
+
+                    if (data.assignments && data.assignments.length > 0) {
+                        displayAssignments(data.assignments);
+                    } else {
+                        // Explicitly handle the case where there are no assignments
+                        assignmentsContent.innerHTML = `
+                    <div class="assignments-container">
+                        <div style="text-align: center; padding: 60px;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📚</div>
+                            <h3 style="color: #6b7280; margin-bottom: 8px;">No assignments yet</h3>
+                            <p style="color: #9ca3af;">Your teacher hasn't created any assignments for this group.</p>
+                        </div>
+                    </div>
+                `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading assignments:', error);
+                    assignmentsContent.innerHTML = `
+                <div class="assignments-container">
+                    <div style="text-align: center; padding: 40px; color: #dc2626;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                        <p class="error">${error.message}</p>
+                        <button onclick="assignmentsLoaded = false; document.querySelector('.main-tab-btn[data-tab=\\'assignments\\']').click();" style="margin-top: 10px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            `;
+                });
+        }
+
+        function displayAssignments(assignments) {
+            const assignmentsContent = document.getElementById('assignments-content');
+
+            let assignmentsHTML = '<div class="assignments-container"><div class="assignments-list">';
+
+            assignments.forEach(assignment => {
+                assignmentsHTML += createAssignmentCardHTML(assignment);
+            });
+
+            assignmentsHTML += '</div></div>';
+            assignmentsContent.innerHTML = assignmentsHTML;
+        }
+
+        function createAssignmentCardHTML(assignment) {
+            const statusBadges = [];
+            if (assignment.visibility === 'draft') {
+                statusBadges.push('<span class="status-badge status-draft">Draft</span>');
+            } else {
+                statusBadges.push('<span class="status-badge status-published">Published</span>');
+            }
+
+            if (assignment.is_overdue) {
+                statusBadges.push('<span class="status-badge status-overdue">Overdue</span>');
+            }
+
+            if (assignment.is_closed) {
+                statusBadges.push('<span class="status-badge status-overdue">Closed</span>');
+            }
+
+            return `
+            <div class="assignment-card">
+                <div class="assignment-header">
+                    <h3 class="assignment-title">${assignment.assignment_name}</h3>
+                    <span class="assignment-type">${assignment.assignment_type}</span>
+                </div>
+                <div class="assignment-meta">
+                    <span>👤 ${assignment.creator_name}</span>
+                    <span>📝 ${assignment.submission_type}</span>
+                    <span>📊 ${assignment.max_points} points</span>
+                    ${assignment.date_assigned ? `<span>📅 Assigned: ${assignment.date_assigned}</span>` : ''}
+                    <span>⏰ Due: ${assignment.date_due}</span>
+                    ${assignment.close_date ? `<span>🔒 Closes: ${assignment.close_date}</span>` : ''}
+                </div>
+                ${assignment.description ? `<div class="assignment-description">${assignment.description}</div>` : ''}
+                <div class="assignment-status">
+                    ${statusBadges.join('')}
+                </div>
+            </div>
+        `;
+        }
+    });
+</script>
+
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>
+
 </html>
