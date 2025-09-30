@@ -1,8 +1,8 @@
 <style>
     .create-post-form {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        width: 100%;
+        margin: 0 0 1.5rem 0;
+        padding: 0;
     }
 
     .create-post-form form {
@@ -63,19 +63,19 @@
 </div>
 <script>
     // VARIABLES
-        const createPostForm = document.querySelector('#create-post-form');
-        const createPostTitle = createPostForm.querySelector('#create-post-title');
-        const createPostContent = createPostForm.querySelector('#create-post-content');
-        const createPostSubmit = createPostForm.querySelector('#create-post-submit');
+    const createPostForm = document.querySelector('#create-post-form');
+    const createPostTitle = createPostForm.querySelector('#create-post-title');
+    const createPostContent = createPostForm.querySelector('#create-post-content');
+    const createPostSubmit = createPostForm.querySelector('#create-post-submit');
     // LOGIC
-        createPostForm.addEventListener('click', () => {
-            createPostContent.style.display = 'block';
-            createPostSubmit.style.display = 'block';
-        });
-        document.addEventListener('click', (e) => {
-            if(!createPostForm.contains(e.target) && createPostTitle.value === '' && createPostContent.value === ''){
-                createPostContent.style.display = 'none';
-                createPostSubmit.style.display = 'none';
-            }
-        });
+    createPostForm.addEventListener('click', () => {
+        createPostContent.style.display = 'block';
+        createPostSubmit.style.display = 'block';
+    });
+    document.addEventListener('click', (e) => {
+        if (!createPostForm.contains(e.target) && createPostTitle.value === '' && createPostContent.value === '') {
+            createPostContent.style.display = 'none';
+            createPostSubmit.style.display = 'none';
+        }
+    });
 </script>

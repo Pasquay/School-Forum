@@ -9,145 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/group-styles.css') }}">
-    <style>
-        /* Tab Styles */
-        .content-tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e1e5e9;
-            gap: 20px;
-        }
-
-        .main-tab-btn,
-        .tab-btn {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .main-tab-btn.active,
-        .tab-btn.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
-        }
-
-        .main-tab-btn:hover,
-        .tab-btn:hover {
-            color: #2563eb;
-        }
-
-        .main-tab-content,
-        .tab-content {
-            display: none;
-        }
-
-        .main-tab-content.active,
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Assignment Styles */
-        .assignments-container {
-            min-height: 300px;
-        }
-
-        .assignment-card {
-            border: 1px solid #e1e5e9;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-            background: white;
-            transition: box-shadow 0.2s ease;
-        }
-
-        .assignment-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .assignment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .assignment-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0;
-        }
-
-        .assignment-type {
-            background: #f3f4f6;
-            color: #6b7280;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        .assignment-meta {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .assignment-meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .assignment-description {
-            color: #4b5563;
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-
-        .assignment-status {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-published {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-draft {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-overdue {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-        }
-    </style>
 </head>
 
 <body>
@@ -230,6 +91,38 @@
             </div>
             <div class="content">
                 <div class="menu">
+                    <a href="#" class="link active" id="search-btn">
+                        <span class="link-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="192"
+                                height="192"
+                                fill="currentColor"
+                                viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <circle
+                                    cx="116"
+                                    cy="116"
+                                    r="84"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></circle>
+                                <line
+                                    x1="175.39356"
+                                    y1="175.40039"
+                                    x2="223.99414"
+                                    y2="224.00098"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="16"></line>
+                            </svg>
+                        </span>
+                        <span class="link-title">Search</span>
+                    </a>
                     <a href="#" class="link" id="add-btn">
                         <span class="link-icon">
                             <svg
@@ -263,38 +156,6 @@
                         </span>
                         <span class="link-title">Add</span>
                     </a>
-                    <a href="#" class="link" id="search-btn">
-                        <span class="link-icon">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="192"
-                                height="192"
-                                fill="currentColor"
-                                viewBox="0 0 256 256">
-                                <rect width="256" height="256" fill="none"></rect>
-                                <circle
-                                    cx="116"
-                                    cy="116"
-                                    r="84"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="16"></circle>
-                                <line
-                                    x1="175.39356"
-                                    y1="175.40039"
-                                    x2="223.99414"
-                                    y2="224.00098"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="16"></line>
-                            </svg>
-                        </span>
-                        <span class="link-title">Search</span>
-                    </a>
                     <a href="#" class="link" id="filter-btn">
                         <span class="link-icon">
                             <svg
@@ -318,13 +179,13 @@
                     </a>
                 </div>
 
-                <!-- Create Post Form (Initially Hidden) -->
-                <div id="create-post-container" style="display: none;">
+                <!-- Create Post Form -->
+                <div id="create-post-container">
                     @include('components.create-post-form', ['group' => $group])
                 </div>
 
-                <!-- Search Form (Initially Hidden) -->
-                <div id="search-container" style="display: none;">
+                <!-- Search Form (Initially Visible) -->
+                <div id="search-container" style="display: block;">
                     <div class="search-form">
                         <input type="text" id="post-search" placeholder="Search posts by title..." />
                         <button id="search-submit">Search</button>

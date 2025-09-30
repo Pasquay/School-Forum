@@ -379,32 +379,60 @@
          const sortBy = document.getElementById('sort-by');
          const filterBy = document.getElementById('filter-by');
 
-         // Hide all containers
+         // Initialize page state on load
+         function initializePageState() {
+             // Hide all containers first
+             createPostContainer.style.display = 'none';
+             searchContainer.style.display = 'none';
+             filterContainer.style.display = 'none';
+
+             // Remove active class from all buttons
+             addBtn.classList.remove('active');
+             searchBtn.classList.remove('active');
+             filterBtn.classList.remove('active');
+
+             // Set search as default active state
+             searchBtn.classList.add('active');
+             searchContainer.style.display = 'block';
+         }
+
+         // Initialize on page load
+         initializePageState();
+
+         // Hide all containers and remove active states
          function hideAllContainers() {
              createPostContainer.style.display = 'none';
              searchContainer.style.display = 'none';
              filterContainer.style.display = 'none';
+
+             // Remove active class from all buttons
+             addBtn.classList.remove('active');
+             searchBtn.classList.remove('active');
+             filterBtn.classList.remove('active');
          }
 
          // Add button functionality
          addBtn.addEventListener('click', function(e) {
              e.preventDefault();
              hideAllContainers();
-             createPostContainer.style.display = createPostContainer.style.display === 'none' ? 'block' : 'none';
+             addBtn.classList.add('active');
+             createPostContainer.style.display = 'block';
          });
 
          // Search button functionality
          searchBtn.addEventListener('click', function(e) {
              e.preventDefault();
              hideAllContainers();
-             searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+             searchBtn.classList.add('active');
+             searchContainer.style.display = 'block';
          });
 
          // Filter button functionality
          filterBtn.addEventListener('click', function(e) {
              e.preventDefault();
              hideAllContainers();
-             filterContainer.style.display = filterContainer.style.display === 'none' ? 'block' : 'none';
+             filterBtn.classList.add('active');
+             filterContainer.style.display = 'block';
          });
 
          // Search functionality

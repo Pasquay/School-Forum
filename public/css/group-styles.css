@@ -952,23 +952,25 @@ main {
 /* From Uiverse.io by Admin12121 */
 
 .menu {
-    padding: 0.5rem;
-    width: 18rem;
+    padding: 0.3rem;
+    width: 23rem;
     background-color: #fff;
     position: relative;
     display: flex;
     justify-content: center;
     border-radius: 8px;
-    box-shadow: 0 10px 25px 0 rgba(#000, 0.075);
-    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 399;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
 }
 
 .link {
     display: inline-flex;
     justify-content: flex-start;
     align-items: center;
-    width: 60px;
-    height: 40px;
+    width: 50px;
+    height: 35px;
     border-radius: 6px;
     position: relative;
     z-index: 1;
@@ -1070,7 +1072,7 @@ main {
 
 .filter-form select:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: #092b00;
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
 }
 
@@ -1087,13 +1089,13 @@ main {
 
 .search-form button:first-of-type,
 .filter-form button:first-of-type {
-    background-color: #4a90e2;
+    background-color: #092b00;
     color: white;
 }
 
 .search-form button:first-of-type:hover,
 .filter-form button:first-of-type:hover {
-    background-color: #357abd;
+    background-color: #092b00;
 }
 
 .search-form button:last-of-type,
@@ -1105,4 +1107,159 @@ main {
 .search-form button:last-of-type:hover,
 .filter-form button:last-of-type:hover {
     background-color: #5a6268;
+}
+
+.content-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e1e5e9;
+    gap: 20px;
+}
+
+.main-tab-btn,
+.tab-btn {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.main-tab-btn.active,
+.tab-btn.active {
+    color: #092b00;
+    border-bottom-color: #092b00;
+}
+
+.main-tab-btn:hover,
+.tab-btn:hover {
+    color: #092b00;
+}
+
+.main-tab-content,
+.tab-content {
+    display: none;
+}
+
+.main-tab-content.active,
+.tab-content.active {
+    display: block;
+}
+
+
+/* Active link state */
+
+.link.active {
+    width: 130px;
+}
+
+.link.active:before {
+    transform: translateX(0);
+}
+
+.link.active .link-title {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+
+/* Assignment Styles */
+
+.assignments-container {
+    min-height: 300px;
+}
+
+.assignment-card {
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    background: white;
+    transition: box-shadow 0.2s ease;
+}
+
+.assignment-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.assignment-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.assignment-type {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.assignment-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.assignment-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.assignment-description {
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.assignment-status {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-published {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-overdue {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
 }
