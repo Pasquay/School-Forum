@@ -85,9 +85,55 @@
         <div class="center">
             <div class="left">
                 @if($group->owner_id === Auth::id())
-                <button>Create Assignment</button>
+                <button type="button" onclick="openCreateAssignmentModal()">Create Assignment</button>
                 @endif
-                [LEFT NAV GOES HERE]
+
+                <h3>Assignments</h3>
+                @if($assignments && $assignments->count() > 0)
+                <div class="assignments-list">
+                    @foreach($assignments as $assignment)
+                    <div class="assignment-item {{ $assignment->is_overdue ? 'overdue' : '' }} {{ $assignment->is_closed ? 'closed' : '' }}">
+                        <div class="assignment-header">
+                            <h4 class="assignment-name">{{ $assignment->assignment_name }}</h4>
+                            <span class="assignment-type">{{ ucfirst($assignment->assignment_type) }}</span>
+                        </div>
+                        <div class="assignment-details">
+                            <div class="assignment-due">
+                                <strong>Due:</strong>
+                                <span class="due-date">{{ $assignment->date_due->format('M j, Y') }}</span>
+                                <span class="due-time">{{ $assignment->date_due->format('g:i A') }}</span>
+                            </div>
+                            @if($assignment->max_points)
+                            <div class="assignment-points">
+                                <strong>Points:</strong> {{ $assignment->max_points }}
+                            </div>
+                            @endif
+                            @if($assignment->description)
+                            <div class="assignment-description">
+                                {{ Str::limit($assignment->description, 100) }}
+                            </div>
+                            @endif
+                        </div>
+                        <div class="assignment-status">
+                            @if($assignment->is_closed)
+                            <span class="status-badge closed">Closed</span>
+                            @elseif($assignment->is_overdue)
+                            <span class="status-badge overdue">Overdue</span>
+                            @else
+                            <span class="status-badge active">Active</span>
+                            @endif
+                            @if($assignment->visibility === 'draft')
+                            <span class="status-badge draft">Draft</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <div class="no-assignments">
+                    <p>No assignments yet...</p>
+                </div>
+                @endif
             </div>
             <div class="content">
                 <div class="menu">
@@ -530,152 +576,103 @@
             </form>
         </div>
     </div>
+
+
+    <div id="createAssignmentModal" class="modal" style="display: none;">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>Create New Assignment</h2>
+                <button class="close-modal" onclick="closeCreateAssignmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('group.createAssignment', $group->id) }}" method="POST" id="createAssignmentForm">
+                    @csrf
+
+                    <div class="form-group">
+                        <label for="assignment_name">Assignment Name *</label>
+                        <input type="text" id="assignment_name" name="assignment_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assignment_type">Assignment Type *</label>
+                        <select id="assignment_type" name="assignment_type" required>
+                            <option value="">Select type...</option>
+                            <option value="essay">Essay</option>
+                            <option value="quiz">Quiz</option>
+                            <option value="project">Project</option>
+                            <option value="homework">Homework</option>
+                            <option value="exam">Exam</option>
+                            <option value="presentation">Presentation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="submission_type">Submission Type *</label>
+                        <select id="submission_type" name="submission_type" required>
+                            <option value="">Select submission type...</option>
+                            <option value="text">Text Submission</option>
+                            <option value="file">File Upload</option>
+                            <option value="link">External Link</option>
+                            <option value="none">No Submission Required</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="max_points">Maximum Points *</label>
+                        <input type="number" id="max_points" name="max_points" min="1" max="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_assigned">Date Assigned</label>
+                        <input type="datetime-local" id="date_assigned" name="date_assigned" value="{{ now()->format('Y-m-d\TH:i') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_due">Due Date *</label>
+                        <input type="datetime-local" id="date_due" name="date_due" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date_close">Close Date</label>
+                        <input type="datetime-local" id="date_close" name="date_close">
+                        <small class="form-text">Optional: When to stop accepting submissions</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="external_link">External Link</label>
+                        <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
+                        <small class="form-text">Optional: Link to external resources</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="visibility">Visibility *</label>
+                        <select id="visibility" name="visibility" required>
+                            <option value="draft">Draft (Only visible to you)</option>
+                            <option value="published">Published (Visible to all members)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" onclick="closeCreateAssignmentModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Main content tab functionality
-        const mainTabBtns = document.querySelectorAll('.main-tab-btn');
-        const mainTabContents = document.querySelectorAll('.main-tab-content');
-        let assignmentsLoaded = false;
-
-        mainTabBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetTab = this.dataset.tab;
-
-                // Remove active class from all main tabs and contents
-                mainTabBtns.forEach(b => b.classList.remove('active'));
-                mainTabContents.forEach(c => c.classList.remove('active'));
-
-                // Add active class to clicked tab and corresponding content
-                this.classList.add('active');
-                document.getElementById(targetTab + '-content').classList.add('active');
-
-                // Load assignments if assignments tab is clicked and not loaded yet
-                if (targetTab === 'assignments' && !assignmentsLoaded) {
-                    loadAssignments();
-                }
-            });
-        });
-
-        function loadAssignments() {
-            const assignmentsContent = document.getElementById('assignments-content');
-
-            // Show loading state
-            assignmentsContent.innerHTML = `
-            <div class="assignments-container">
-                <div class="loading" style="text-align: center; padding: 40px; color: #6b7280;">
-                    Loading assignments...
-                </div>
-            </div>
-        `;
-
-            fetch(`/group/{{ $group->id }}/assignments`, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        if (response.status === 403) {
-                            throw new Error('You do not have permission to view assignments in this group.');
-                        } else if (response.status === 404) {
-                            throw new Error('Group not found.');
-                        } else {
-                            throw new Error(`Server error: ${response.status}`);
-                        }
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    assignmentsLoaded = true;
-                    console.log('Assignments data:', data); // Debug log
-
-                    if (data.assignments && data.assignments.length > 0) {
-                        displayAssignments(data.assignments);
-                    } else {
-                        // Explicitly handle the case where there are no assignments
-                        assignmentsContent.innerHTML = `
-                    <div class="assignments-container">
-                        <div style="text-align: center; padding: 60px;">
-                            <div style="font-size: 48px; margin-bottom: 16px;">📚</div>
-                            <h3 style="color: #6b7280; margin-bottom: 8px;">No assignments yet</h3>
-                            <p style="color: #9ca3af;">Your teacher hasn't created any assignments for this group.</p>
-                        </div>
-                    </div>
-                `;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading assignments:', error);
-                    assignmentsContent.innerHTML = `
-                <div class="assignments-container">
-                    <div style="text-align: center; padding: 40px; color: #dc2626;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                        <p class="error">${error.message}</p>
-                        <button onclick="assignmentsLoaded = false; document.querySelector('.main-tab-btn[data-tab=\\'assignments\\']').click();" style="margin-top: 10px; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            Try Again
-                        </button>
-                    </div>
-                </div>
-            `;
-                });
-        }
-
-        function displayAssignments(assignments) {
-            const assignmentsContent = document.getElementById('assignments-content');
-
-            let assignmentsHTML = '<div class="assignments-container"><div class="assignments-list">';
-
-            assignments.forEach(assignment => {
-                assignmentsHTML += createAssignmentCardHTML(assignment);
-            });
-
-            assignmentsHTML += '</div></div>';
-            assignmentsContent.innerHTML = assignmentsHTML;
-        }
-
-        function createAssignmentCardHTML(assignment) {
-            const statusBadges = [];
-            if (assignment.visibility === 'draft') {
-                statusBadges.push('<span class="status-badge status-draft">Draft</span>');
-            } else {
-                statusBadges.push('<span class="status-badge status-published">Published</span>');
-            }
-
-            if (assignment.is_overdue) {
-                statusBadges.push('<span class="status-badge status-overdue">Overdue</span>');
-            }
-
-            if (assignment.is_closed) {
-                statusBadges.push('<span class="status-badge status-overdue">Closed</span>');
-            }
-
-            return `
-            <div class="assignment-card">
-                <div class="assignment-header">
-                    <h3 class="assignment-title">${assignment.assignment_name}</h3>
-                    <span class="assignment-type">${assignment.assignment_type}</span>
-                </div>
-                <div class="assignment-meta">
-                    <span>👤 ${assignment.creator_name}</span>
-                    <span>📝 ${assignment.submission_type}</span>
-                    <span>📊 ${assignment.max_points} points</span>
-                    ${assignment.date_assigned ? `<span>📅 Assigned: ${assignment.date_assigned}</span>` : ''}
-                    <span>⏰ Due: ${assignment.date_due}</span>
-                    ${assignment.close_date ? `<span>🔒 Closes: ${assignment.close_date}</span>` : ''}
-                </div>
-                ${assignment.description ? `<div class="assignment-description">${assignment.description}</div>` : ''}
-                <div class="assignment-status">
-                    ${statusBadges.join('')}
-                </div>
-            </div>
-        `;
-        }
-    });
+    // Pass group ID to JavaScript - using a more robust approach
+    window.groupData = JSON.parse('{!! json_encode(["id" => $group->id, "name" => $group->name]) !!}');
+    console.log('Group data set:', window.groupData);
 </script>
-
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>
 

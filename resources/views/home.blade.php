@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,13 +20,14 @@
             background-color: #f5f5f5;
             padding-top: 72px;
         }
-        
+
         main {
             display: flex;
             flex-direction: row;
             align-items: flex-start;
             justify-content: center;
-            gap: 2rem; /* optional: adds space between left and right */
+            gap: 2rem;
+            /* optional: adds space between left and right */
         }
 
         .search {
@@ -279,7 +281,7 @@
         }
 
         .post-share-button:hover {
-            transform:scale(1.1);
+            transform: scale(1.1);
         }
 
         .post-share-button:active {
@@ -295,149 +297,152 @@
             line-height: 1.5;
             transition: background 0.2s;
         }
+
         /* RIGHT SIDE */
-            .right-side {
-                flex: 0 0 340px;
-                max-width: 340px;
-                min-width: 340px;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: sticky;
-                top: 88px;
-                height: fit-content;
-                max-height: calc(100vh - 88px);
-                overflow-y: auto;
-            }
+        .right-side {
+            flex: 0 0 340px;
+            max-width: 340px;
+            min-width: 340px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            position: sticky;
+            top: 88px;
+            height: fit-content;
+            max-height: calc(100vh - 88px);
+            overflow-y: auto;
+        }
 
-            /* RIGHT SIDE SCROLLBAR */
-                .right-side::-webkit-scrollbar {
-                    width: 8px;
-                }
+        /* RIGHT SIDE SCROLLBAR */
+        .right-side::-webkit-scrollbar {
+            width: 8px;
+        }
 
-                .right-side::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 4px;
-                }
+        .right-side::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
 
-                .right-side::-webkit-scrollbar-thumb {
-                    background: #c1c1c1;
-                    border-radius: 4px;
-                    transition: background 0.2s;
-                }
+        .right-side::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
 
-                .right-side::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8;
-                }
+        .right-side::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
 
-                /* For Firefox */
-                .right-side {
-                    scrollbar-width: thin;
-                    scrollbar-color: #c1c1c1 #f1f1f1;
-                }
+        /* For Firefox */
+        .right-side {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+        }
 
-            .user-info {
-                background-color: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.10);
-                padding: 2rem 1.5rem;
-                margin-bottom: 2rem;
-                display: flex;
-                flex-direction: column;
-                align-items: start;
-                gap: 1rem;
-                width: 100%;
-            }
+        .user-info {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.10);
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            gap: 1rem;
+            width: 100%;
+        }
 
-            .groups-created, .groups-moderated, .groups-joined {
-                width: 100%;
-            }
+        .groups-created,
+        .groups-moderated,
+        .groups-joined {
+            width: 100%;
+        }
 
-            .main-header {
-                text-align: center;
-                font-size: 20px;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                color: #333;
-                letter-spacing: 0.01em;
-            }
+        .main-header {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+            letter-spacing: 0.01em;
+        }
 
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                border-bottom: 1px solid #f0f0f0;
-                padding-bottom: 10px;
-                width: 100%;
-            }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+            width: 100%;
+        }
 
-            .section-header p {
-                margin: 0;
-                font-size: 18px; 
-                flex: 1;
-                line-height: 1.5;
-                font-weight: 500;
-                text-decoration: none;
-                transition: color 0.2s;
-            }
+        .section-header p {
+            margin: 0;
+            font-size: 18px;
+            flex: 1;
+            line-height: 1.5;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
 
-            .section-header button:hover {
-                background-color: #357abd;
-            }
+        .section-header button:hover {
+            background-color: #357abd;
+        }
 
-            .user-info .empty {
-                color: #666;
-                font-style: italic;
-                text-align: center;
-                padding: 1rem 0 1rem 0;
-                margin: 0;
-                font-size: 0.9rem;
-                width: 100%;
-                border-bottom: 1px solid #f0f0f0;
-                display: block;
-            }
+        .user-info .empty {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem 0 1rem 0;
+            margin: 0;
+            font-size: 0.9rem;
+            width: 100%;
+            border-bottom: 1px solid #f0f0f0;
+            display: block;
+        }
     </style>
 </head>
+
 <body>
 
     @include('components.navbar', ['active' => 'home'])
 
     @if (session()->has('success'))
-        <div class="success-message">
-            <div 
-                style=
-                    "background-color: #d4edda;
+    <div class="success-message">
+        <div
+            style="background-color: #d4edda;
                      color: #155724;
                      padding: 1rem; 
                      border-radius: 8px; 
                      margin-top: -0.5rem;
                      margin-bottom: 1rem; 
                      text-align: center;">
-                {{ session('success') }}
-            </div>
+            {{ session('success') }}
         </div>
+    </div>
     @endif
     @if ($errors->any())
-        <div 
-            style="background-color: #f8d7da; 
+    <div
+        style="background-color: #f8d7da; 
             color: #721c24; 
             padding: 1rem; 
             border-radius: 8px; 
             margin-top: -0.5rem;
             margin-bottom: 1rem;
             text-align: center;">
-            <ul style="margin: 0; padding-left: 1rem;">
-                @foreach ($errors->all() as $error)
-                    <p>{{ $error }}</p>
-                @endforeach
-            </ul>
-        </div>
+        <ul style="margin: 0; padding-left: 1rem;">
+            @foreach ($errors->all() as $error)
+            <p>{{ $error }}</p>
+            @endforeach
+        </ul>
+    </div>
     @endif
     <main>
         <div class="left-side">
             <div class="create-post-form" id='create-post-form'>
                 <form action="/create-post/1" method='POST'>
-                    @csrf 
+                    @csrf
                     <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
                     <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
                     <button type="submit" id='create-post-submit' style='display:none;'>Post</button>
@@ -446,24 +451,23 @@
             <div class="posts-column" id='posts-column'>
                 <!-- PINNED POSTS -->
                 @foreach($pinned as $post)
-                    @include('components.post', ['post' => $post])
+                @include('components.post', ['post' => $post])
                 @endforeach
                 <!-- POSTS -->
                 @foreach($posts as $post)
-                    @include('components.post', ['post' => $post])
+                @include('components.post', ['post' => $post])
                 @endforeach
             </div>
             @include('components.back-to-top-button')
-            <div class="loader" id='loader' 
+            <div class="loader" id='loader'
                 style='
                     text-align:center;
                     margin:5rem;
-                    display:none;'
-            >
+                    display:none;'>
                 Loading...
             </div>
             <p class="home-bottom" id='home-bottom' style='display:none;'>
-                You're all caught up!     
+                You're all caught up!
             </p>
         </div>
 
@@ -475,11 +479,11 @@
                         <p>Groups Created</p>
                     </div>
                     @if($createdGroups->count() > 0)
-                        @foreach($createdGroups as $group)
-                            @include('components.group-info-minimal', ['group' => $group])
-                        @endforeach
+                    @foreach($createdGroups as $group)
+                    @include('components.group-info-minimal', ['group' => $group])
+                    @endforeach
                     @else
-                        <p class="empty">No groups created yet...</p>
+                    <p class="empty">No groups created yet...</p>
                     @endif
                 </div>
                 <div class="groups-moderated">
@@ -487,11 +491,11 @@
                         <p>Groups Moderated</p>
                     </div>
                     @if($moderatedGroups->count() > 0)
-                        @foreach($moderatedGroups as $group)
-                            @include('components.group-info-minimal', ['group' => $group])
-                        @endforeach
+                    @foreach($moderatedGroups as $group)
+                    @include('components.group-info-minimal', ['group' => $group])
+                    @endforeach
                     @else
-                        <p class="empty">No groups to moderate...</p>
+                    <p class="empty">No groups to moderate...</p>
                     @endif
                 </div>
                 <div class="groups-joined">
@@ -499,11 +503,11 @@
                         <p>Groups Joined</p>
                     </div>
                     @if($joinedGroups->count() > 0)
-                        @foreach($joinedGroups as $group)
-                            @include('components.group-info-minimal', ['group' => $group])
-                        @endforeach
+                    @foreach($joinedGroups as $group)
+                    @include('components.group-info-minimal', ['group' => $group])
+                    @endforeach
                     @else
-                        <p class="empty">No groups joined yet...</p>
+                    <p class="empty">No groups joined yet...</p>
                     @endif
                 </div>
             </div>
@@ -523,148 +527,148 @@
     window.addEventListener('scroll', () => {
         const postContainer = document.getElementById('posts-column');
         const loader = document.getElementById('loader');
-        if(!loading && nextPage){
-            if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 300){
+        if (!loading && nextPage) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
                 loading = true;
                 loader.style.display = 'block';
                 fetch(`home?page=${nextPage}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    postContainer.insertAdjacentHTML('beforeend', data.html);
-                    nextPage = data.next_page;
-                    loading = false;
-                    loader.style.display = 'none';
-                    //attach event listeners again
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        postContainer.insertAdjacentHTML('beforeend', data.html);
+                        nextPage = data.next_page;
+                        loading = false;
+                        loader.style.display = 'none';
+                        //attach event listeners again
                         // Post cards link to post pages
-                            Array.from(posts).forEach(post => {
-                                post.addEventListener('click', () => {
-                                    window.location.href = `/post/${post.id}`;
-                                });
-                                // Post share buttons
-                                const shareButton = post.querySelector('.post-share-button');
-                                shareButton.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                    postUrl = `${window.location.origin}/post/${post.id}`;
-                                    navigator.clipboard.writeText(postUrl)
-                                        .then(() => {
-                                            shareButton.textContent = 'Copied!';
-                                            setTimeout(() => {
-                                                shareButton.textContent = 'Share';
-                                            }, 1200);
-                                        })
-                                })
+                        Array.from(posts).forEach(post => {
+                            post.addEventListener('click', () => {
+                                window.location.href = `/post/${post.id}`;
                             });
+                            // Post share buttons
+                            const shareButton = post.querySelector('.post-share-button');
+                            shareButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                postUrl = `${window.location.origin}/post/${post.id}`;
+                                navigator.clipboard.writeText(postUrl)
+                                    .then(() => {
+                                        shareButton.textContent = 'Copied!';
+                                        setTimeout(() => {
+                                            shareButton.textContent = 'Share';
+                                        }, 1200);
+                                    })
+                            })
+                        });
                         // Upvote and downvote logic
-                            Array.from(posts).forEach(post => {
-                                const voteContainer = post.querySelector('#vote-container');
-                                const upvoteForm = voteContainer.querySelector('form:first-child');
-                                const downvoteForm = voteContainer.querySelector('form:last-child');
-                                const voteCount = voteContainer.querySelector('form:first-child + p');
-                                
-                                voteContainer.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                });
-                                
-                        // UPVOTE
-                                upvoteForm.addEventListener('submit', async(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                        Array.from(posts).forEach(post => {
+                            const voteContainer = post.querySelector('#vote-container');
+                            const upvoteForm = voteContainer.querySelector('form:first-child');
+                            const downvoteForm = voteContainer.querySelector('form:last-child');
+                            const voteCount = voteContainer.querySelector('form:first-child + p');
 
-                                    try {
-                                        const response = await fetch(upvoteForm.action, {
-                                            method: 'POST',
-                                            headers: {
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                                'Accept': 'application/json',
-                                                'Content-Type': 'application/x-www-form-urlencoded'
-                                            },
-                                            credentials: 'same-origin',
-                                            body: new URLSearchParams({
-                                                _token: document.querySelector('meta[name="csrf-token"]').content
-                                            })
-                                        });
-
-                                        if(response.ok){
-                                            const data = await response.json();
-                                            
-                                            voteCount.textContent = data.voteCount;
-
-                                            const upArrow = upvoteForm.querySelector('img');
-                                            upArrow.src = data.voteValue == 1 ?
-                                                "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                                "{{ asset('/icons/up-arrow.png') }}" ;
-                                            
-                                            const downArrow = downvoteForm.querySelector('img');
-                                            if (data.voteValue == 1){
-                                                downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
-                                            }
-                                        }
-                                    } catch (error) {
-                                        console.error('Error:', error);
-                                    }
-                                })
-
-                        // DOWNVOTE
-                                downvoteForm.addEventListener('submit', async(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                            
-                                    try {
-                                        const response = await fetch(downvoteForm.action, {
-                                            method: 'POST',
-                                            headers: {
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                                'Accept': 'application/json',
-                                                'Content-Type': 'application/x-www-form-urlencoded'
-                                            },
-                                            credentials: 'same-origin',
-                                            body: new URLSearchParams({
-                                                _token: document.querySelector('meta[name="csrf-token"]').content
-                                            })
-                                        });
-                            
-                                        if(response.ok){
-                                            const data = await response.json();
-                            
-                                            voteCount.textContent = data.voteCount;
-                            
-                                            const downArrow = downvoteForm.querySelector('img');
-                                            downArrow.src = data.voteValue == -1 ?
-                                                "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                                "{{ asset('/icons/down-arrow.png') }}" ;
-                            
-                                            const upArrow = upvoteForm.querySelector('img');
-                                            if(data.voteValue == -1){
-                                                upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
-                                            }
-                                        }
-                                    } catch(error){
-                                        console.error('Error:', error);
-                                    }
-                                })
+                            voteContainer.addEventListener('click', (e) => {
+                                e.stopPropagation();
                             });
-                })
+
+                            // UPVOTE
+                            upvoteForm.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                try {
+                                    const response = await fetch(upvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
+
+                                    if (response.ok) {
+                                        const data = await response.json();
+
+                                        voteCount.textContent = data.voteCount;
+
+                                        const upArrow = upvoteForm.querySelector('img');
+                                        upArrow.src = data.voteValue == 1 ?
+                                            "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                            "{{ asset('/icons/up-arrow.png') }}";
+
+                                        const downArrow = downvoteForm.querySelector('img');
+                                        if (data.voteValue == 1) {
+                                            downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                }
+                            })
+
+                            // DOWNVOTE
+                            downvoteForm.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                try {
+                                    const response = await fetch(downvoteForm.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: new URLSearchParams({
+                                            _token: document.querySelector('meta[name="csrf-token"]').content
+                                        })
+                                    });
+
+                                    if (response.ok) {
+                                        const data = await response.json();
+
+                                        voteCount.textContent = data.voteCount;
+
+                                        const downArrow = downvoteForm.querySelector('img');
+                                        downArrow.src = data.voteValue == -1 ?
+                                            "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                            "{{ asset('/icons/down-arrow.png') }}";
+
+                                        const upArrow = upvoteForm.querySelector('img');
+                                        if (data.voteValue == -1) {
+                                            upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                        }
+                                    }
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                }
+                            })
+                        });
+                    })
             }
         }
-        if(!nextPage){
+        if (!nextPage) {
             document.getElementById('home-bottom').style.display = 'block';
         }
     })
     // Dynamic create post form
-        createPostForm.addEventListener('click', () => {
-            createPostContent.style.display = 'block';
-            createPostSubmit.style.display = 'block';
-        });
-        document.addEventListener('click', (e) => {
-            if(!createPostForm.contains(e.target) && createPostTitle.value === '' && createPostContent.value === ''){
-                createPostContent.style.display = 'none';
-                createPostSubmit.style.display = 'none';
-            }
-        });
+    createPostForm.addEventListener('click', () => {
+        createPostContent.style.display = 'block';
+        createPostSubmit.style.display = 'block';
+    });
+    document.addEventListener('click', (e) => {
+        if (!createPostForm.contains(e.target) && createPostTitle.value === '' && createPostContent.value === '') {
+            createPostContent.style.display = 'none';
+            createPostSubmit.style.display = 'none';
+        }
+    });
 
     // Post cards link to post pages
     Array.from(posts).forEach(post => {
@@ -686,150 +690,151 @@
         })
     });
     // Upvote and downvote logic
-        Array.from(posts).forEach(post => {
-            const voteContainer = post.querySelector('#vote-container');
-            const upvoteForm = voteContainer.querySelector('form:first-child');
-            const downvoteForm = voteContainer.querySelector('form:last-child');
-            const voteCount = voteContainer.querySelector('form:first-child + p');
-    
-            voteContainer.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-            
-    // UPVOTE
-            upvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+    Array.from(posts).forEach(post => {
+        const voteContainer = post.querySelector('#vote-container');
+        const upvoteForm = voteContainer.querySelector('form:first-child');
+        const downvoteForm = voteContainer.querySelector('form:last-child');
+        const voteCount = voteContainer.querySelector('form:first-child + p');
 
-                try {
-                    const response = await fetch(upvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content
-                        })
-                    });
-
-                    if(response.ok){
-                        const data = await response.json();
-                        
-                        voteCount.textContent = data.voteCount;
-
-                        const upArrow = upvoteForm.querySelector('img');
-                        upArrow.src = data.voteValue == 1 ?
-                            "{{ asset('/icons/up-arrow-alt.png') }}" :
-                            "{{ asset('/icons/up-arrow.png') }}" ;
-                        
-                        const downArrow = downvoteForm.querySelector('img');
-                        if (data.voteValue == 1){
-                            downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            })
-
-    // DOWNVOTE
-            downvoteForm.addEventListener('submit', async(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-        
-                try {
-                    const response = await fetch(downvoteForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        credentials: 'same-origin',
-                        body: new URLSearchParams({
-                            _token: document.querySelector('meta[name="csrf-token"]').content
-                        })
-                    });
-        
-                    if(response.ok){
-                        const data = await response.json();
-        
-                        voteCount.textContent = data.voteCount;
-        
-                        const downArrow = downvoteForm.querySelector('img');
-                        downArrow.src = data.voteValue == -1 ?
-                            "{{ asset('/icons/down-arrow-alt.png') }}" :
-                            "{{ asset('/icons/down-arrow.png') }}" ;
-        
-                        const upArrow = upvoteForm.querySelector('img');
-                        if(data.voteValue == -1){
-                            upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
-                        }
-                    }
-                } catch(error){
-                    console.error('Error:', error);
-                }
-            })
+        voteContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
-    // Right Side
-        function addRightGroupEventListeners(){
-            const rightGroups = document.querySelectorAll('.group-info-minimal');
-            rightGroups.forEach(group => {
-            // Onclick lead to group Page
-                const groupid = group.dataset.groupid;
-                group.addEventListener('click', () => {
-                    window.location.href = `/group/${groupid}`;
-                })
-            // Star and Unstar Group
-                const starForm = group.querySelector('form');
-                const starBtn = group.querySelector('.star');
-                if(starBtn){
-                    let starImg = starBtn.querySelector('img');
 
-                    starBtn.addEventListener('click', async(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+        // UPVOTE
+        upvoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-                        starBtn.disabled = true;
-                        starBtn.style.opacity = '0.5';
-                        starBtn.style.cursor = 'default';
-
-                        setTimeout(() => {
-                            starBtn.disabled = false;
-                            starBtn.style.opacity = '1';
-                            starBtn.style.cursor = 'pointer';
-                        }, 400);
-
-                        try {
-                            const response = await fetch(starForm.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'x-www-form-urlencoded',
-                                },
-                                credentials: 'same-origin',
-                                body: new URLSearchParams({
-                                    _token: document.querySelector('meta[name="csrf-token"]').content,
-                                })
-                            });
-
-                            if(response.ok){
-                                const data = await response.json();
-                                starImg.src = data.starValue ?
-                                    '{{ asset("/icons/star.png") }}' :
-                                    '{{ asset("/icons/star-alt.png") }}' ;
-                            }
-                        } catch(error){
-                            console.error('Error: ', error);
-                        }
+            try {
+                const response = await fetch(upvoteForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    credentials: 'same-origin',
+                    body: new URLSearchParams({
+                        _token: document.querySelector('meta[name="csrf-token"]').content
                     })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    voteCount.textContent = data.voteCount;
+
+                    const upArrow = upvoteForm.querySelector('img');
+                    upArrow.src = data.voteValue == 1 ?
+                        "{{ asset('/icons/up-arrow-alt.png') }}" :
+                        "{{ asset('/icons/up-arrow.png') }}";
+
+                    const downArrow = downvoteForm.querySelector('img');
+                    if (data.voteValue == 1) {
+                        downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                    }
                 }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        })
+
+        // DOWNVOTE
+        downvoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            try {
+                const response = await fetch(downvoteForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    credentials: 'same-origin',
+                    body: new URLSearchParams({
+                        _token: document.querySelector('meta[name="csrf-token"]').content
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    voteCount.textContent = data.voteCount;
+
+                    const downArrow = downvoteForm.querySelector('img');
+                    downArrow.src = data.voteValue == -1 ?
+                        "{{ asset('/icons/down-arrow-alt.png') }}" :
+                        "{{ asset('/icons/down-arrow.png') }}";
+
+                    const upArrow = upvoteForm.querySelector('img');
+                    if (data.voteValue == -1) {
+                        upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        })
+    });
+    // Right Side
+    function addRightGroupEventListeners() {
+        const rightGroups = document.querySelectorAll('.group-info-minimal');
+        rightGroups.forEach(group => {
+            // Onclick lead to group Page
+            const groupid = group.dataset.groupid;
+            group.addEventListener('click', () => {
+                window.location.href = `/group/${groupid}`;
             })
-        }
-        addRightGroupEventListeners();
+            // Star and Unstar Group
+            const starForm = group.querySelector('form');
+            const starBtn = group.querySelector('.star');
+            if (starBtn) {
+                let starImg = starBtn.querySelector('img');
+
+                starBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    starBtn.disabled = true;
+                    starBtn.style.opacity = '0.5';
+                    starBtn.style.cursor = 'default';
+
+                    setTimeout(() => {
+                        starBtn.disabled = false;
+                        starBtn.style.opacity = '1';
+                        starBtn.style.cursor = 'pointer';
+                    }, 400);
+
+                    try {
+                        const response = await fetch(starForm.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'Content-Type': 'x-www-form-urlencoded',
+                            },
+                            credentials: 'same-origin',
+                            body: new URLSearchParams({
+                                _token: document.querySelector('meta[name="csrf-token"]').content,
+                            })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            starImg.src = data.starValue ?
+                                '{{ asset("/icons/star.png") }}' :
+                                '{{ asset("/icons/star-alt.png") }}';
+                        }
+                    } catch (error) {
+                        console.error('Error: ', error);
+                    }
+                })
+            }
+        })
+    }
+    addRightGroupEventListeners();
 </script>
+
 </html>

@@ -27,7 +27,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
     Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
     Route::post('/password/reset', 'resetPassword')->name('password.update'); // update password
-    
+
     Route::get('/groups/{groupId}/search-users', 'searchUsers')->middleware('auth')->name('group.searchUsers'); // search for users by name
 });
 
@@ -104,7 +104,7 @@ Route::controller(GroupController::class)->group(function () {
     Route::post('/group/{id}/transfer', 'transferOwnership')->middleware('auth')->name('group.transferOwnership'); // transfer ownership
     Route::delete('/group/{id}', 'destroy')->middleware('auth')->name('group.destroy'); // delete group
     //ASSignments
-    Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth'); // create assignment
+    Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth')->name('group.createAssignment'); // create assignment
     Route::get('/group/{id}/assignments', 'getAssignments')->middleware('auth'); // get assignments for a group
 });
 

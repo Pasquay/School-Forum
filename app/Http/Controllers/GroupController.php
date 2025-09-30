@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
@@ -10,13 +9,16 @@ use App\Models\Assignment;
 use App\Models\InboxMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreGroupRequest;
 use App\Http\Requests\UpdateGroupRequest;
 use Illuminate\Validation\ValidationException;
 
 class GroupController extends Controller
 {
-    public function showGroups(Request $request){
+    public function showGroups(Request $request)
+    {
         $sortBy = $request->get('sort', 'members');
         $timeFrame = $request->get('time', 'all');
         $showJoined = $request->get('show_joined', '1');
@@ -26,56 +28,56 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        if($search){
+        if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
-                   ->orWhere('description', 'like', '%' . $search . '%');
+                ->orWhere('description', 'like', '%' . $search . '%');
         }
 
-        switch($sortBy){
+        switch ($sortBy) {
             case 'new':
                 $groups->orderBy('created_at', 'desc')
-                       ->orderBy('name', 'asc');
+                    ->orderBy('name', 'asc');
                 break;
             case 'active':
-                if($timeFrame !== 'all'){
-                    $date = match($timeFrame){
+                if ($timeFrame !== 'all') {
+                    $date = match ($timeFrame) {
                         'today' => now()->startOfDay(),
                         'week' => now()->startOfWeek(),
                         'month' => now()->startOfMonth(),
                         'year' => now()->startOfYear(),
                         default => null,
                     };
-                    if($date){
-                        $groups->withCount(['posts' => function($query) use ($date){
+                    if ($date) {
+                        $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
             default:
                 $groups->orderBy('member_count', 'desc')
-                       ->orderBy('name', 'asc');
+                    ->orderBy('name', 'asc');
         }
 
         $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
 
-        if($showJoined === '0'){
+        if ($showJoined === '0') {
             $groups->whereNotIn('id', $joinedGroupIds);
         }
 
         // Pagination
-        
+
         $perPage = 10;
         $currentPage = request('page', 1);
-        
+
         $groups = $groups->get();
         $groupsCount = $groups->count();
         $offset = ($currentPage - 1) * $perPage;
@@ -89,42 +91,42 @@ class GroupController extends Controller
             ['path' => request()->url()]
         );
 
-        foreach($groups as $group){
+        foreach ($groups as $group) {
             $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
         }
 
         // Right Side Groups    
         $createdGroups = $user->groups()
-                              ->wherePivot('role', 'owner')
-                              ->orderBy('is_starred', 'desc')
-                              ->orderBy('name', 'asc')
-                              ->get();
+            ->wherePivot('role', 'owner')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
         $moderatedGroups = $user->groups()
-                                ->wherePivot('role', 'moderator')
-                                ->orderBy('is_starred', 'desc')
-                                ->orderBy('name', 'asc')
-                                ->get();
+            ->wherePivot('role', 'moderator')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
         $joinedGroups = $user->groups()
-                             ->wherePivot('role', 'member')
-                             ->orderBy('is_starred', 'desc')
-                             ->orderBy('name', 'asc')
-                             ->get();
+            ->wherePivot('role', 'member')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
 
-        if($request->ajax()){
+        if ($request->ajax()) {
             $html = '';
-            foreach($groups as $group){
+            foreach ($groups as $group) {
                 $html .= view('components.group-info', [
-                            'group' => $group,
-                        ])->render();
+                    'group' => $group,
+                ])->render();
             }
             $html .= '<p class="empty"></p>';
 
             return response()->json([
                 'html' => $html,
             ]);
-        }    
+        }
 
         return view('groups', compact(
             'groups',
@@ -134,7 +136,8 @@ class GroupController extends Controller
         ));
     }
 
-    public function showGroupsPaginated($page, Request $request){
+    public function showGroupsPaginated($page, Request $request)
+    {
         $sortBy = $request->get('sort', 'members');
         $timeFrame = $request->get('time', 'all');
         $showJoined = $request->get('show_joined', '1');
@@ -144,53 +147,52 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        foreach($groups as $group){
+        foreach ($groups as $group) {
             $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
         }
 
-        if($search){
+        if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
-                   ->orWhere('description', 'like', '%' . $search . '%');
+                ->orWhere('description', 'like', '%' . $search . '%');
         }
 
-        switch($sortBy){
+        switch ($sortBy) {
             case 'new':
                 $groups->orderBy('created_at', 'desc')
-                       ->orderBy('name', 'asc');
+                    ->orderBy('name', 'asc');
                 break;
             case 'active':
-                if($timeFrame !== 'all'){
-                    $date = match($timeFrame){
+                if ($timeFrame !== 'all') {
+                    $date = match ($timeFrame) {
                         'today' => now()->startOfDay(),
                         'week' => now()->startOfWeek(),
                         'month' => now()->startOfMonth(),
                         'year' => now()->startOfYear(),
                         default => null,
                     };
-                    if($date){
-                        $groups->withCount(['posts' => function($query) use ($date){
-                                $query->where('created_at', '>=', $date);
-                            }])->having('posts_count', '>', 0)
-                               ->orderBy('posts_count', 'desc')
-                               ->orderBy('name', 'asc'); 
+                    if ($date) {
+                        $groups->withCount(['posts' => function ($query) use ($date) {
+                            $query->where('created_at', '>=', $date);
+                        }])->having('posts_count', '>', 0)
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
             default:
                 $groups->orderBy('member_count', 'desc')
-                       ->orderBy('name', 'asc');
-
+                    ->orderBy('name', 'asc');
         }
 
         $joinedGroupIds = $user->groups()->pluck('groups.id')->toArray();
 
-        if($showJoined === '0'){
+        if ($showJoined === '0') {
             $groups->whereNotIn('id', $joinedGroupIds);
         }
 
@@ -201,22 +203,24 @@ class GroupController extends Controller
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
 
         $html = '';
-        foreach($groups as $group){
+        foreach ($groups as $group) {
             $html .= view('components.group-info', ['group' => $group])->render();
         }
 
         // $html .= '<p class="empty">test</p>';
         return response()->json([
             'html' => $html,
-            'next_page' => $groups->hasMorePages() ? $groups->currentPage()+1 : NULL
+            'next_page' => $groups->hasMorePages() ? $groups->currentPage() + 1 : NULL
         ]);
     }
 
-    public function showCreateGroup(){
+    public function showCreateGroup()
+    {
         return view('create-group');
     }
 
-    public function createGroup(Request $request){
+    public function createGroup(Request $request)
+    {
         try {
             $groupData = $request->validate([
                 'name' => ['required', 'string', 'min:3', 'max:50'],
@@ -244,7 +248,7 @@ class GroupController extends Controller
                 'member_count' => 1,
             ]);
 
-            if($request->hasFile('photo')){
+            if ($request->hasFile('photo')) {
                 $photoPath = $request->file('photo')->storeAs(
                     'groups/photos',
                     'group-' . $group->id . '-photo.' . $request->file('photo')->extension(),
@@ -253,7 +257,7 @@ class GroupController extends Controller
                 $group->update(['photo' => $photoPath]);
             }
 
-            if($request->hasFile('banner')){
+            if ($request->hasFile('banner')) {
                 $bannerPath = $request->file('banner')->storeAs(
                     'groups/banners',
                     'group-' . $group->id . '-banner.' . $request->file('banner')->extension(),
@@ -271,69 +275,88 @@ class GroupController extends Controller
 
             // later change this to redirect to that group's page
             return redirect('/groups')->with('success', 'Group created successfully');
-        } catch(\Illuminate\Validation\ValidationException $error){
+        } catch (\Illuminate\Validation\ValidationException $error) {
             return redirect()->back()->withErrors($error->errors())->withInput();
-        } catch (\Exception $error){
+        } catch (\Exception $error) {
             return redirect()->back()->with('error', $error->getMessage())->withInput();
         }
     }
- 
-    public function showGroup($id){
+
+    public function showGroup($id)
+    {
         // Return to home page if $id is home group
-            if($id == 1) return app(\App\Http\Controllers\PostController::class)->getLatest(request());
+        if ($id == 1) return app(\App\Http\Controllers\PostController::class)->getLatest(request());
 
         // Load all members
-            $group = Group::with('members')->findOrFail($id);
-            $group->requested = InboxMessage::hasPendingGroupJoinRequest(Auth::id(), $group->id);
+        $group = Group::with('members')->findOrFail($id);
+        $group->requested = InboxMessage::hasPendingGroupJoinRequest(Auth::id(), $group->id);
 
         // Find the current user's membership (if any)
-            $membership = $group->members->where('id', Auth::id())
-                                        ->first();
+        $membership = $group->members->where('id', Auth::id())
+            ->first();
 
         // All members for the member list
-            $memberList = $group->members;
+        $memberList = $group->members;
 
         // Pinned Posts
-            $pinned = $group->pinnedPosts()
-                            ->orderByDesc('pinned_post.created_at')
-                            ->take(5)
-                            ->get();
-            
-            $pinned->transform(function($post){
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                $post->isPinned = 1;
-                return $post;
-            });
+        $pinned = $group->pinnedPosts()
+            ->orderByDesc('pinned_post.created_at')
+            ->take(5)
+            ->get();
+
+        $pinned->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            $post->isPinned = 1;
+            return $post;
+        });
 
         // First 15 posts in the group
-            $allPosts = Post::where('group_id', $group->id)
-                        ->whereDoesntHave('pinnedInGroups', function($query) use ($group){
-                            $query->where('group_id', $group->id);
-                        })
-                        ->latest()
-                        ->withCount(['votes', 'comments'])
-                        ->get();
+        $allPosts = Post::where('group_id', $group->id)
+            ->whereDoesntHave('pinnedInGroups', function ($query) use ($group) {
+                $query->where('group_id', $group->id);
+            })
+            ->latest()
+            ->withCount(['votes', 'comments'])
+            ->get();
 
-            $allPosts->transform(function($post){
-                $post->votes = $post->getVoteCountAttribute();
-                $post->userVote = $post->getUserVoteAttribute();
-                return $post;
-            });
+        $allPosts->transform(function ($post) {
+            $post->votes = $post->getVoteCountAttribute();
+            $post->userVote = $post->getUserVoteAttribute();
+            return $post;
+        });
 
-            $perPage = 15;
-            $currentPage = request('page', 1);
-            $total = $allPosts->count();
-            $offset = ($currentPage - 1) * $perPage;
-            $items = $allPosts->slice($offset, $perPage)->values();
+        $perPage = 15;
+        $currentPage = request('page', 1);
+        $total = $allPosts->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $items = $allPosts->slice($offset, $perPage)->values();
 
-            $posts = new \Illuminate\Pagination\LengthAwarePaginator(
-                $items,
-                $total,
-                $perPage,
-                $currentPage,
-                ['path' => request()->url()]
-            );
+        $posts = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        // Get assignments for left sidebar
+        $assignments = collect();
+        if ($membership) {
+            $query = $group->assignments()->with(['creator']);
+
+            // Check user role from the membership pivot table
+            $userRole = $membership->pivot->role ?? null;
+
+            // If user is not owner/moderator, only show published assignments
+            if ($userRole !== 'owner' && $userRole !== 'moderator') {
+                $query->where('visibility', 'published');
+            }
+
+            $assignments = $query->orderBy('date_due', 'asc')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         return view('group', compact(
             'group',
@@ -341,20 +364,22 @@ class GroupController extends Controller
             'memberList',
             'pinned',
             'posts',
+            'assignments',
         ));
     }
 
     // SHOW GROUP PAGINATED
 
-    public function toggleStar($id){
+    public function toggleStar($id)
+    {
         $user = User::findOrFail(Auth::id());
         $group = $user->groups()->where('group_id', $id)->first();
-        
-        if(!$group) return back()->with('error', 'You are not a member of that group');
+
+        if (!$group) return back()->with('error', 'You are not a member of that group');
 
         $starState = $group->pivot->is_starred;
-        
-        $newStarState = $starState ? 0 : 1; 
+
+        $newStarState = $starState ? 0 : 1;
 
         $user->groups()->updateExistingPivot($id, ['is_starred' => $newStarState]);
 
@@ -364,12 +389,13 @@ class GroupController extends Controller
         ]);
     }
 
-    public function toggleMute($id){
+    public function toggleMute($id)
+    {
         $user = User::findOrFail(Auth::id());
         $group = $user->groups()->where('group_id', $id)->first();
 
-        if(!$group) return back()->with('error', 'You are not a member of that group');
-        
+        if (!$group) return back()->with('error', 'You are not a member of that group');
+
         $muteState = $group->pivot->is_muted;
 
         $newMuteState = $muteState ? 0 : 1;
@@ -382,35 +408,36 @@ class GroupController extends Controller
         ]);
     }
 
-    public function joinGroup($id){
+    public function joinGroup($id)
+    {
         $user = User::findOrFail(Auth::id());
         $membership = $user->groups()
-                           ->where('groups.id', $id)
-                           ->exists();
-        if(!$membership){
+            ->where('groups.id', $id)
+            ->exists();
+        if (!$membership) {
             $user->groups()
-                 ->attach($id, [
+                ->attach($id, [
                     'role' => 'member',
                     'is_starred' => false,
                     'is_muted' => false,
-                 ]);
+                ]);
 
             $group = Group::findOrFail($id);
             $group->update(['member_count' => $group->getMemberCount()]);
 
             $joinedGroups = $user->groups()
-                                 ->wherePivot('role', 'member')
-                                 ->orderBy('is_starred', 'desc')
-                                 ->orderBy('name', 'asc')
-                                 ->get();
-            
+                ->wherePivot('role', 'member')
+                ->orderBy('is_starred', 'desc')
+                ->orderBy('name', 'asc')
+                ->get();
+
             $joinedGroupsHTML = '
                 <div class="section-header">
                     <p>Groups Joined</p>
                 </div>';
 
-            if($joinedGroups->count() > 0){
-                foreach($joinedGroups as $joinedGroup){
+            if ($joinedGroups->count() > 0) {
+                foreach ($joinedGroups as $joinedGroup) {
                     $joinedGroupsHTML .= view('components.group-info-minimal', ['group' => $joinedGroup])->render();
                 }
             } else {
@@ -430,31 +457,32 @@ class GroupController extends Controller
         ]);
     }
 
-    public function leaveGroup($id){
+    public function leaveGroup($id)
+    {
         $user = User::findOrFail(Auth::id());
         $membership = $user->groups()
-                           ->where('groups.id', $id)
-                           ->exists();
-        if($membership){
+            ->where('groups.id', $id)
+            ->exists();
+        if ($membership) {
             $user->groups()
-                 ->detach($id);
+                ->detach($id);
 
             $group = Group::findOrFail($id);
-            $group->update(['member_count', $group->getMemberCount()]);
+            $group->update(['member_count' => $group->getMemberCount()]);
 
             $joinedGroups = $user->groups()
-                                 ->wherePivot('role', 'member')
-                                 ->orderBy('is_starred', 'desc')
-                                 ->orderBy('name', 'asc')
-                                 ->get();
+                ->wherePivot('role', 'member')
+                ->orderBy('is_starred', 'desc')
+                ->orderBy('name', 'asc')
+                ->get();
 
             $joinedGroupsHTML = '
                 <div class="section-header">
                     <p>Groups Joined</p>
                 </div>';
 
-            if($joinedGroups->count() > 0){
-                foreach($joinedGroups as $joinedGroup){
+            if ($joinedGroups->count() > 0) {
+                foreach ($joinedGroups as $joinedGroup) {
                     $joinedGroupsHTML .= view('components.group-info-minimal', ['group' => $joinedGroup])->render();
                 }
             } else {
@@ -474,18 +502,19 @@ class GroupController extends Controller
         ]);
     }
 
-    public function showGroupSettings($id, Request $request){
+    public function showGroupSettings($id, Request $request)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
-        if($group->isOwner($user) || $group->isModerator($user)){
+        if ($group->isOwner($user) || $group->isModerator($user)) {
             $moderatorIds = $group->getModeratorIds();
             $moderators = User::whereIn('id', $moderatorIds)
-                              ->get();
+                ->get();
 
             $memberIds = $group->getMemberIds();
             $members = User::whereIn('id', $memberIds)
-                           ->get();
+                ->get();
 
             return view('group-settings', compact(
                 'group',
@@ -495,20 +524,20 @@ class GroupController extends Controller
         } else {
             return $this->showGroups($request)->with('error', 'Must be moderator or owner to access group settings');
         }
-        
     }
 
-    public function addModerators($id, Request $request){
+    public function addModerators($id, Request $request)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
-        if($group->isOwner($user) || $group->isModerator($user)){
+        if ($group->isOwner($user) || $group->isModerator($user)) {
             $data = $request->validate([
                 'moderators' => 'required|array|min:1',
                 'moderators.*' => 'exists:users,id',
             ]);
 
-            foreach($data['moderators'] as $moderatorId){
+            foreach ($data['moderators'] as $moderatorId) {
                 $group->members()->updateExistingPivot($moderatorId, ['role' => 'moderator']);
 
                 InboxMessage::create([
@@ -527,16 +556,17 @@ class GroupController extends Controller
         }
     }
 
-    public function demoteModerator($groupId, $userId){
+    public function demoteModerator($groupId, $userId)
+    {
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
-        
-        if($group->isOwner($user) || $group->isModerator($user)){
+
+        if ($group->isOwner($user) || $group->isModerator($user)) {
             $member = User::findOrFail($userId);
             $group->members()->updateExistingPivot($member->id, ['role' => 'member']);
 
             InboxMessage::create([
-                'sender_id' => $user->id, 
+                'sender_id' => $user->id,
                 'recipient_id' => $member->id,
                 'type' => 'moderator_action',
                 'title' => "You have been made a member for <a href='/group/$group->id'>$group->name</a>",
@@ -550,17 +580,18 @@ class GroupController extends Controller
         }
     }
 
-    public function requestToJoinGroup($id){
+    public function requestToJoinGroup($id)
+    {
         $user = User::findOrFail(Auth::id());
         $membership = $user->groups()
-                           ->where('groups.id', $id)
-                           ->exists();
+            ->where('groups.id', $id)
+            ->exists();
 
         $requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $id);
-        
-        if(!$membership && !$requested){
+
+        if (!$membership && !$requested) {
             $group = Group::findOrFail($id);
-            foreach($group->getModeratorAndOwnerIds() as $recipientId){
+            foreach ($group->getModeratorAndOwnerIds() as $recipientId) {
                 InboxMessage::create([
                     'sender_id' => $user->id,
                     'recipient_id' => $recipientId,
@@ -577,8 +608,8 @@ class GroupController extends Controller
                 'message' => 'Requested to join ' . $group->name,
             ]);
         } else {
-            $message = $membership ? 
-                'You are already a member.' : 
+            $message = $membership ?
+                'You are already a member.' :
                 'You already requested to join.';
             return response()->json([
                 'success' => false,
@@ -589,7 +620,8 @@ class GroupController extends Controller
     }
 
     // Group Settings Modal Methods
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -653,18 +685,19 @@ class GroupController extends Controller
         }
     }
 
-    public function invite(Request $request, $groupId){
+    public function invite(Request $request, $groupId)
+    {
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
 
 
-        if(!$group->isOwner($user) && !$group->isModerator($user)){
+        if (!$group->isOwner($user) && !$group->isModerator($user)) {
             return redirect()->back()->with('error', 'Unauthorized');
         } else {
             $userIds = $request->input('user_ids', []);
 
-            foreach($userIds as $userId){
-                if($group->isMember(User::findOrFail($userId))){
+            foreach ($userIds as $userId) {
+                if ($group->isMember(User::findOrFail($userId))) {
                     return redirect()->back()->with('error', 'Already member of group');
                 } else {
                     InboxMessage::create([
@@ -682,7 +715,8 @@ class GroupController extends Controller
         }
     }
 
-    public function promote(Request $request, $groupId, $userId){
+    public function promote(Request $request, $groupId, $userId)
+    {
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -743,7 +777,8 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been promoted to moderator.');
     }
 
-    public function demote(Request $request, $groupId, $userId){
+    public function demote(Request $request, $groupId, $userId)
+    {
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -784,7 +819,7 @@ class GroupController extends Controller
 
         // Demote to member
         $group->members()->updateExistingPivot($userId, ['role' => 'member']);
-        
+
         InboxMessage::create([
             'sender_id' => $user->id,
             'recipient_id' => $targetUser->id,
@@ -804,7 +839,8 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been demoted to member.');
     }
 
-    public function removeMember(Request $request, $groupId, $userId){
+    public function removeMember(Request $request, $groupId, $userId)
+    {
         $group = Group::findOrFail($groupId);
         $user = User::findOrFail(Auth::id());
         $targetUser = User::findOrFail($userId);
@@ -880,7 +916,8 @@ class GroupController extends Controller
         return redirect()->back()->with('success', $targetUser->name . ' has been removed from the group.');
     }
 
-    public function updatePermissions(Request $request, $id){
+    public function updatePermissions(Request $request, $id)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -933,7 +970,8 @@ class GroupController extends Controller
         }
     }
 
-    public function transferOwnership(Request $request, $id){
+    public function transferOwnership(Request $request, $id)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -1001,7 +1039,8 @@ class GroupController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         $group = Group::findOrFail($id);
         $user = User::findOrFail(Auth::id());
 
@@ -1054,6 +1093,11 @@ class GroupController extends Controller
             $validatedData['created_by'] = Auth::id();
             $validatedData['group_id'] = $group->id;
 
+            // Temporary fix: Set description to null to avoid constraint violation
+            if (isset($validatedData['description'])) {
+                $validatedData['description'] = null;
+            }
+
             $assignment = Assignment::create($validatedData);
 
             // Future: Add rubrics and notifications
@@ -1062,7 +1106,6 @@ class GroupController extends Controller
                 'message' => 'Assignment created successfully!',
                 'assignment' => $assignment
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
@@ -1072,27 +1115,42 @@ class GroupController extends Controller
 
     public function getAssignments(Request $request, $id)
     {
+        Log::info('getAssignments called with ID: ' . $id);
         try {
             $group = Group::findOrFail($id);
             $user = Auth::user();
 
-            // Check if user is a member of the group
-            if (!$user->isMemberOf($group)) {
+            Log::info('User authenticated: ' . $user->id);
+            Log::info('Group found: ' . $group->id);
+
+            // Check if user is a member using direct database query
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $id)
+                ->first();
+
+            if (!$membership) {
+                Log::info('User is not a member of this group');
                 return response()->json(['message' => 'You are not a member of this group'], 403);
             }
+
+            Log::info('User is a member with role: ' . $membership->role);
 
             // Get assignments based on user role
             $query = $group->assignments()->with(['creator']);
 
+            // Check user role from the pivot table
+            $userRole = $membership->role;
+
             // If user is not owner/moderator, only show published assignments
-            if (!$user->isOwnerOf($group) && !$user->isModeratorOf($group)) {
-                $query->published();
+            if ($userRole !== 'owner' && $userRole !== 'moderator') {
+                $query->where('visibility', 'published');
             }
 
-            // Get assignments with pagination
+            // Get assignments
             $assignments = $query->orderBy('date_due', 'asc')
-                               ->orderBy('created_at', 'desc')
-                               ->get();
+                ->orderBy('created_at', 'desc')
+                ->get();
 
             // Format assignments for frontend
             $formattedAssignments = $assignments->map(function ($assignment) {
@@ -1121,8 +1179,9 @@ class GroupController extends Controller
                     'name' => $group->name
                 ]
             ], 200);
-
         } catch (\Exception $e) {
+            Log::error('Assignment fetch error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json(['message' => 'Failed to fetch assignments', 'error' => $e->getMessage()], 500);
         }
     }
