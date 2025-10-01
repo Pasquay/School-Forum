@@ -7,6 +7,12 @@
  const muteBtn = muteForm ? muteForm.querySelector('button') : null;
 
  function addStarMuteEventListeners() {
+    const actionButtons = document.querySelector('.right-actions');
+    const starForm = actionButtons ? actionButtons.querySelector('#star-form') : null;
+    const starBtn = starForm ? starForm.querySelector('button') : null;
+    const muteForm = actionButtons ? actionButtons.querySelector('#mute-form') : null;
+    const muteBtn = muteForm ? muteForm.querySelector('button') : null;
+
      // Star Toggle
      if (starBtn) {
          let starImg = starBtn.querySelector('img');
@@ -112,9 +118,9 @@
 
      // Join Group
      if (JLBtn.classList.contains('join-button')) {
-         newJLForm.action = `/group/{{ $group->id }}/join`;
+         newJLForm.action = `/group/${window.groupData.id}/join`;
          newJLForm.addEventListener('submit', async(e) => {
-             console.log(newJLForm.action);
+            //  console.log(newJLForm.action);
              e.preventDefault();
              e.stopPropagation();
              try {
@@ -141,13 +147,13 @@
 
                          // Show star/mute forms
                          document.querySelector('#star-mute-forms').innerHTML = `
-                                        <form action="/group/toggleStar/{{ $group->id }}" method="POST" id="star-form">
+                                        <form action="/group/toggleStar/${window.groupData.id}" method="POST" id="star-form">
                                             <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
                                             <button class="star">
                                                 <img src="/icons/star-alt.png" alt="star">
                                             </button>
                                         </form>
-                                        <form action="/group/toggleMute/{{ $group->id }}" method="POST" id="mute-form">
+                                        <form action="/group/toggleMute/${window.groupData.id}" method="POST" id="mute-form">
                                             <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
                                             <button class="mute">
                                                 <img src="/icons/mute-alt.png" alt="Mute">
@@ -165,9 +171,9 @@
 
      // Leave Group
      if (JLBtn.classList.contains('leave-button')) {
-         newJLForm.action = `/group/{{ $group->id }}/leave`;
+         newJLForm.action = `/group/${window.groupData.id}/leave`;
          newJLForm.addEventListener('submit', async(e) => {
-             console.log(newJLForm.action);
+            //  console.log(newJLForm.action);
              e.preventDefault();
              e.stopPropagation();
              try {
@@ -211,7 +217,7 @@
      }
      // Request Button
      if (JLBtn.classList.contains('request-button')) {
-         newJLForm.action = `/group/{{ $group->id }}/request`;
+         newJLForm.action = `/group/${window.groupData.id}/request`;
          newJLForm.addEventListener('submit', async(e) => {
              e.preventDefault();
              e.stopPropagation();
@@ -244,14 +250,9 @@
          })
      }
  }
- // ACTIVATE!!!
  if (starForm && muteForm) addStarMuteEventListeners();
  addJoinLeaveEventListeners();
- // RIGHT ACTIONS
- // LEFT ACTIONS
- // MAIN CONTENT ACTIONS
- // POST
- // Variables
+
  const posts = document.querySelectorAll('.post');
 
  function addPostEventListeners() {
@@ -538,10 +539,6 @@
      });
  }
 
- // ACTIVATE!!!
  addPostEventListeners();
- //
 
- // ACTIVATE!!!
  addPostEventListeners();
- //

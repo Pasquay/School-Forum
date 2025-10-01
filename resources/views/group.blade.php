@@ -577,7 +577,7 @@
         </div>
     </div>
 
-
+    <!-- Create Assignments Modal -->
     <div id="createAssignmentModal" class="modal" style="display: none;">
         <div class="modal-content settings-modal">
             <div class="modal-header">
@@ -671,7 +671,7 @@
 <script>
     // Pass group ID to JavaScript - using a more robust approach
     window.groupData = JSON.parse('{!! json_encode(["id" => $group->id, "name" => $group->name]) !!}');
-    console.log('Group data set:', window.groupData);
+    // console.log('Group data set:', window.groupData);
 </script>
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>
