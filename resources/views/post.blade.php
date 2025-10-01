@@ -1103,7 +1103,7 @@
             </div>
         </div>
     @endif
-    <div class="post-column">
+    <div class="post-column" >
         <a href="/home" class="back-button">← Return</a>
         <div class="post" id='post-{{ $post->id }}'>
             <div class="post-top">
@@ -1131,7 +1131,7 @@
                                     $post->group->members->where('id', Auth::id())->first() &&
                                     in_array($post->group->members->where('id', Auth::id())->first()->pivot->role, ['owner', 'moderator'])
                                 )
-                                    @if($post->isPinned)
+                                    @if($post->isPinnedHome)
                                         <button class="dropdown-item" id='pin-post-toggle-button'>Unpin</button>
                                     @else
                                         <button class="dropdown-item" id="pin-post-toggle-button">Pin</button>
@@ -1587,6 +1587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(settingsDropdown.classList.contains('show-dropdown')){
                     settingsDropdown.classList.remove('show-dropdown');
                 }
+                
                 pinPostHomeConfirm.textContent = (parseInt('{{ $post->isPinnedHome }}')) ?
                     'Unpin From Home' : 'Pin To Home';
             })
@@ -1613,8 +1614,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(settingsDropdown.classList.contains('show-dropdown')){
                     settingsDropdown.classList.remove('show-dropdown');
                 }
-                pinPostConfirm.textContent = (parseInt('{{ $post->isPinned }}')) ?
-                    'Unpin Post' : 'Pin Post';
+                const groupId = parseInt('{{ $post->group->id }}');
+                if(groupId!=1) pinPostConfirm.textContent = (parseInt('{{ $post->isPinned }}')) ? 'Unpin Post' : 'Pin Post';
+                else pinPostConfirm.textContent = (parseInt('{{ $post->isPinnedHome }}')) ? 'Unpin From Home' : 'Pin To Home';
             });
             pinPostCancel.addEventListener('click', (e) => {
                 e.preventDefault();
