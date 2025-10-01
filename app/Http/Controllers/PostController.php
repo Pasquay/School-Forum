@@ -33,6 +33,10 @@ class PostController extends Controller
         // Posts
         $posts = Post::whereNull('deleted_at')
             ->whereNotIn('id', $pinned->pluck('id')->all())
+            ->whereHas('group', function($query){
+                $query->where('is_private', 0)
+                      ->where('type', '!=', 'academic');
+            })
             ->latest()
             ->with(['group'])
             ->withCount(['votes', 'comments'])
