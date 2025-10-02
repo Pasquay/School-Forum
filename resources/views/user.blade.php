@@ -999,7 +999,7 @@
     </style>
 </head>
 <body data-user-id='{{ $user->id }}'>
-    @include('components.navbar', ['active' => 'profile'])
+    @include('components.navbar', ['active' => ''])
     @include('components.success-header')
     @include('components.error-header')
     <main>
@@ -1016,7 +1016,7 @@
                 <form action="#" method='GET' id='comments-form'>
                     @csrf
                     <button type="submit">Comments</button>
-                </form>
+                </form> 
             </div>
             <div class="overview-column" id='overview-column'>
                 @foreach($overview as $item)

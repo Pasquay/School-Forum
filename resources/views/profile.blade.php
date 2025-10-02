@@ -1595,7 +1595,7 @@
                 const overviewForm = leftnav.querySelector('#overview-form');
                 const overviewBtn = leftnav.querySelector('#overview-form button');
                 const overviewCol = document.querySelector('.left-side .overview-column');
-                
+                 
                 const postsForm = leftnav.querySelector('#posts-form');
                 const postsBtn = leftnav.querySelector('#posts-form button');
                 const postsCol = document.querySelector('.left-side .posts-column');

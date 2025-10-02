@@ -512,11 +512,6 @@ class UserController extends Controller
         $offset = ($currentPage - 1) * $perPage;
         $overviewItems = $overviewAll->slice($offset, $perPage)->values();
 
-        $postCount = $overviewPosts->count();
-        $commentCount = $overviewComments->count();
-        $replyCount = $overviewReplies->count();
-        $likeCount = $overviewAll->sum('votes');
-
         $overview = new \Illuminate\Pagination\LengthAwarePaginator(
             $overviewItems,
             $overviewCount,
@@ -525,182 +520,27 @@ class UserController extends Controller
             ['path' => request()->url()]
         );
 
-        // Posts
-        $posts = Post::where([
-            'deleted_at' => NULL,
-            'user_id' => $user->id
-        ])->latest()
-            ->withCount(['votes', 'comments'])
-            ->paginate(15);
+        // AJAX Response for pagination
+        if(request()->ajax()){
+            $html = '';
+            foreach($overviewItems as $item){
+                switch($item->type){
+                    case 'post':
+                        $html .= view('components.post', ['post' => $item])->render();
+                        break;
+                    case 'comment':
+                        $html .= view('components.profile-comment', ['comment' => $item])->render();
+                        break;
+                    case 'reply':
+                        $html .= view('components.profile-reply', ['reply' => $item])->render();
+                        break;
+                }
+            }
 
-        $posts->getCollection()->transform(function ($post) {
-            $post->votes = $post->getVoteCountAttribute();
-            $post->userVote = $post->getUserVoteAttribute();
-            return $post;
-        });
-
-        // Comments & Replies
-        $comments = Comment::where([
-            'deleted_at' => NULL,
-            'user_id' => $user->id
-        ])->latest()
-            ->withCount(['votes'])
-            ->with([
-                'post' => function ($query) {
-                    $query->withTrashed();
-                },
-                'post.user',
-                'user',
-            ])
-            ->paginate(15);
-
-        $comments->getCollection()->transform(function ($comment) {
-            $comment->votes = $comment->getVoteCountAttribute();
-            $comment->userVote = $comment->getUserVoteAttribute();
-            $comment->replyCount = $comment->getReplyCountAttribute();
-            $comment->type = 'comment';
-            return $comment;
-        });
-
-        $replies = Reply::where([
-            'deleted_at' => NULL,
-            'user_id' => $user->id
-        ])->latest()
-            ->withCount(['votes'])
-            ->with([
-                'comment' => function ($query) {
-                    $query->withTrashed();
-                },
-                'comment.user',
-                'comment.post' => function ($query) {
-                    $query->withTrashed();
-                },
-                'comment.post.user'
-            ])
-            ->paginate(15);
-
-        $replies->getCollection()->transform(function ($reply) {
-            $reply->votes = $reply->getVoteCountAttribute();
-            $reply->userVote = $reply->getUserVoteAttribute();
-            $reply->type = 'reply';
-            return $reply;
-        });
-
-        $repliesCount = $replies->count();
-
-        $commentsPerPage = 15;
-        $commentsCurrentPage = request('page', 1);
-
-        $commentsAndReplies = $comments->concat($replies)->sortByDesc('created_at');
-        $commentsAndRepliesCount = $commentsAndReplies->count();
-        $commentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
-        $commentsItems = $commentsAndReplies->slice($commentsOffset, $commentsPerPage)->values();
-
-        $comments = new \Illuminate\Pagination\LengthAwarePaginator(
-            $commentsItems,
-            $commentsAndRepliesCount,
-            $commentsPerPage,
-            $commentsCurrentPage,
-            ['path' => request()->url()]
-        );
-
-        // Deleted Overview
-        $deletedOverview = $this->getUserDeletedOverview($user->id);
-        // Deleted Posts
-        $deletedPosts = Post::onlyTrashed()
-            ->where(['user_id' => $user->id])
-            ->latest()
-            ->withCount(['votes', 'comments'])
-            ->paginate(15);
-
-        $deletedPosts->getCollection()->transform(function ($post) {
-            $post->votes = $post->getVoteCountAttribute();
-            $post->userVote = $post->getUserVoteAttribute();
-            return $post;
-        });
-
-        // Deleted Comments
-        $deletedComments = Comment::onlyTrashed()
-            ->where(['user_id' => $user->id])
-            ->latest()
-            ->withCount(['votes'])
-            ->with(['post' => function ($query) {
-                $query->withTrashed();
-            }, 'post.user'])
-            ->paginate(15);
-
-        $deletedComments->getCollection()->transform(function ($comment) {
-            $comment->votes = $comment->getVoteCountAttribute();
-            $comment->userVote = $comment->getUserVoteAttribute();
-            $comment->type = 'comment';
-            return $comment;
-        });
-
-        $deletedReplies = Reply::onlyTrashed()
-            ->where(['user_id' => $user->id])
-            ->latest()
-            ->withCount(['votes'])
-            ->with([
-                'comment' => function ($query) {
-                    $query->withTrashed();
-                },
-                'comment.user',
-                'comment.post' => function ($query) {
-                    $query->withTrashed();
-                },
-                'comment.post.user',
-            ])
-            ->paginate(15);
-
-        $deletedReplies->getCollection()->transform(function ($reply) {
-            $reply->votes = $reply->getVoteCountAttribute();
-            $reply->userVote = $reply->getUserVoteAttribute();
-            $reply->type = 'reply';
-            return $reply;
-        });
-
-        $deletedCommentsPerPage = 15;
-        $deletedCommentsCurrentPage = request('page', 1);
-
-        $deletedCommentsAndReplies = $deletedComments->concat($deletedReplies)->sortByDesc('created_at');
-        $deletedCommentsAndRepliesCount = $deletedCommentsAndReplies->count();
-        $deletedCommentsOffset = ($commentsCurrentPage - 1) * $commentsPerPage;
-        $deletedCommentsItems = $deletedCommentsAndReplies->slice($deletedCommentsOffset, $deletedCommentsPerPage)->values();
-
-        $deletedCommentsAndReplies = new \Illuminate\Pagination\LengthAwarePaginator(
-            $deletedCommentsItems,
-            $deletedCommentsAndRepliesCount,
-            $deletedCommentsPerPage,
-            $deletedCommentsCurrentPage,
-            ['path' => request()->url()]
-        );
-
-        // Response
-        if ($user->id == Auth::id()) {
-            return view('profile', compact(
-                'user',
-                'postCount',
-                'commentCount',
-                'replyCount',
-                'likeCount',
-                'overview',
-                'posts',
-                'comments',
-                'deletedOverview',
-                'deletedPosts',
-                'deletedCommentsAndReplies',
-            ));
-        } else {
-            return view('user', compact(
-                'user',
-                'postCount',
-                'commentCount',
-                'replyCount',
-                'likeCount',
-                'overview',
-                'posts',
-                'comments',
-            ));
+            return response()->json([
+                'html' => $html,
+                'next_page' => $overview->hasMorePages() ? $overview->currentPage() + 1 : null,
+            ]);
         }
     }
 
