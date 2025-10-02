@@ -147,10 +147,6 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        foreach ($groups as $group) {
-            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
-        }
-
         if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
                 ->orWhere('description', 'like', '%' . $search . '%');
@@ -201,6 +197,10 @@ class GroupController extends Controller
         $currentPage = (int)$page;
 
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
+
+        foreach ($groups as $group) {
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
 
         $html = '';
         foreach ($groups as $group) {
