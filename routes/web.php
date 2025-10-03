@@ -106,6 +106,9 @@ Route::controller(GroupController::class)->group(function () {
     //ASSignments
     Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth')->name('group.createAssignment'); // create assignment
     Route::get('/group/{id}/assignments', 'getAssignments')->middleware('auth'); // get assignments for a group
+    Route::get('/group/{groupId}/assignments/{assignmentId}', 'getAssignment')->middleware('auth')->name('group.getAssignment'); // get single assignment
+    Route::post('/group/{groupId}/assignments/{assignmentId}', 'updateAssignment')->middleware('auth')->name('group.updateAssignment'); // update assignment
+    Route::delete('/group/{groupId}/assignments/{assignmentId}', 'deleteAssignment')->middleware('auth')->name('group.deleteAssignment'); // delete assignment
 });
 
 Route::controller(InboxMessageController::class)->group(function () {

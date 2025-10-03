@@ -89,51 +89,9 @@
                 @endif
 
                 <h3>Assignments</h3>
-                @if($assignments && $assignments->count() > 0)
-                <div class="assignments-list">
-                    @foreach($assignments as $assignment)
-                    <div class="assignment-item {{ $assignment->is_overdue ? 'overdue' : '' }} {{ $assignment->is_closed ? 'closed' : '' }}">
-                        <div class="assignment-header">
-                            <h4 class="assignment-name">{{ $assignment->assignment_name }}</h4>
-                            <span class="assignment-type">{{ ucfirst($assignment->assignment_type) }}</span>
-                        </div>
-                        <div class="assignment-details">
-                            <div class="assignment-due">
-                                <strong>Due:</strong>
-                                <span class="due-date">{{ $assignment->date_due->format('M j, Y') }}</span>
-                                <span class="due-time">{{ $assignment->date_due->format('g:i A') }}</span>
-                            </div>
-                            @if($assignment->max_points)
-                            <div class="assignment-points">
-                                <strong>Points:</strong> {{ $assignment->max_points }}
-                            </div>
-                            @endif
-                            @if($assignment->description)
-                            <div class="assignment-description">
-                                {{ Str::limit($assignment->description, 100) }}
-                            </div>
-                            @endif
-                        </div>
-                        <div class="assignment-status">
-                            @if($assignment->is_closed)
-                            <span class="status-badge closed">Closed</span>
-                            @elseif($assignment->is_overdue)
-                            <span class="status-badge overdue">Overdue</span>
-                            @else
-                            <span class="status-badge active">Active</span>
-                            @endif
-                            @if($assignment->visibility === 'draft')
-                            <span class="status-badge draft">Draft</span>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
+                <div class="assignments-list" id="sidebar-assignments-list">
+                    <div class="loading">Loading assignments...</div>
                 </div>
-                @else
-                <div class="no-assignments">
-                    <p>No assignments yet...</p>
-                </div>
-                @endif
             </div>
             <div class="content">
                 <div class="menu">
@@ -666,12 +624,106 @@
         </div>
     </div>
 
+
+    <!-- Edit Assingment Modal -->
+    <div id="editAssignmentModal" class="modal" style="display: none;">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>EditAssignment</h2>
+                <button class="close-modal" onclick="closeEditAssignmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST" id="editAssignmentForm">
+                    @csrf
+                    <input type="hidden" name="assignment_id" id="edit_assignment_id" value="">
+
+                    <div class="form-group">
+                        <label for="edit_assignment_name">Assignment Name *</label>
+                        <input type="text" id="edit_assignment_name" name="assignment_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_description">Description</label>
+                        <textarea id="edit_description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_assignment_type">Assignment Type *</label>
+                        <select id="edit_assignment_type" name="assignment_type" required>
+                            <option value="">Select type...</option>
+                            <option value="essay">Essay</option>
+                            <option value="quiz">Quiz</option>
+                            <option value="project">Project</option>
+                            <option value="homework">Homework</option>
+                            <option value="exam">Exam</option>
+                            <option value="presentation">Presentation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_submission_type">Submission Type *</label>
+                        <select id="edit_submission_type" name="submission_type" required>
+                            <option value="">Select submission type...</option>
+                            <option value="text">Text Submission</option>
+                            <option value="file">File Upload</option>
+                            <option value="link">External Link</option>
+                            <option value="none">No Submission Required</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_max_points">Maximum Points *</label>
+                        <input type="number" id="edit_max_points" name="max_points" min="1" max="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_date_assigned">Date Assigned</label>
+                        <input type="datetime-local" id="edit_date_assigned" name="date_assigned">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_date_due">Due Date *</label>
+                        <input type="datetime-local" id="edit_date_due" name="date_due" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_date_close">Close Date</label>
+                        <input type="datetime-local" id="edit_date_close" name="date_close">
+                        <small class="form-text">Optional: When to stop accepting submissions</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_external_link">External Link</label>
+                        <input type="url" id="edit_external_link" name="external_link" placeholder="https://example.com">
+                        <small class="form-text">Optional: Link to external resources</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_visibility">Visibility *</label>
+                        <select id="edit_visibility" name="visibility" required>
+                            <option value="draft">Draft (Only visible to you)</option>
+                            <option value="published">Published (Visible to all members)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Assignment</button>
+                        <button type="button" class="btn btn-primary-del" onclick="deleteAssignment()">Delete Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
 </body>
 
 <script>
     // Pass group ID to JavaScript - using a more robust approach
     window.groupData = JSON.parse('{!! json_encode(["id" => $group->id, "name" => $group->name]) !!}');
-    // console.log('Group data set:', window.groupData);
+    console.log('Group data set:', window.groupData);
 </script>
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>

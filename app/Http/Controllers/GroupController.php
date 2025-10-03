@@ -147,6 +147,10 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
+        foreach ($groups as $group) {
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
+
         if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
                 ->orWhere('description', 'like', '%' . $search . '%');
@@ -197,10 +201,6 @@ class GroupController extends Controller
         $currentPage = (int)$page;
 
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
-
-        foreach ($groups as $group) {
-            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
-        }
 
         $html = '';
         foreach ($groups as $group) {
@@ -1153,7 +1153,7 @@ class GroupController extends Controller
                 ->get();
 
             // Format assignments for frontend
-            $formattedAssignments = $assignments->map(function ($assignment) {
+            $formattedAssignments = $assignments->map(function ($assignment) use ($membership, $group) {
                 return [
                     'id' => $assignment->id,
                     'assignment_name' => $assignment->assignment_name,
@@ -1169,10 +1169,12 @@ class GroupController extends Controller
                     'is_overdue' => $assignment->is_overdue,
                     'is_closed' => $assignment->is_closed,
                     'created_at' => $assignment->created_at->format('M j, Y g:i A'),
+                    'can_edit' => $group->owner_id === Auth::id() || $membership->role === 'moderator',
                 ];
             });
 
             return response()->json([
+                'success' => true,
                 'assignments' => $formattedAssignments,
                 'group' => [
                     'id' => $group->id,
@@ -1183,6 +1185,331 @@ class GroupController extends Controller
             Log::error('Assignment fetch error: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json(['message' => 'Failed to fetch assignments', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getAssignment(Request $request, $groupId, $assignmentId)
+    {
+        Log::info("DEBUG: Getting assignment - Group: {$groupId}, Assignment: {$assignmentId}");
+
+        try {
+            // Step 1: Check if assignment exists
+            $assignment = Assignment::find($assignmentId);
+            if (!$assignment) {
+                Log::error("DEBUG: Assignment not found: {$assignmentId}");
+                return response()->json(['message' => 'Assignment not found'], 404);
+            }
+
+            Log::info("DEBUG: Assignment found: " . $assignment->assignment_name);
+
+            // Step 2: Check group match
+            if ($assignment->group_id != $groupId) {
+                Log::error("DEBUG: Group mismatch - Assignment group: {$assignment->group_id}, Request group: {$groupId}");
+                return response()->json([
+                    'message' => 'Assignment does not belong to this group'
+                ], 404);
+            }
+
+            // Step 3: Check user membership
+            $user = Auth::user();
+            if (!$user) {
+                Log::error("DEBUG: No authenticated user");
+                return response()->json(['message' => 'Not authenticated'], 401);
+            }
+
+            Log::info("DEBUG: User ID: " . $user->id);
+
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                Log::error("DEBUG: User {$user->id} is not a member of group {$groupId}");
+                return response()->json([
+                    'message' => 'You are not a member of this group'
+                ], 403);
+            }
+
+            Log::info("DEBUG: User role: " . $membership->role);
+
+            // Step 4: Check visibility permissions
+            $userRole = $membership->role;
+            if (
+                $assignment->visibility === 'draft' &&
+                $userRole !== 'owner' &&
+                $userRole !== 'moderator'
+            ) {
+                Log::error("DEBUG: Permission denied - Assignment is draft and user is not owner/moderator");
+                return response()->json([
+                    'message' => 'This assignment is not available yet'
+                ], 403);
+            }
+
+            // Step 5: Load relationships safely
+            try {
+                $assignment->load('creator', 'group');
+                Log::info("DEBUG: Relationships loaded successfully");
+            } catch (\Exception $e) {
+                Log::error("DEBUG: Error loading relationships: " . $e->getMessage());
+                return response()->json(['message' => 'Error loading assignment relationships'], 500);
+            }
+
+            // Step 6: Count submissions safely
+            $submissionCount = 0;
+            try {
+                $submissionCount = $assignment->submissions()->count();
+                Log::info("DEBUG: Submission count: " . $submissionCount);
+            } catch (\Exception $e) {
+                Log::error("DEBUG: Error counting submissions: " . $e->getMessage());
+                // Continue without submission count
+            }
+
+            // Step 7: Format response
+            $formattedAssignment = [
+                'id' => $assignment->id,
+                'assignment_name' => $assignment->assignment_name,
+                'description' => $assignment->description,
+                'assignment_type' => $assignment->assignment_type,
+                'submission_type' => $assignment->submission_type,
+                'max_points' => $assignment->max_points,
+                'visibility' => $assignment->visibility,
+                'date_assigned' => $assignment->date_assigned
+                    ? $assignment->date_assigned->format('M j, Y g:i A')
+                    : null,
+                'date_due' => $assignment->date_due ? $assignment->date_due->format('M j, Y g:i A') : null,
+                'close_date' => $assignment->close_date
+                    ? $assignment->close_date->format('M j, Y g:i A')
+                    : null,
+                'creator_name' => $assignment->creator ? $assignment->creator->name : 'Unknown',
+                'creator_id' => $assignment->created_by,
+                'is_overdue' => $assignment->is_overdue,
+                'is_closed' => $assignment->is_closed,
+                'created_at' => $assignment->created_at->format('M j, Y g:i A'),
+                'submission_count' => $submissionCount,
+                'group_name' => $assignment->group ? $assignment->group->name : 'Unknown',
+            ];
+
+            Log::info("DEBUG: Successfully formatted assignment response");
+
+            return response()->json([
+                'assignment' => $formattedAssignment
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('DEBUG: Get single assignment error: ' . $e->getMessage());
+            Log::error('DEBUG: Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'message' => 'Failed to fetch assignment',
+                'error' => $e->getMessage(),
+                'debug' => true
+            ], 500);
+        }
+    }
+
+    public function updateAssignment(Request $request, $groupId, $assignmentId)
+    {
+        Log::info("DEBUG UPDATE: Updating assignment - Group: {$groupId}, Assignment: {$assignmentId}");
+
+        try {
+            // Step 1: Find assignment
+            $assignment = Assignment::findOrFail($assignmentId);
+            Log::info("DEBUG UPDATE: Assignment found: " . $assignment->assignment_name);
+
+            // Step 2: Check group match
+            if ($assignment->group_id != $groupId) {
+                Log::error("DEBUG UPDATE: Group mismatch");
+                return response()->json([
+                    'message' => 'Assignment does not belong to this group'
+                ], 404);
+            }
+
+            // Step 3: Check user permissions
+            $user = Auth::user();
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                Log::error("DEBUG UPDATE: User not a member");
+                return response()->json([
+                    'message' => 'You are not a member of this group'
+                ], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+            Log::info("DEBUG UPDATE: User role: {$userRole}, Is creator: " . ($isCreator ? 'yes' : 'no'));
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                Log::error("DEBUG UPDATE: Permission denied");
+                return response()->json([
+                    'message' => 'You do not have the permission to edit this assignment'
+                ], 403);
+            }
+
+            // Step 4: Log incoming data
+            Log::info("DEBUG UPDATE: Request data: " . json_encode($request->all()));
+
+            // Step 5: Validate data (temporarily exclude description to test)
+            $validatedData = $request->validate([
+                'assignment_name' => 'sometimes|required|string|max:255',
+                // 'description' => 'nullable|string|max:1000',  // TEMPORARILY DISABLED
+                'max_points' => 'sometimes|required|integer|min:0',
+                'assignment_type' => 'sometimes|required|in:assignment,quiz,essay,discussion,exam,project,homework,presentation',
+                'submission_type' => 'sometimes|required|in:text,file,link,none',
+                'visibility' => 'sometimes|required|in:draft,published',
+                'date_assigned' => 'nullable|date',
+                'date_due' => 'sometimes|required|date|after_or_equal:date_assigned',
+                'close_date' => 'nullable|date|after_or_equal:date_due',
+                'external_link' => 'nullable|url'
+            ]);
+
+            Log::info("DEBUG UPDATE: Validated data (no description): " . json_encode($validatedData));
+            Log::info("DEBUG UPDATE: Validated data: " . json_encode($validatedData));
+
+            // Step 6: Update assignment (excluding description for now)
+            $assignment->update($validatedData);
+            Log::info("DEBUG UPDATE: Assignment updated successfully (without description)");
+
+            // Step 7: Load relationships and format response
+            $assignment->load(['creator', 'group']);
+
+            $submissionCount = 0;
+            try {
+                $submissionCount = $assignment->submissions()->count();
+            } catch (\Exception $e) {
+                Log::error("DEBUG UPDATE: Error counting submissions: " . $e->getMessage());
+            }
+
+            $formattedAssignment = [
+                'id' => $assignment->id,
+                'assignment_name' => $assignment->assignment_name,
+                'description' => $assignment->description,
+                'assignment_type' => $assignment->assignment_type,
+                'submission_type' => $assignment->submission_type,
+                'max_points' => $assignment->max_points,
+                'visibility' => $assignment->visibility,
+                'date_assigned' => $assignment->date_assigned
+                    ? $assignment->date_assigned->format('M j, Y g:i A')
+                    : null,
+                'date_due' => $assignment->date_due ? $assignment->date_due->format('M j, Y g:i A') : null,
+                'close_date' => $assignment->close_date
+                    ? $assignment->close_date->format('M j, Y g:i A')
+                    : null,
+                'creator_name' => $assignment->creator ? $assignment->creator->name : 'Unknown',
+                'is_overdue' => $assignment->is_overdue,
+                'is_closed' => $assignment->is_closed,
+                'updated_at' => $assignment->updated_at->format('M j, Y g:i A'),
+                'submission_count' => $submissionCount,
+            ];
+
+            Log::info("DEBUG UPDATE: Response formatted successfully");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Assignment updated successfully!',
+                'assignment' => $formattedAssignment,
+                'redirect' => route('group.show', $groupId)
+            ], 200);
+        } catch (ValidationException $e) {
+            Log::error("DEBUG UPDATE: Validation error: " . json_encode($e->errors()));
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('DEBUG UPDATE: Update assignment error: ' . $e->getMessage());
+            Log::error('DEBUG UPDATE: Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'message' => 'Failed to update assignment',
+                'error' => $e->getMessage(),
+                'debug' => true
+            ], 500);
+        }
+    }
+
+    public function deleteAssignment(Request $request, $groupId, $assignmentId)
+    {
+        Log::info("DEBUG DELETE: Starting delete for assignment {$assignmentId} in group {$groupId}");
+
+        try {
+            //find assignmetn again
+            $assignment = Assignment::findOrFail($assignmentId);
+            Log::info("DEBUG DELETE: Assignment found: " . $assignment->assignment_name);
+
+            if ($assignment->group_id != $groupId) {
+                Log::error("DEBUG DELETE: Group mismatch");
+                return response()->json([
+                    'message' => 'Assignment does not belong to this group !!!'
+                ], 404);
+            }
+
+            $user = Auth::user();
+            Log::info("DEBUG DELETE: User ID: " . $user->id);
+
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                Log::error("DEBUG DELETE: User not a member");
+                return response()->json([
+                    'message' => 'You are not a member of this group'
+                ], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+            Log::info("DEBUG DELETE: User role: {$userRole}, Is creator: " . ($isCreator ? 'yes' : 'no'));
+
+            //only creator can delete ass
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                Log::error("DEBUG DELETE: Permission denied");
+                return response()->json([
+                    'message' => 'You do not have permission to delete this assignment'
+                ], 403);
+            }
+
+            //cannot delete if there are submissions
+            $submissionCount = 0;
+            try {
+                $submissionCount = $assignment->submissions()->count();
+                Log::info("DEBUG DELETE: Submission count: " . $submissionCount);
+            } catch (\Exception $e) {
+                Log::warning("DEBUG DELETE: Error counting submissions (might not exist yet): " . $e->getMessage());
+                // Continue with deletion if submission table doesn't exist yet
+            }
+
+            if ($submissionCount > 0) {
+                Log::error("DEBUG DELETE: Cannot delete - has submissions");
+                return response()->json([
+                    'message' => 'Cannot delete assignment with existing submissions. Consider hiding it instead.',
+                    'submission_count' => $submissionCount
+                ], 400);
+            }
+
+            $assignmentName = $assignment->assignment_name;
+            Log::info("DEBUG DELETE: Attempting to delete assignment: " . $assignmentName);
+
+            $assignment->delete();
+
+            Log::info("DEBUG DELETE: Assignment deleted successfully");
+
+            return response()->json([
+                'success' => true,
+                'message' => "Assignment '{$assignmentName}' has been deleted successfully!",
+                'deleted_id' => $assignmentId
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('DEBUG DELETE: Delete assignment error: ' . $e->getMessage());
+            Log::error('DEBUG DELETE: Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete assignment',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

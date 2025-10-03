@@ -12,31 +12,16 @@ function closeGroupSettingsModal() {
 
 // Tab switching functionality
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all tabs and content
-            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            // Add active class to clicked tab and corresponding content
-            btn.classList.add('active');
-            const tabId = btn.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-        });
-    });
+    // Load sidebar assignments on page load
+    loadSidebarAssignments();
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {/* Lines 16-25 omitted */});
 
     // Close modal when clicking outside
-    document.getElementById('groupSettingsModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeGroupSettingsModal();
-        }
-    });
+    document.getElementById('groupSettingsModal').addEventListener('click', function(e) {/* Lines 29-32 omitted */});
 
     // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeGroupSettingsModal();
-        }
-    });
+    document.addEventListener('keydown', function(e) {/* Lines 36-39 omitted */});
 });
 
 // Transfer modal functions (if needed later)
@@ -324,6 +309,106 @@ function closeAddMembersModal() {
     showSearchPrompt();
 }
 
+// Load sidebar assignments
+function loadSidebarAssignments() {
+    const sidebarList = document.getElementById('sidebar-assignments-list');
+    
+    if (!sidebarList) return;
+    
+    sidebarList.innerHTML = '<div class="loading">Loading assignments...</div>';
+    
+    if (!window.groupData || !window.groupData.id) {
+        console.error('Group data not available');
+        sidebarList.innerHTML = '<div class="error-message">Unable to load assignments</div>';
+        return;
+    }
+    
+    fetch(`/group/${window.groupData.id}/assignments`, {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to load assignments: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.assignments && data.assignments.length > 0) {
+            displaySidebarAssignments(data.assignments);
+        } else {
+            sidebarList.innerHTML = '<div class="no-assignments"><p>No assignments yet...</p></div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading assignments:', error);
+        sidebarList.innerHTML = '<div class="error-message">Failed to load assignments</div>';
+    });
+}
+
+function displaySidebarAssignments(assignments) {
+    const sidebarList = document.getElementById('sidebar-assignments-list');
+    
+    if (!sidebarList) return;
+    
+    const assignmentsHtml = assignments.map(assignment => createSidebarAssignmentHTML(assignment)).join('');
+    sidebarList.innerHTML = assignmentsHtml;
+}
+
+function createSidebarAssignmentHTML(assignment) {
+    const statusClasses = [];
+    if (assignment.is_overdue) statusClasses.push('overdue');
+    if (assignment.is_closed) statusClasses.push('closed');
+    
+    const statusBadges = [];
+    if (assignment.is_closed) {
+        statusBadges.push('<span class="status-badge closed">Closed</span>');
+    } else if (assignment.is_overdue) {
+        statusBadges.push('<span class="status-badge overdue">Overdue</span>');
+    } else {
+        statusBadges.push('<span class="status-badge active">Active</span>');
+    }
+    
+    if (assignment.visibility === 'draft') {
+        statusBadges.push('<span class="status-badge draft">Draft</span>');
+    }
+    
+    // Only show edit button if user can edit
+    const editButton = assignment.can_edit ? 
+        `<button class="edit-assignment-btn" onclick="openEditAssignmentModal(${assignment.id})">Edit</button>` : '';
+    
+    return `
+        <div class="assignment-item ${statusClasses.join(' ')}" data-assignment-id="${assignment.id}">
+            <div class="assignment-header">
+                <h4 class="assignment-name">${assignment.assignment_name}</h4>
+                <span class="assignment-type">${assignment.assignment_type.charAt(0).toUpperCase() + assignment.assignment_type.slice(1)}</span>
+            </div>
+            <div class="assignment-details">
+                <div class="assignment-due">
+                    <strong>Due:</strong>
+                    <span class="due-date">${assignment.date_due}</span>
+                </div>
+                ${assignment.max_points ? `
+                    <div class="assignment-points">
+                        <strong>Points:</strong> ${assignment.max_points}
+                    </div>
+                ` : ''}
+                ${assignment.description ? `
+                    <div class="assignment-description">
+                        ${assignment.description.substring(0, 100)}${assignment.description.length > 100 ? '...' : ''}
+                    </div>
+                ` : ''}
+            </div>
+            <div class="assignment-status">
+                ${statusBadges.join('')}
+                ${editButton}
+            </div>
+        </div>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
             // Main content tab functionality
             const mainTabBtns = document.querySelectorAll('.main-tab-btn');
@@ -457,6 +542,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (assignment.is_closed) {
                     statusBadges.push('<span class="status-badge status-overdue">Closed</span>');
                 }
+                const editButton = assignment.can_edit ? 
+                `<button class="edit-assignment-btn" onclick="openEditAssignmentModal(${assignment.id})">Edit</button>` : '';
+
 
                 return `
             <div class="assignment-card">
@@ -465,17 +553,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span class="assignment-type">${assignment.assignment_type}</span>
                 </div>
                 <div class="assignment-meta">
-                    <span> ${assignment.creator_name}</span>
                     <span> ${assignment.submission_type}</span>
                     <span> ${assignment.max_points} points</span>
-                    ${assignment.date_assigned ? `<span> Assigned: ${assignment.date_assigned}</span>` : ''}
-                    <span> Due: ${assignment.date_due}</span>
-                    ${assignment.close_date ? `<span> Closes: ${assignment.close_date}</span>` : ''}
                 </div>
                 ${assignment.description ? `<div class="assignment-description">${assignment.description}</div>` : ''}
-                <div class="assignment-status">
-                    ${statusBadges.join('')}
-                </div>
+                
             </div>
         `;
         }
@@ -493,8 +575,258 @@ function closeCreateAssignmentModal() {
     document.getElementById('createAssignmentModal').style.display = 'none';
     document.body.style.overflow = 'auto'; 
     // Reset form if it exists
-    const form = document.getElementById('createAssignmentForm');
+    const form = document.getElementById('editAssignmentForm');
     if (form) {
         form.reset();
     }
 }
+
+function openEditAssignmentModal(assignmentId){
+    console.log('openEditAssignmentModal called with ID:', assignmentId);
+    console.log('Type of assignmentId:', typeof assignmentId);
+    
+    if (!assignmentId) {
+        console.error('Assignment ID is required');
+        alert('Assignment ID is missing!');
+        return;
+    }
+
+    if (!window.groupData || !window.groupData.id) {
+        console.error('Group data not available:', window.groupData);
+        alert('Group data not available. Please refresh the page.');
+        return;
+    }
+
+    document.getElementById('editAssignmentModal').style.display = "flex";
+    document.body.style.overflow = 'hidden'; 
+
+    loadAssignmentData(assignmentId);
+}
+
+function loadAssignmentData(assignmentId) {
+    console.log('Loading assignment data for ID:', assignmentId);
+    console.log('Group data:', window.groupData);
+    
+    // Show loading state in modal
+    const form = document.getElementById('editAssignmentForm');
+    if (form) {
+        // Disable form while loading
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => input.disabled = true);
+    }
+    
+    const url = `/group/${window.groupData.id}/assignments/${assignmentId}`;
+    console.log('Fetching from URL:', url);
+    
+    fetch(url, {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response body:', text);
+                throw new Error(`Failed to load assignment: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Assignment data received:', data);
+        populateEditForm(data.assignment);
+    })
+    .catch(error => {
+        console.error('Error loading assignment:', error);
+        alert(`Failed to load assignment details: ${error.message}`);
+        closeEditAssignmentModal();
+    });
+}
+
+function populateEditForm(assignment) {
+    const form = document.getElementById('editAssignmentForm');
+    if (!form) {
+        console.error('Edit form not found');
+        return;
+    }
+    
+    // Set assignment ID in hidden field
+    form.querySelector('#edit_assignment_id').value = assignment.id;
+    
+    // Set form action to include assignment ID
+    form.action = `/group/${window.groupData.id}/assignments/${assignment.id}`;
+    console.log('Form action set to:', form.action);
+    
+    // Populate form fields with updated IDs
+    form.querySelector('#edit_assignment_name').value = assignment.assignment_name || '';
+    form.querySelector('#edit_description').value = assignment.description || '';
+    form.querySelector('#edit_assignment_type').value = assignment.assignment_type || '';
+    form.querySelector('#edit_submission_type').value = assignment.submission_type || '';
+    form.querySelector('#edit_max_points').value = assignment.max_points || '';
+    form.querySelector('#edit_visibility').value = assignment.visibility || 'draft';
+    form.querySelector('#edit_external_link').value = assignment.external_link || '';
+    
+    // Handle datetime fields - convert from server format to input format
+    if (assignment.date_assigned) {
+        const dateAssigned = new Date(assignment.date_assigned);
+        form.querySelector('#edit_date_assigned').value = formatDateTimeForInput(dateAssigned);
+    }
+    
+    if (assignment.date_due) {
+        const dateDue = new Date(assignment.date_due);
+        form.querySelector('#edit_date_due').value = formatDateTimeForInput(dateDue);
+    }
+    
+    if (assignment.close_date) {
+        const closeDate = new Date(assignment.close_date);
+        form.querySelector('#edit_date_close').value = formatDateTimeForInput(closeDate);
+    }
+    
+    // Re-enable form inputs
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => input.disabled = false);
+}
+
+function formatDateTimeForInput(date) {
+    // Format: YYYY-MM-DDTHH:MM
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function closeEditAssignmentModal() {
+    document.getElementById('editAssignmentModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    const form = document.getElementById('editAssignmentForm');
+    if (form) {
+        form.reset();
+        // Reset form action
+        form.action = '';
+    }
+}
+
+// Delete assignment function
+function deleteAssignment() {
+    const assignmentId = document.getElementById('edit_assignment_id').value;
+    
+    console.log('Delete function called, assignment ID:', assignmentId);
+    console.log('Group data:', window.groupData);
+    
+    if (!assignmentId) {
+        alert('No assignment selected');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to delete this assignment? This action cannot be undone.')) {
+        return;
+    }
+    
+    const deleteUrl = `/group/${window.groupData.id}/assignments/${assignmentId}`;
+    console.log('Sending DELETE request to:', deleteUrl);
+    
+    fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Failed to delete assignment');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Assignment deleted:', data);
+        
+        // Close modal
+        closeEditAssignmentModal();
+        
+        // Reload sidebar assignments
+        loadSidebarAssignments();
+        
+        // Show success message
+        alert(data.message || 'Assignment deleted successfully!');
+        
+        // Reload page to show changes
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Error deleting assignment:', error);
+        alert('Failed to delete assignment: ' + error.message);
+    });
+}
+
+// Handle edit assignment form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editAssignmentForm');
+    
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Updating...';
+            
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to update assignment');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Assignment updated:', data);
+                
+                // Close modal
+                closeEditAssignmentModal();
+                
+                // Reload sidebar assignments to show updated data
+                loadSidebarAssignments();
+                
+                // // Show success message (you can customize this with a nicer notification)
+                // alert(data.message || 'Assignment updated successfully!');
+                
+                // Redirect to group page to see changes
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    // Reload page to show updated assignment
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error updating assignment:', error);
+                alert('Failed to update assignment: ' + error.message);
+                
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            });
+        });
+    }
+});
