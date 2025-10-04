@@ -148,12 +148,8 @@ class GroupController extends Controller
         $user = User::findOrFail(Auth::id());
 
         $groups = Group::query();
-        
-        $groups = $groups->withCount('posts');
 
-        foreach ($groups as $group) {
-            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
-        }
+        $groups = $groups->withCount('posts');
 
         if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
@@ -205,6 +201,10 @@ class GroupController extends Controller
         $currentPage = (int)$page;
 
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
+
+        foreach ($groups as $group) {
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
 
         $html = '';
         foreach ($groups as $group) {
