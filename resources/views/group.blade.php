@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    @include('components.navbar', ['active' => 'groups'])
+    @include('components.navbar', ['active' => ''])
     @include('components.success-header')
     @include('components.error-header')
     <main>
