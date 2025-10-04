@@ -20,8 +20,20 @@
         <p class="group-name">{{ $group->name }}</p>
         <p class="description">{{ Str::limit($group->description, 80) }}</p>
         <div class="member-details">
-            <p class="member-count">--- Members</p>
-            <p class="online-member-count">--- Online Members</p>
+            <p class="member-count">
+                @if($group->member_count > 1)
+                    {{ $group->member_count }} Members
+                @else
+                    {{ $group->member_count }} Member
+                @endif
+            </p>
+            <p class="online-member-count">
+                @if($group->posts_count == 1)
+                    {{ $group->posts_count }} Post
+                @else
+                    {{ $group->posts_count }} Posts
+                @endif
+            </p>
         </div>
     </div>
 

@@ -28,6 +28,8 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
+        $groups = $groups->withCount('posts');
+
         if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
                 ->orWhere('description', 'like', '%' . $search . '%');
@@ -146,6 +148,8 @@ class GroupController extends Controller
         $user = User::findOrFail(Auth::id());
 
         $groups = Group::query();
+        
+        $groups = $groups->withCount('posts');
 
         foreach ($groups as $group) {
             $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
