@@ -51,14 +51,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                            ->orderBy('posts_count', 'desc')
-                            ->orderBy('name', 'asc');
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                        ->having('posts_count', '>', 0)
-                        ->orderBy('posts_count', 'desc')
-                        ->orderBy('name', 'asc');
+                           ->having('posts_count', '>', 0)
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -147,10 +147,6 @@ class GroupController extends Controller
 
         $groups = Group::query();
 
-        foreach ($groups as $group) {
-            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
-        }
-
         if ($search) {
             $groups->where('name', 'like', '%' . $search . '%')
                 ->orWhere('description', 'like', '%' . $search . '%');
@@ -174,14 +170,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                            ->orderBy('posts_count', 'desc')
-                            ->orderBy('name', 'asc');
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                        ->having('posts_count', '>', 0)
-                        ->orderBy('posts_count', 'desc')
-                        ->orderBy('name', 'asc');
+                           ->having('posts_count', '>', 0)
+                           ->orderBy('posts_count', 'desc')
+                           ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -201,6 +197,10 @@ class GroupController extends Controller
         $currentPage = (int)$page;
 
         $groups = $groups->paginate($perPage, ['*'], 'page', $currentPage);
+
+        foreach ($groups as $group) {
+            $group->requested = InboxMessage::hasPendingGroupJoinRequest($user->id, $group->id);
+        }
 
         $html = '';
         foreach ($groups as $group) {
