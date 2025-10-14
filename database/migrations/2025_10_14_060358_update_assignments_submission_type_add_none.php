@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,10 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('assignments', function (Blueprint $table) {
-            // Update submission_type enum to include 'none' option
-            $table->enum('submission_type', ['text', 'file', 'external_link', 'none'])->default('text')->change();
-        });
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'sqlite') {
+            // SQLite: Just ensure the column exists
+            Schema::table('assignments', function (Blueprint $table) {
+                if (!Schema::hasColumn('assignments', 'submission_type')) {
+                    $table->string('submission_type')->default('text')->after('visibility');
+                }
+            });
+        } else {
+            // MySQL: Use raw SQL to modify ENUM
+            DB::statement("ALTER TABLE `assignments` MODIFY COLUMN `submission_type` ENUM('text', 'file', 'external_link', 'none') DEFAULT 'text'");
+        }
     }
 
     /**
@@ -22,9 +32,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('assignments', function (Blueprint $table) {
-            // Revert back to original submission_type enum
-            $table->enum('submission_type', ['text', 'file', 'external_link'])->default('text')->change();
-        });
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver !== 'sqlite') {
+            // MySQL: Revert back to original ENUM
+            DB::statement("ALTER TABLE `assignments` MODIFY COLUMN `submission_type` ENUM('text', 'file', 'external_link') DEFAULT 'text'");
+        }
     }
 };

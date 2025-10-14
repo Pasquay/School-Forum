@@ -15,7 +15,11 @@ class AssignmentSubmission extends Model
         'student_id',
         'submission_text',
         'file_path',
+        'external_link',
         'status',
+        'is_late',
+        'late_penalty_applied',
+        'attempt_number',
         'date_submitted',
         'grade',
         'teacher_feedback',
@@ -25,7 +29,9 @@ class AssignmentSubmission extends Model
     protected $casts = [
         'date_submitted' => 'datetime',
         'graded_at' => 'datetime',
-        'grade' => 'decimal:2'
+        'grade' => 'decimal:2',
+        'is_late' => 'boolean',
+        'attempt_number' => 'integer'
     ];
 
     // Relationships
@@ -37,6 +43,26 @@ class AssignmentSubmission extends Model
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function quizResponses()
+    {
+        return $this->hasMany(StudentQuizResponse::class, 'submission_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(SubmissionComment::class, 'submission_id')->orderBy('created_at');
+    }
+
+    public function rubricScores()
+    {
+        return $this->hasMany(RubricScore::class, 'submission_id');
+    }
+
+    public function groupMembers()
+    {
+        return $this->hasMany(GroupAssignmentMember::class, 'submission_id');
     }
 
     // Scopes
@@ -58,8 +84,26 @@ class AssignmentSubmission extends Model
     // Accessors & Mutators
     public function getIsLateAttribute()
     {
-        return $this->date_submitted && $this->assignment->date_due && 
-               $this->date_submitted > $this->assignment->date_due;
+        // If the model has a persisted value for is_late, prefer that (set at submit time)
+        if (array_key_exists('is_late', $this->attributes) && $this->attributes['is_late'] !== null) {
+            return (bool) $this->attributes['is_late'];
+        }
+
+        // Otherwise, compute dynamically using Pacific time to match server-side gating
+        try {
+            if (!$this->date_submitted || !$this->assignment || !$this->assignment->date_due) {
+                return false;
+            }
+
+            $submittedPt = $this->date_submitted->copy()->setTimezone('America/Los_Angeles');
+            $duePt = $this->assignment->date_due->copy()->setTimezone('America/Los_Angeles');
+            return $submittedPt->gt($duePt);
+        } catch (\Throwable $e) {
+            // Fallback to raw comparison if anything goes wrong
+            return $this->date_submitted && $this->assignment && $this->assignment->date_due
+                ? $this->date_submitted > $this->assignment->date_due
+                : false;
+        }
     }
 
     public function getIsGradedAttribute()

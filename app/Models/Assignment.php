@@ -17,12 +17,23 @@ class Assignment extends Model
         'assignment_name',
         'description',
         'assignment_type',
+        'is_group_assignment',
+        'group_size_min',
+        'group_size_max',
+        'time_limit',
         'max_points',
+        'weight',
         'date_assigned',
         'date_due',
         'close_date',
         'visibility',
-        'submission_type'
+        'submission_type',
+        'allow_late_submissions',
+        'late_penalty_percentage',
+        'allow_resubmission',
+        'max_resubmissions',
+        'allow_resubmissions',
+        'max_attempts'
     ];
 
     protected $casts = [
@@ -31,7 +42,12 @@ class Assignment extends Model
         'close_date' => 'datetime',
         'assignment_type' => 'string',
         'visibility' => 'string',
-        'submission_type' => 'string'
+        'submission_type' => 'string',
+        'allow_late_submissions' => 'boolean',
+        'allow_resubmission' => 'boolean',
+        'allow_resubmissions' => 'boolean',
+        'is_group_assignment' => 'boolean',
+        'max_attempts' => 'integer'
     ];
 
     // Relationships
@@ -50,6 +66,33 @@ class Assignment extends Model
         return $this->hasMany(AssignmentSubmission::class);
     }
 
+    public function quizQuestions()
+    {
+        return $this->hasMany(QuizQuestion::class)->orderBy('order');
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(AssignmentAttachment::class);
+    }
+
+    public function rubrics()
+    {
+        return $this->hasMany(Rubric::class)->orderBy('order');
+    }
+
+    // Helper method to check if assignment uses rubrics
+    public function hasRubrics()
+    {
+        return $this->rubrics()->count() > 0;
+    }
+
+    // Get total possible points from rubrics
+    public function getRubricTotalPoints()
+    {
+        return $this->rubrics()->sum('max_points');
+    }
+
     // Scopes
     public function scopePublished($query)
     {
@@ -64,11 +107,39 @@ class Assignment extends Model
     // Accessors & Mutators
     public function getIsOverdueAttribute()
     {
-        return $this->date_due < now() && $this->visibility === 'published';
+        // Compare in Pacific time to align with UI input/display
+        try {
+            if (!$this->date_due) {
+                return false;
+            }
+            $nowPt = \Carbon\Carbon::now('America/Los_Angeles');
+            $duePt = $this->date_due->copy()->setTimezone('America/Los_Angeles');
+            return $duePt->lt($nowPt) && $this->visibility === 'published';
+        } catch (\Throwable $e) {
+            return $this->date_due < now() && $this->visibility === 'published';
+        }
     }
 
     public function getIsClosedAttribute()
     {
         return $this->close_date && $this->close_date < now();
+    }
+
+    /**
+     * Determine if the assignment is past due based on Pacific time.
+     * Falls back to UTC comparison if anything goes wrong.
+     */
+    public function isPastDuePacific(): bool
+    {
+        try {
+            if (!$this->date_due) {
+                return false;
+            }
+            $nowPt = \Carbon\Carbon::now('America/Los_Angeles');
+            $duePt = $this->date_due->copy()->setTimezone('America/Los_Angeles');
+            return $nowPt->gt($duePt);
+        } catch (\Throwable $e) {
+            return now()->gt($this->date_due);
+        }
     }
 }

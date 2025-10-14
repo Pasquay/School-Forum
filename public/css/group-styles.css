@@ -425,8 +425,8 @@ main {
 }
 
 .tab-btn.active {
-    color: #4a90e2;
-    border-bottom-color: #4a90e2;
+    color: var(--color-pakistan-green);
+    border-bottom-color: var(--color-pakistan-green);
 }
 
 .tab-btn:hover {
@@ -570,7 +570,7 @@ main {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #4a90e2;
+    background: var(--color-sage);
     color: white;
     display: flex;
     align-items: center;
@@ -632,12 +632,12 @@ main {
 }
 
 .btn-primary {
-    background: #4a90e2;
+    background: var(--color-sage);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #357abd;
+    background: var(--color-dark-green);
 }
 
 .btn-primary-del {
@@ -1008,7 +1008,7 @@ main {
 
 .member-search-input:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: var(--color-sage);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     background: #fff;
 }
@@ -1079,7 +1079,7 @@ main {
 }
 
 .invite-members-btn {
-    background: #4a90e2;
+    background: var(--color-sage);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -1094,7 +1094,7 @@ main {
 }
 
 .invite-members-btn:hover {
-    background: #357abd;
+    background: var(--color-dark-green);
 }
 
 
@@ -1120,7 +1120,7 @@ main {
 
 .user-search-input:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: var(--color-sage);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
     background: #fff;
 }
@@ -1164,8 +1164,8 @@ main {
 }
 
 .loading-state {
-    color: #4a90e2;
-    background: #f0f7ff;
+    color: var(--color-sage);
+    background: rgba(220, 252, 231, 0.2);
 }
 
 .error-message {
@@ -1199,8 +1199,8 @@ main {
 }
 
 .user-item.selected {
-    background: #e3f2fd;
-    border-color: #4a90e2;
+    background: rgba(220, 252, 231, 0.3);
+    border-color: var(--color-sage);
 }
 
 .user-info {
@@ -1213,7 +1213,7 @@ main {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #4a90e2;
+    background: var(--color-sage);
     color: white;
     display: flex;
     align-items: center;
@@ -1241,8 +1241,8 @@ main {
 }
 
 .user-item.selected {
-    background: #e3f2fd;
-    border-color: #4a90e2;
+    background: rgba(220, 252, 231, 0.3);
+    border-color: var(--color-sage);
 }
 
 
@@ -1267,8 +1267,8 @@ main {
 }
 
 .user-checkbox:checked {
-    background: #4a90e2;
-    border-color: #4a90e2;
+    background: var(--color-sage);
+    border-color: var(--color-sage);
 }
 
 .user-checkbox:checked::after {
@@ -1284,7 +1284,7 @@ main {
 }
 
 .user-checkbox:hover {
-    border-color: #4a90e2;
+    border-color: var(--color-sage);
 }
 
 
@@ -1364,12 +1364,12 @@ main {
 }
 
 .add-member-form-buttons button[type="submit"] {
-    background: #4a90e2;
+    background: var(--color-sage);
     color: white;
 }
 
 .add-member-form-buttons button[type="submit"]:hover {
-    background: #357abd;
+    background: var(--color-dark-green);
 }
 
 .content {
@@ -1740,30 +1740,25 @@ main {
 }
 
 .assignment-item {
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(45, 74, 43, 0.15);
-    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
     padding: 1rem;
     transition: all 0.2s ease;
 }
 
 .assignment-item:hover {
-    background: rgba(255, 255, 255, 0.5);
-    border-color: rgba(45, 74, 43, 0.3);
+    border-color: var(--color-pakistan-green);
     cursor: pointer;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .assignment-item.overdue {
-    border-left: 4px solid #dc3545;
-    background: rgba(254, 242, 242, 0.5);
+    border-left: 3px solid #dc3545;
 }
 
 .assignment-item.closed {
-    opacity: 0.7;
-    background: rgba(243, 244, 246, 0.4);
+    opacity: 0.65;
 }
 
 .assignment-header {
@@ -1880,6 +1875,27 @@ main {
     color: #92400e;
 }
 
+/* Student submission status badges */
+.assignment-status .status-badge.not-submitted {
+    background: rgba(254, 226, 226, 0.7);
+    color: #991b1b;
+}
+
+.assignment-status .status-badge.submitted {
+    background: rgba(220, 252, 231, 0.7);
+    color: #166534;
+}
+
+.assignment-status .status-badge.late {
+    background: rgba(254, 215, 170, 0.7);
+    color: #9a3412;
+}
+
+.assignment-status .status-badge.graded {
+    background: rgba(209, 250, 229, 0.7);
+    color: #065f46;
+}
+
 .no-assignments {
     text-align: center;
     padding: 2rem 1rem;
@@ -1948,4 +1964,264 @@ p.empty::after {
         align-items: flex-start;
         gap: 0.125rem;
     }
+}
+
+/* Submissions Tab Styling */
+.submissions-container {
+    padding: 20px;
+}
+
+.submissions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.submissions-header h3 {
+    margin: 0;
+    color: var(--color-pakistan-green);
+}
+
+.submissions-stats {
+    background: #f8f9fa;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.submissions-list {
+    display: grid;
+    gap: 15px;
+}
+
+.submission-item {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.submission-item:hover {
+    border-color: var(--color-pakistan-green);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.submission-student-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.submission-student-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--color-pakistan-green);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.submission-student-details h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.submission-student-details p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.submission-meta {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.submission-status-indicator {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.submission-status-indicator.submitted {
+    background: rgba(220, 252, 231, 0.7);
+    color: #166534;
+}
+
+.submission-status-indicator.graded {
+    background: rgba(209, 250, 229, 0.7);
+    color: #065f46;
+}
+
+.submission-status-indicator.not-submitted {
+    background: rgba(254, 226, 226, 0.7);
+    color: #991b1b;
+}
+
+.submission-grade {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-pakistan-green);
+}
+
+.no-submissions {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Quiz Builder in Create/Edit Modal */
+.quiz-builder-divider {
+    border-top: 2px solid #e0e0e0;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+#quiz_submission_note {
+    display: block;
+    margin-top: 5px;
+}
+
+/* Quiz Question Cards in Edit View */
+.quiz-question-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.quiz-question-card .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.quiz-question-card .question-number {
+    font-weight: 600;
+    color: var(--color-pakistan-green);
+    font-size: 14px;
+}
+
+.quiz-question-card .question-points {
+    background: var(--color-pakistan-green);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.quiz-question-card .question-text {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.quiz-question-card .question-type-badge {
+    display: inline-block;
+    background: #f0f0f0;
+    color: #666;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 12px;
+}
+
+.quiz-question-card .question-options {
+    margin-top: 12px;
+    padding-left: 10px;
+}
+
+.quiz-question-card .option-item {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: #f9f9f9;
+    border-left: 3px solid #ddd;
+    border-radius: 4px;
+}
+
+.quiz-question-card .option-item.correct-answer {
+    background: #e8f5e9;
+    border-left-color: var(--color-pakistan-green);
+    font-weight: 500;
+}
+
+/* Duplicate Assignment Button */
+/* Assignment Attachments */
+.attachments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.attachment-item:hover {
+    background: #e9ecef;
+    border-color: var(--color-pakistan-green);
+    transform: translateX(4px);
+}
+
+.attachment-item .file-icon {
+    font-size: 24px;
+}
+
+.attachment-item .file-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.attachment-item .file-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.attachment-item .file-size {
+    font-size: 12px;
+    color: #666;
+}
+
+.attachment-item .download-icon {
+    font-size: 18px;
+    opacity: 0.6;
+}
+
+.attachment-item:hover .download-icon {
+    opacity: 1;
 }

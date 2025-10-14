@@ -9,6 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/group-styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/rubric-system.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/resubmission-system.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/analytics-dashboard.css') }}">
+
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -551,187 +561,534 @@
                 <h2>Create New Assignment</h2>
                 <button class="close-modal" onclick="closeCreateAssignmentModal()">&times;</button>
             </div>
+
+            <!-- Tabs Navigation -->
+            <div class="settings-nav">
+                <button class="tab-btn active" data-tab="create-details" onclick="switchCreateTab('create-details')">Details</button>
+                <button class="tab-btn" data-tab="create-questions" id="create-questions-tab-btn" style="display: none;" onclick="switchCreateTab('create-questions')">Questions</button>
+                <button class="tab-btn" data-tab="create-rubrics" onclick="switchCreateTab('create-rubrics')">Rubrics</button>
+            </div>
+
             <div class="modal-body">
-                <form action="{{ route('group.createAssignment', $group->id) }}" method="POST" id="createAssignmentForm">
-                    @csrf
+                <!-- Details Tab -->
+                <div id="create-details-tab" class="tab-content active">
+                    <form action="{{ route('group.createAssignment', $group->id) }}" method="POST" id="createAssignmentForm" enctype="multipart/form-data">
+                        @csrf
 
-                    <div class="form-group">
-                        <label for="assignment_name">Assignment Name *</label>
-                        <input type="text" id="assignment_name" name="assignment_name" required>
-                    </div>
+                        <div class="form-group">
+                            <label for="assignment_name">Assignment Name *</label>
+                            <input type="text" id="assignment_name" name="assignment_name" required>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea id="description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
-                    </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="assignment_type">Assignment Type *</label>
-                        <select id="assignment_type" name="assignment_type" required>
-                            <option value="">Select type...</option>
-                            <option value="essay">Essay</option>
-                            <option value="quiz">Quiz</option>
-                            <option value="project">Project</option>
-                            <option value="homework">Homework</option>
-                            <option value="exam">Exam</option>
-                            <option value="presentation">Presentation</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="assignment_type">Assignment Type *</label>
+                            <select id="assignment_type" name="assignment_type" required onchange="handleAssignmentTypeChange()">
+                                <option value="">Select type...</option>
+                                <option value="essay">Essay</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="project">Project</option>
+                                <option value="homework">Homework</option>
+                                <option value="exam">Exam</option>
+                                <option value="presentation">Presentation</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="submission_type">Submission Type *</label>
-                        <select id="submission_type" name="submission_type" required>
-                            <option value="">Select submission type...</option>
-                            <option value="text">Text Submission</option>
-                            <option value="file">File Upload</option>
-                            <option value="link">External Link</option>
-                            <option value="none">No Submission Required</option>
-                        </select>
-                    </div>
+                        <div class="form-group" id="time_limit_group" style="display: none;">
+                            <label for="time_limit">Time Limit (minutes)</label>
+                            <input type="number" id="time_limit" name="time_limit" min="1" max="600" placeholder="e.g., 60 minutes">
+                            <small class="form-text" style="color: #999;">
+                                Optional: Set a time limit for students to complete this quiz/exam.
+                            </small>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="max_points">Maximum Points *</label>
-                        <input type="number" id="max_points" name="max_points" min="1" max="1000" required>
-                    </div>
+                        <div class="form-group" id="submission_type_group">
+                            <label for="submission_type">Submission Type <span id="submission_type_required">*</span></label>
+                            <select id="submission_type" name="submission_type">
+                                <option value="">Select submission type...</option>
+                                <option value="text">Text Submission</option>
+                                <option value="file">File Upload</option>
+                                <option value="external_link">External Link</option>
+                                <option value="none">No Submission Required</option>
+                                <option value="quiz" style="display: none;">Quiz</option>
+                            </select>
+                            <small class="form-text" id="quiz_submission_note" style="display: none; color: #999;">
+                                Submission type is automatically set to "quiz" for Quiz and Exam assignments.
+                            </small>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="date_assigned">Date Assigned</label>
-                        <input type="datetime-local" id="date_assigned" name="date_assigned" value="{{ now()->format('Y-m-d\TH:i') }}">
-                    </div>
+                        <!-- Quiz Builder Section (hidden by default) -->
+                        <div id="create_quiz_builder_section" style="display: none;">
+                            <div class="quiz-builder-divider">
+                                <h3 style="color: var(--color-pakistan-green); margin: 20px 0 15px;">Quiz/Exam Questions</h3>
+                                <p style="color: #666; margin-bottom: 20px;">Add questions below. You can also add questions after creating the assignment.</p>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="date_due">Due Date *</label>
-                        <input type="datetime-local" id="date_due" name="date_due" required>
-                    </div>
+                            <div id="create_quiz_questions_list" class="quiz-questions-list">
+                                <div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="date_close">Close Date</label>
-                        <input type="datetime-local" id="date_close" name="date_close">
-                        <small class="form-text">Optional: When to stop accepting submissions</small>
-                    </div>
+                            <div class="add-question-section">
+                                <button type="button" class="btn btn-secondary" onclick="addCreateQuizQuestion()">
+                                    ➕ Add Question
+                                </button>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="external_link">External Link</label>
-                        <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
-                        <small class="form-text">Optional: Link to external resources</small>
-                    </div>
+                        <div class="form-group" id="max_points_group">
+                            <label for="max_points">Maximum Points *</label>
+                            <input type="number" id="max_points" name="max_points" min="1" max="1000" required>
+                            <small class="form-text" id="auto_points_note" style="display: none; color: var(--color-pakistan-green);">
+                                Points will be automatically calculated from quiz questions.
+                            </small>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="visibility">Visibility *</label>
-                        <select id="visibility" name="visibility" required>
-                            <option value="draft">Draft (Only visible to you)</option>
-                            <option value="published">Published (Visible to all members)</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="date_assigned">Date Assigned</label>
+                            <input type="datetime-local" id="date_assigned" name="date_assigned" value="{{ now()->format('Y-m-d\TH:i') }}">
+                        </div>
 
-                    <div class="form-buttons">
-                        <button type="button" onclick="closeCreateAssignmentModal()" class="btn btn-secondary">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Assignment</button>
+                        <div class="form-group">
+                            <label for="date_due">Due Date *</label>
+                            <input type="datetime-local" id="date_due" name="date_due" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date_close">Close Date</label>
+                            <input type="datetime-local" id="date_close" name="date_close">
+                            <small class="form-text">Optional: When to stop accepting submissions</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="hidden" name="allow_late_submissions" value="0">
+                                <input type="checkbox" id="allow_late_submissions" name="allow_late_submissions" value="1" checked onchange="toggleLatePenalty()">
+                                Allow Late Submissions
+                            </label>
+                            <small class="form-text">Students can submit after the due date</small>
+                        </div>
+
+                        <div class="form-group" id="late_penalty_group">
+                            <label for="late_penalty_percentage">Late Penalty (%)</label>
+                            <input type="number" id="late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" value="0" placeholder="e.g., 10">
+                            <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="hidden" name="allow_resubmissions" value="0">
+                                <input type="checkbox" id="allow_resubmissions" name="allow_resubmissions" value="1" checked onchange="toggleResubmissions()">
+                                Allow Resubmissions
+                            </label>
+                            <small class="form-text">Students can resubmit after receiving a grade</small>
+                        </div>
+
+                        <div class="form-group" id="max_attempts_group">
+                            <label for="max_attempts">Maximum Attempts</label>
+                            <select id="max_attempts" name="max_attempts">
+                                <option value="-1">Unlimited</option>
+                                <option value="1">1 (No resubmissions)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                            <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="external_link">External Link</label>
+                            <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
+                            <small class="form-text">Optional: Link to external resources</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="attachments">Attach Files</label>
+                            <input type="file" id="attachments" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip">
+                            <small class="form-text">Optional: Attach reference materials, rubrics, examples, etc. (Max 10MB per file)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="visibility">Visibility *</label>
+                            <select id="visibility" name="visibility" required>
+                                <option value="draft">Draft (Only visible to you)</option>
+                                <option value="published">Published (Visible to all members)</option>
+                            </select>
+                        </div>
+
+                        <!-- Hidden field for quiz questions JSON -->
+                        <input type="hidden" id="quiz_questions" name="quiz_questions" value="">
+
+                        <!-- Hidden fields for quiz questions and rubrics JSON -->
+                        <input type="hidden" id="create_rubrics_data" name="rubrics_data" value="">
+
+                        <div class="form-buttons">
+                            <button type="button" onclick="closeCreateAssignmentModal()" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Assignment</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Questions Tab (for Quiz/Exam types) -->
+                <div id="create-questions-tab" class="tab-content" style="display: none;">
+                    <div class="quiz-builder-section">
+                        <div class="quiz-builder-header">
+                            <h3>Quiz/Exam Questions</h3>
+                            <p style="color: #666; margin-bottom: 20px;">Add questions for this quiz or exam. Points will be automatically calculated.</p>
+                        </div>
+
+                        <div id="create_quiz_questions_tab_list" class="quiz-questions-list">
+                            <div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>
+                        </div>
+
+                        <div class="add-question-section">
+                            <button type="button" class="btn btn-primary" onclick="addCreateQuizQuestionInTab()">
+                                ➕ Add Question
+                            </button>
+                        </div>
                     </div>
-                </form>
+                </div>
+
+                <!-- Rubrics Tab -->
+                <div id="create-rubrics-tab" class="tab-content" style="display: none;">
+                    <div class="rubrics-container">
+                        <div class="rubrics-header">
+                            <h3>Grading Rubric</h3>
+                            <p style="color: #666; margin-bottom: 20px;">Create grading criteria for this assignment. Students will see this rubric. Total rubric points will override the max points setting.</p>
+                        </div>
+
+                        <div id="create-rubrics-list" class="rubrics-list">
+                            <div class="no-rubrics-message" style="text-align: center; padding: 40px; color: #999;">
+                                <p>📋 No rubric criteria yet. Click "Add Criterion" to get started.</p>
+                                <p style="font-size: 0.9em; margin-top: 10px;">Rubrics help ensure consistent grading and set clear expectations for students.</p>
+                            </div>
+                        </div>
+
+                        <div class="rubric-actions">
+                            <button type="button" class="btn btn-secondary" onclick="addCreateRubricCriterion()">
+                                ➕ Add Criterion
+                            </button>
+                        </div>
+
+                        <div id="create-rubric-total" class="rubric-total" style="display: none;">
+                            <strong>Total Points: <span id="create-rubric-total-points">0</span></strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
 
-    <!-- Edit Assingment Modal -->
+    <!-- Edit Assignment Modal -->
     <div id="editAssignmentModal" class="modal" style="display: none;">
         <div class="modal-content settings-modal">
             <div class="modal-header">
-                <h2>EditAssignment</h2>
+                <h2>Edit Assignment</h2>
                 <button class="close-modal" onclick="closeEditAssignmentModal()">&times;</button>
             </div>
+
+            <!-- Tabs Navigation -->
+            <div class="settings-nav">
+                <button class="tab-btn active" data-tab="edit-details" onclick="switchEditTab('edit-details')">Details</button>
+                <button class="tab-btn" data-tab="edit-questions" id="edit-questions-tab-btn" style="display: none;" onclick="switchEditTab('edit-questions')">Questions</button>
+                <button class="tab-btn" data-tab="edit-rubrics" onclick="switchEditTab('edit-rubrics')">Rubrics</button>
+                <button class="tab-btn" data-tab="edit-analytics" onclick="switchEditTab('edit-analytics')">Analytics</button>
+                <button class="tab-btn" data-tab="edit-submissions" onclick="switchEditTab('edit-submissions')">Submissions</button>
+            </div>
+
             <div class="modal-body">
-                <form action="" method="POST" id="editAssignmentForm">
-                    @csrf
-                    <input type="hidden" name="assignment_id" id="edit_assignment_id" value="">
+                <!-- Details Tab -->
+                <div id="edit-details-tab" class="tab-content active">
+                    <form action="" method="POST" id="editAssignmentForm">
+                        @csrf
+                        <input type="hidden" name="assignment_id" id="edit_assignment_id" value="">
 
-                    <div class="form-group">
-                        <label for="edit_assignment_name">Assignment Name *</label>
-                        <input type="text" id="edit_assignment_name" name="assignment_name" required>
+                        <div class="form-group">
+                            <label for="edit_assignment_name">Assignment Name *</label>
+                            <input type="text" id="edit_assignment_name" name="assignment_name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_description">Description</label>
+                            <textarea id="edit_description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_assignment_type">Assignment Type *</label>
+                            <select id="edit_assignment_type" name="assignment_type" required>
+                                <option value="">Select type...</option>
+                                <option value="essay">Essay</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="project">Project</option>
+                                <option value="homework">Homework</option>
+                                <option value="exam">Exam</option>
+                                <option value="presentation">Presentation</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_submission_type">Submission Type *</label>
+                            <select id="edit_submission_type" name="submission_type" required>
+                                <option value="">Select submission type...</option>
+                                <option value="text">Text Submission</option>
+                                <option value="file">File Upload</option>
+                                <option value="external_link">External Link</option>
+                                <option value="none">No Submission Required</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_max_points">Maximum Points *</label>
+                            <input type="number" id="edit_max_points" name="max_points" min="1" max="1000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_date_assigned">Date Assigned</label>
+                            <input type="datetime-local" id="edit_date_assigned" name="date_assigned">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_date_due">Due Date *</label>
+                            <input type="datetime-local" id="edit_date_due" name="date_due" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_date_close">Close Date</label>
+                            <input type="datetime-local" id="edit_date_close" name="date_close">
+                            <small class="form-text">Optional: When to stop accepting submissions</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="hidden" name="allow_late_submissions" value="0">
+                                <input type="checkbox" id="edit_allow_late_submissions" name="allow_late_submissions" value="1" onchange="toggleEditLatePenalty()">
+                                Allow Late Submissions
+                            </label>
+                            <small class="form-text">Students can submit after the due date</small>
+                        </div>
+
+                        <div class="form-group" id="edit_late_penalty_group">
+                            <label for="edit_late_penalty_percentage">Late Penalty (%)</label>
+                            <input type="number" id="edit_late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" placeholder="e.g., 10">
+                            <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <input type="hidden" name="allow_resubmissions" value="0">
+                                <input type="checkbox" id="edit_allow_resubmissions" name="allow_resubmissions" value="1" onchange="toggleEditResubmissions()">
+                                Allow Resubmissions
+                            </label>
+                            <small class="form-text">Students can resubmit after receiving a grade</small>
+                        </div>
+
+                        <div class="form-group" id="edit_max_attempts_group">
+                            <label for="edit_max_attempts">Maximum Attempts</label>
+                            <select id="edit_max_attempts" name="max_attempts">
+                                <option value="-1">Unlimited</option>
+                                <option value="1">1 (No resubmissions)</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                            </select>
+                            <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_external_link">External Link</label>
+                            <input type="url" id="edit_external_link" name="external_link" placeholder="https://example.com">
+                            <small class="form-text">Optional: Link to external resources</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit_visibility">Visibility *</label>
+                            <select id="edit_visibility" name="visibility" required>
+                                <option value="draft">Draft (Only visible to you)</option>
+                                <option value="published">Published (Visible to all members)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Assignment</button>
+                            <button type="button" class="btn btn-danger" onclick="confirmDeleteAssignment()">Delete Assignment</button>
+                        </div>
+                    </form>
+
+                    <!-- Hidden Delete Form -->
+                    <form id="delete-assignment-form" method="POST" style="display: none;">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                </div>
+
+                <!-- Questions Tab (for Quiz/Exam) -->
+                <div id="edit-questions-tab" class="tab-content" style="display: none;">
+                    <div class="quiz-builder-container">
+                        <div class="quiz-instructions">
+                            <p>Add or edit questions for your quiz/exam. Changes are saved automatically.</p>
+                        </div>
+
+                        <div id="edit_quiz_questions_list" class="quiz-questions-list">
+                            <!-- Questions will be loaded here -->
+                        </div>
+
+                        <div class="add-question-section">
+                            <button type="button" class="btn btn-primary" onclick="addEditQuizQuestion()">
+                                ➕ Add Question
+                            </button>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Close</button>
+                            <button type="button" onclick="saveEditQuizQuestions()" class="btn btn-primary">Save All Questions</button>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="edit_description">Description</label>
-                        <textarea id="edit_description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                <!-- Rubrics Tab -->
+                <div id="edit-rubrics-tab" class="tab-content" style="display: none;">
+                    <div class="rubrics-container">
+                        <div class="rubrics-header">
+                            <h3>Grading Rubric</h3>
+                            <p style="color: #666; margin-bottom: 20px;">Create criteria to grade submissions consistently. Total rubric points will override the assignment's max points.</p>
+                        </div>
+
+                        <div id="rubrics-list" class="rubrics-list">
+                            <!-- Rubrics will be loaded here -->
+                        </div>
+
+                        <div class="rubric-actions">
+                            <button type="button" class="btn btn-secondary" onclick="addRubricCriterion()">
+                                ➕ Add Criterion
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="saveRubrics()">
+                                💾 Save Rubric
+                            </button>
+                        </div>
+
+                        <div id="rubric-total" class="rubric-total" style="display: none;">
+                            <strong>Total Points: <span id="rubric-total-points">0</span></strong>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="edit_assignment_type">Assignment Type *</label>
-                        <select id="edit_assignment_type" name="assignment_type" required>
-                            <option value="">Select type...</option>
-                            <option value="essay">Essay</option>
-                            <option value="quiz">Quiz</option>
-                            <option value="project">Project</option>
-                            <option value="homework">Homework</option>
-                            <option value="exam">Exam</option>
-                            <option value="presentation">Presentation</option>
-                        </select>
+                <!-- Analytics Tab -->
+                <div id="edit-analytics-tab" class="tab-content" style="display: none;">
+                    <div class="analytics-container">
+                        <div class="analytics-header">
+                            <h3>Assignment Analytics</h3>
+                            <p style="color: #666; margin-bottom: 20px;">View performance statistics and grade distribution for this assignment.</p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="analytics-loading" style="text-align: center; padding: 40px; display: none;">
+                            <p>Loading analytics...</p>
+                        </div>
+
+                        <!-- No Data State -->
+                        <div id="analytics-no-data" style="text-align: center; padding: 40px; color: #999; display: none;">
+                            <p>📊 No graded submissions yet. Analytics will appear once you grade student work.</p>
+                        </div>
+
+                        <!-- Analytics Content -->
+                        <div id="analytics-content" style="display: none;">
+                            <!-- Statistics Cards -->
+                            <div class="analytics-stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Submissions</div>
+                                    <div class="stat-value" id="stat-total">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Average Grade</div>
+                                    <div class="stat-value" id="stat-average">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Median Grade</div>
+                                    <div class="stat-value" id="stat-median">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-label">Std Deviation</div>
+                                    <div class="stat-value" id="stat-stddev">0</div>
+                                </div>
+                            </div>
+
+                            <!-- Grade Distribution Chart -->
+                            <div class="analytics-chart-section">
+                                <h4>Grade Distribution</h4>
+                                <div class="chart-container">
+                                    <canvas id="gradeDistributionChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Min/Max Section -->
+                            <div class="analytics-minmax">
+                                <div class="minmax-item">
+                                    <span class="minmax-label">Lowest Grade:</span>
+                                    <span class="minmax-value" id="stat-min">0</span>
+                                </div>
+                                <div class="minmax-item">
+                                    <span class="minmax-label">Highest Grade:</span>
+                                    <span class="minmax-value" id="stat-max">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Student Grades Table -->
+                            <div class="analytics-table-section">
+                                <h4>Student Grades</h4>
+                                <div class="analytics-table-container">
+                                    <table class="analytics-table" id="student-grades-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Grade</th>
+                                                <th>Status</th>
+                                                <th>Submitted</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="student-grades-tbody">
+                                            <!-- Student grades will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="edit_submission_type">Submission Type *</label>
-                        <select id="edit_submission_type" name="submission_type" required>
-                            <option value="">Select submission type...</option>
-                            <option value="text">Text Submission</option>
-                            <option value="file">File Upload</option>
-                            <option value="link">External Link</option>
-                            <option value="none">No Submission Required</option>
-                        </select>
+                <!-- Submissions Tab -->
+                <div id="edit-submissions-tab" class="tab-content" style="display: none;">
+                    <div class="submissions-container">
+                        <div class="submissions-header">
+                            <h3>Student Submissions</h3>
+                            <div class="submissions-stats" id="submissions-stats">
+                                Loading...
+                            </div>
+                        </div>
+
+                        <div id="submissions-list" class="submissions-list">
+                            <!-- Submissions will be loaded here -->
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="edit_max_points">Maximum Points *</label>
-                        <input type="number" id="edit_max_points" name="max_points" min="1" max="1000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_date_assigned">Date Assigned</label>
-                        <input type="datetime-local" id="edit_date_assigned" name="date_assigned">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_date_due">Due Date *</label>
-                        <input type="datetime-local" id="edit_date_due" name="date_due" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_date_close">Close Date</label>
-                        <input type="datetime-local" id="edit_date_close" name="date_close">
-                        <small class="form-text">Optional: When to stop accepting submissions</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_external_link">External Link</label>
-                        <input type="url" id="edit_external_link" name="external_link" placeholder="https://example.com">
-                        <small class="form-text">Optional: Link to external resources</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_visibility">Visibility *</label>
-                        <select id="edit_visibility" name="visibility" required>
-                            <option value="draft">Draft (Only visible to you)</option>
-                            <option value="published">Published (Visible to all members)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Update Assignment</button>
-                        <button type="button" class="btn btn-primary-del" onclick="confirmDeleteAssignment()">Delete Assignment</button>
-                    </div>
-                </form>
-
-                <!-- Hidden Delete Form -->
-                <form id="delete-assignment-form" method="POST" style="display: none;">
-                    @csrf
-                    @method('DELETE')
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Student Assignment Modal -->
+    @include('components.student-assignment-modal')
 
+    <!-- Quiz Builder Modal -->
+    @include('components.quiz-builder-modal')
+
+    <!-- Teacher Grading Modal -->
+    @include('components.grading-modal')
 
 </body>
 
@@ -742,5 +1099,10 @@
 </script>
 <script src="{{ asset('js/group-script.js') }}"></script>
 <script src="{{ asset('js/group-settings.js') }}"></script>
+<script src="{{ asset('js/student-assignment.js') }}"></script>
+<script src="{{ asset('js/quiz-builder.js') }}"></script>
+<script src="{{ asset('js/grading.js') }}"></script>
+<script src="{{ asset('js/rubric-system.js') }}"></script>
+<script src="{{ asset('js/analytics-dashboard.js') }}"></script>
 
 </html>
