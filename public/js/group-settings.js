@@ -713,7 +713,7 @@ function closeEditAssignmentModal() {
 }
 
 // Delete assignment function
-function deleteAssignment() {
+function confirmDeleteAssignment() {
     const assignmentId = document.getElementById('edit_assignment_id').value;
     
     console.log('Delete function called, assignment ID:', assignmentId);
@@ -728,43 +728,18 @@ function deleteAssignment() {
         return;
     }
     
+    // Set the form action to the correct delete URL
     const deleteUrl = `/group/${window.groupData.id}/assignments/${assignmentId}`;
-    console.log('Sending DELETE request to:', deleteUrl);
+    console.log('Submitting DELETE form to:', deleteUrl);
     
-    fetch(deleteUrl, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.message || 'Failed to delete assignment');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Assignment deleted:', data);
-        
-        // Close modal
-        closeEditAssignmentModal();
-        
-        // Reload sidebar assignments
-        loadSidebarAssignments();
-        
-        // Show success message
-        alert(data.message || 'Assignment deleted successfully!');
-        
-        // Reload page to show changes
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error('Error deleting assignment:', error);
-        alert('Failed to delete assignment: ' + error.message);
-    });
+    const deleteForm = document.getElementById('delete-assignment-form');
+    deleteForm.action = deleteUrl;
+    deleteForm.submit();
+}
+
+// Keep old function name for backwards compatibility if needed elsewhere
+function deleteAssignment() {
+    confirmDeleteAssignment();
 }
 
 // Handle edit assignment form submission

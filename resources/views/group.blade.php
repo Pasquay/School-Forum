@@ -718,8 +718,14 @@
                     <div class="form-buttons">
                         <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update Assignment</button>
-                        <button type="button" class="btn btn-primary-del" onclick="deleteAssignment()">Delete Assignment</button>
+                        <button type="button" class="btn btn-primary-del" onclick="confirmDeleteAssignment()">Delete Assignment</button>
                     </div>
+                </form>
+
+                <!-- Hidden Delete Form -->
+                <form id="delete-assignment-form" method="POST" style="display: none;">
+                    @csrf
+                    @method('DELETE')
                 </form>
             </div>
         </div>

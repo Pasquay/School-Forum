@@ -51,14 +51,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -170,14 +170,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -1083,7 +1083,7 @@ class GroupController extends Controller
                 'description' => 'nullable|string',
                 'max_points' => 'required|integer|min:0',
                 'assignment_type' => 'required|in:assignment,quiz,essay,discussion,exam,project',
-                'submission_type' => 'required|in:text,file,external_link',
+                'submission_type' => 'required|in:text,file,external_link,none',
                 'visibility' => 'required|in:draft,published',
                 'date_assigned' => 'nullable|date',
                 'date_due' => 'required|date|after_or_equal:date_assigned',
@@ -1102,14 +1102,11 @@ class GroupController extends Controller
 
             // Future: Add rubrics and notifications
 
-            return response()->json([
-                'message' => 'Assignment created successfully!',
-                'assignment' => $assignment
-            ], 201);
+            return back()->with('success', 'Assignment created successfully!');
         } catch (ValidationException $e) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to create assignment', 'error' => $e->getMessage()], 500);
+            return back()->with('error', 'Failed to create assignment: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -1406,26 +1403,14 @@ class GroupController extends Controller
 
             Log::info("DEBUG UPDATE: Response formatted successfully");
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Assignment updated successfully!',
-                'assignment' => $formattedAssignment,
-                'redirect' => route('group.show', $groupId)
-            ], 200);
+            return back()->with('success', 'Assignment updated successfully!');
         } catch (ValidationException $e) {
             Log::error("DEBUG UPDATE: Validation error: " . json_encode($e->errors()));
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('DEBUG UPDATE: Update assignment error: ' . $e->getMessage());
             Log::error('DEBUG UPDATE: Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'message' => 'Failed to update assignment',
-                'error' => $e->getMessage(),
-                'debug' => true
-            ], 500);
+            return back()->with('error', 'Failed to update assignment: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -1497,19 +1482,11 @@ class GroupController extends Controller
 
             Log::info("DEBUG DELETE: Assignment deleted successfully");
 
-            return response()->json([
-                'success' => true,
-                'message' => "Assignment '{$assignmentName}' has been deleted successfully!",
-                'deleted_id' => $assignmentId
-            ], 200);
+            return back()->with('success', "Assignment '{$assignmentName}' has been deleted successfully!");
         } catch (\Exception $e) {
             Log::error('DEBUG DELETE: Delete assignment error: ' . $e->getMessage());
             Log::error('DEBUG DELETE: Stack trace: ' . $e->getTraceAsString());
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete assignment',
-                'error' => $e->getMessage()
-            ], 500);
+            return back()->with('error', 'Failed to delete assignment: ' . $e->getMessage());
         }
     }
 }
