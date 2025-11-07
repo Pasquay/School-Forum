@@ -1,3 +1,27 @@
+// Helper function to parse datetime as local time (not UTC)
+function parseLocalDateTime(dateString) {
+    if (!dateString) return null;
+    try {
+        // Remove timezone markers if present (Z or +00:00)
+        let cleanDate = dateString.replace(/Z$/, '').replace(/\.\d{6}$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
+        
+        // dateString format: "2025-10-14T18:07:00" or "2025-10-14T18:07"
+        const [datePart, timePart] = cleanDate.split('T');
+        if (!datePart || !timePart) return new Date(dateString); // Fallback
+        
+        const [year, month, day] = datePart.split('-');
+        const timeComponents = timePart.split(':');
+        const hour = timeComponents[0];
+        const minute = timeComponents[1];
+        const second = timeComponents[2] || 0;
+        
+        return new Date(year, month - 1, day, hour, minute, second);
+    } catch (e) {
+        console.error('Error parsing date:', dateString, e);
+        return new Date(dateString); // Fallback to default parsing
+    }
+}
+
 // Show Group Settings Modal
 function showGroupSettingsModal() {
     document.getElementById('groupSettingsModal').style.display = 'flex';
@@ -375,12 +399,40 @@ function createSidebarAssignmentHTML(assignment) {
         statusBadges.push('<span class="status-badge draft">Draft</span>');
     }
     
-    // Only show edit button if user can edit
-    const editButton = assignment.can_edit ? 
-        `<button class="edit-assignment-btn" onclick="openEditAssignmentModal(${assignment.id})">Edit</button>` : '';
+    // Add submission status badge for students
+    if (assignment.submission_status) {
+        const statusText = {
+            'not_submitted': 'Not Submitted',
+            'draft': 'Draft Saved',
+            'submitted': 'Submitted',
+            'submitted_late': 'Submitted (Late)',
+            'graded': 'Graded'
+        }[assignment.submission_status] || 'Unknown';
+        
+        const statusClass = {
+            'not_submitted': 'not-submitted',
+            'draft': 'draft',
+            'submitted': 'submitted',
+            'submitted_late': 'late',
+            'graded': 'graded'
+        }[assignment.submission_status] || 'unknown';
+        
+        statusBadges.push(`<span class="status-badge ${statusClass}">${statusText}</span>`);
+    }
+    
+    // Show edit button for teachers/moderators only
+    let actionButtons = '';
+    if (assignment.can_edit) {
+        actionButtons = `<button class="edit-assignment-btn" onclick="openEditAssignmentModal(${assignment.id})">Edit</button>`;
+    }
+    
+    // Make entire card clickable for students
+    const clickHandler = assignment.can_edit ? 
+        '' : 
+        `onclick="openStudentAssignmentModal(${assignment.id})" style="cursor: pointer;"`;
     
     return `
-        <div class="assignment-item ${statusClasses.join(' ')}" data-assignment-id="${assignment.id}">
+        <div class="assignment-item ${statusClasses.join(' ')}" data-assignment-id="${assignment.id}" ${clickHandler}>
             <div class="assignment-header">
                 <h4 class="assignment-name">${assignment.assignment_name}</h4>
                 <span class="assignment-type">${assignment.assignment_type.charAt(0).toUpperCase() + assignment.assignment_type.slice(1)}</span>
@@ -388,22 +440,17 @@ function createSidebarAssignmentHTML(assignment) {
             <div class="assignment-details">
                 <div class="assignment-due">
                     <strong>Due:</strong>
-                    <span class="due-date">${assignment.date_due}</span>
+                    <span class="due-date">${new Date(assignment.date_due).toLocaleString()}</span>
                 </div>
                 ${assignment.max_points ? `
                     <div class="assignment-points">
                         <strong>Points:</strong> ${assignment.max_points}
                     </div>
                 ` : ''}
-                ${assignment.description ? `
-                    <div class="assignment-description">
-                        ${assignment.description.substring(0, 100)}${assignment.description.length > 100 ? '...' : ''}
-                    </div>
-                ` : ''}
             </div>
             <div class="assignment-status">
                 ${statusBadges.join('')}
-                ${editButton}
+                ${actionButtons}
             </div>
         </div>
     `;
@@ -637,6 +684,7 @@ function loadAssignmentData(assignmentId) {
     })
     .then(data => {
         console.log('Assignment data received:', data);
+        console.log('Quiz questions in response:', data.assignment?.quiz_questions);
         populateEditForm(data.assignment);
     })
     .catch(error => {
@@ -653,6 +701,59 @@ function populateEditForm(assignment) {
         return;
     }
     
+    // Store current assignment globally
+    currentEditAssignment = assignment;
+    
+    // Show/hide tabs based on assignment state
+    const questionsTabBtn = document.getElementById('edit-questions-tab-btn');
+    const analyticsTabBtn = document.querySelector('[data-tab="edit-analytics"]');
+    const submissionsTabBtn = document.querySelector('[data-tab="edit-submissions"]');
+    
+    console.log('Assignment type:', assignment.assignment_type);
+    console.log('Quiz questions from API:', assignment.quiz_questions);
+    
+    // Show Questions tab only for quiz/exam types
+    if (assignment.assignment_type === 'quiz' || assignment.assignment_type === 'exam') {
+        questionsTabBtn.style.display = 'block';
+        // Load quiz questions if available
+        if (assignment.quiz_questions && assignment.quiz_questions.length > 0) {
+            console.log('Loading', assignment.quiz_questions.length, 'questions into editor');
+            editQuizQuestions = assignment.quiz_questions;
+            renderEditQuizQuestions();
+        } else {
+            console.log('No quiz questions found, showing empty state');
+            editQuizQuestions = [];
+            renderEditQuizQuestions();
+        }
+    } else {
+        questionsTabBtn.style.display = 'none';
+    }
+    
+    // Hide Analytics tab if no graded submissions exist
+    const hasGradedSubmissions = assignment.graded_count && assignment.graded_count > 0;
+    if (!hasGradedSubmissions) {
+        analyticsTabBtn.style.display = 'none';
+        analyticsTabBtn.title = 'Analytics available after grading submissions';
+    } else {
+        analyticsTabBtn.style.display = 'block';
+        analyticsTabBtn.title = '';
+    }
+    
+    // Hide Submissions tab if assignment is draft or has no submissions
+    const hasSubmissions = assignment.submission_count && assignment.submission_count > 0;
+    const isPublished = assignment.visibility === 'published';
+    if (!isPublished || !hasSubmissions) {
+        submissionsTabBtn.style.display = 'none';
+        if (!isPublished) {
+            submissionsTabBtn.title = 'Publish assignment to see submissions';
+        } else {
+            submissionsTabBtn.title = 'No submissions yet';
+        }
+    } else {
+        submissionsTabBtn.style.display = 'block';
+        submissionsTabBtn.title = '';
+    }
+    
     // Set assignment ID in hidden field
     form.querySelector('#edit_assignment_id').value = assignment.id;
     
@@ -667,22 +768,47 @@ function populateEditForm(assignment) {
     form.querySelector('#edit_submission_type').value = assignment.submission_type || '';
     form.querySelector('#edit_max_points').value = assignment.max_points || '';
     form.querySelector('#edit_visibility').value = assignment.visibility || 'draft';
-    form.querySelector('#edit_external_link').value = assignment.external_link || '';
+    // Removed: assignments don't have external_link field (it's on submissions only)
     
     // Handle datetime fields - convert from server format to input format
     if (assignment.date_assigned) {
-        const dateAssigned = new Date(assignment.date_assigned);
+        const dateAssigned = parseLocalDateTime(assignment.date_assigned);
         form.querySelector('#edit_date_assigned').value = formatDateTimeForInput(dateAssigned);
     }
     
     if (assignment.date_due) {
-        const dateDue = new Date(assignment.date_due);
+        const dateDue = parseLocalDateTime(assignment.date_due);
         form.querySelector('#edit_date_due').value = formatDateTimeForInput(dateDue);
     }
     
     if (assignment.close_date) {
-        const closeDate = new Date(assignment.close_date);
+        const closeDate = parseLocalDateTime(assignment.close_date);
         form.querySelector('#edit_date_close').value = formatDateTimeForInput(closeDate);
+    }
+    
+    // Set late submission fields
+    const allowLateCheckbox = form.querySelector('#edit_allow_late_submissions');
+    if (allowLateCheckbox) {
+        // Explicitly convert to boolean - handles 0, 1, false, true, null
+        allowLateCheckbox.checked = assignment.allow_late_submissions === 1 || assignment.allow_late_submissions === true;
+        toggleEditLatePenalty();
+    }
+    
+    const latePenaltyInput = form.querySelector('#edit_late_penalty_percentage');
+    if (latePenaltyInput) {
+        latePenaltyInput.value = assignment.late_penalty_percentage || 0;
+    }
+    
+    // Set resubmission control fields
+    const allowResubmissionsCheckbox = form.querySelector('#edit_allow_resubmissions');
+    if (allowResubmissionsCheckbox) {
+        allowResubmissionsCheckbox.checked = assignment.allow_resubmissions === 1 || assignment.allow_resubmissions === true;
+        toggleEditResubmissions();
+    }
+    
+    const maxAttemptsSelect = form.querySelector('#edit_max_attempts');
+    if (maxAttemptsSelect) {
+        maxAttemptsSelect.value = assignment.max_attempts ?? -1;
     }
     
     // Re-enable form inputs
@@ -713,7 +839,7 @@ function closeEditAssignmentModal() {
 }
 
 // Delete assignment function
-function deleteAssignment() {
+function confirmDeleteAssignment() {
     const assignmentId = document.getElementById('edit_assignment_id').value;
     
     console.log('Delete function called, assignment ID:', assignmentId);
@@ -728,43 +854,18 @@ function deleteAssignment() {
         return;
     }
     
+    // Set the form action to the correct delete URL
     const deleteUrl = `/group/${window.groupData.id}/assignments/${assignmentId}`;
-    console.log('Sending DELETE request to:', deleteUrl);
+    console.log('Submitting DELETE form to:', deleteUrl);
     
-    fetch(deleteUrl, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.message || 'Failed to delete assignment');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Assignment deleted:', data);
-        
-        // Close modal
-        closeEditAssignmentModal();
-        
-        // Reload sidebar assignments
-        loadSidebarAssignments();
-        
-        // Show success message
-        alert(data.message || 'Assignment deleted successfully!');
-        
-        // Reload page to show changes
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error('Error deleting assignment:', error);
-        alert('Failed to delete assignment: ' + error.message);
-    });
+    const deleteForm = document.getElementById('delete-assignment-form');
+    deleteForm.action = deleteUrl;
+    deleteForm.submit();
+}
+
+// Keep old function name for backwards compatibility if needed elsewhere
+function deleteAssignment() {
+    confirmDeleteAssignment();
 }
 
 // Handle edit assignment form submission
@@ -830,3 +931,654 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ==================== CREATE ASSIGNMENT - QUIZ BUILDER ====================
+
+let createQuizQuestions = [];
+let createQuestionIdCounter = 1;
+
+// Handle assignment type change in create modal
+function handleAssignmentTypeChange() {
+    const assignmentType = document.getElementById('assignment_type').value;
+    const submissionTypeGroup = document.getElementById('submission_type_group');
+    const submissionTypeSelect = document.getElementById('submission_type');
+    const submissionTypeRequired = document.getElementById('submission_type_required');
+    const quizNote = document.getElementById('quiz_submission_note');
+    const quizBuilderSection = document.getElementById('create_quiz_builder_section');
+    const timeLimitGroup = document.getElementById('time_limit_group');
+    const maxPointsInput = document.getElementById('max_points');
+    const autoPointsNote = document.getElementById('auto_points_note');
+    const questionsTabBtn = document.getElementById('create-questions-tab-btn');
+    
+    if (assignmentType === 'quiz' || assignmentType === 'exam') {
+        // Show Questions tab
+        if (questionsTabBtn) {
+            questionsTabBtn.style.display = 'block';
+        }
+        // Grey out and set submission type to quiz
+        submissionTypeSelect.value = 'quiz';
+        submissionTypeSelect.disabled = true;
+        submissionTypeSelect.style.opacity = '0.6';
+        submissionTypeSelect.style.cursor = 'not-allowed';
+        submissionTypeSelect.required = false; // Remove required validation
+        submissionTypeSelect.removeAttribute('required'); // Ensure attribute is removed
+        submissionTypeRequired.style.display = 'none';
+        quizNote.style.display = 'block';
+        quizBuilderSection.style.display = 'block';
+        timeLimitGroup.style.display = 'block'; // Show time limit field
+        
+        // Disable max points and show auto-calc note
+        maxPointsInput.disabled = true;
+        maxPointsInput.style.opacity = '0.6';
+        maxPointsInput.style.cursor = 'not-allowed';
+        maxPointsInput.required = false;
+        maxPointsInput.removeAttribute('required');
+        autoPointsNote.style.display = 'block';
+        
+        // Calculate points from questions
+        updateMaxPointsFromQuestions();
+    } else {
+        // Hide Questions tab
+        if (questionsTabBtn) {
+            questionsTabBtn.style.display = 'none';
+            // If currently on Questions tab, switch to Details
+            const questionsTab = document.getElementById('create-questions-tab');
+            if (questionsTab && questionsTab.classList.contains('active')) {
+                switchCreateTab('create-details');
+            }
+        }
+        
+        // Enable submission type
+        submissionTypeSelect.disabled = false;
+        submissionTypeSelect.style.opacity = '1';
+        submissionTypeSelect.style.cursor = 'pointer';
+        submissionTypeSelect.required = true;
+        submissionTypeSelect.setAttribute('required', 'required');
+        submissionTypeRequired.style.display = 'inline';
+        quizNote.style.display = 'none';
+        quizBuilderSection.style.display = 'none';
+        timeLimitGroup.style.display = 'none'; // Hide time limit field
+        
+        // Enable max points
+        maxPointsInput.disabled = false;
+        maxPointsInput.style.opacity = '1';
+        maxPointsInput.style.cursor = 'text';
+        maxPointsInput.required = true;
+        maxPointsInput.setAttribute('required', 'required');
+        autoPointsNote.style.display = 'none';
+        
+        createQuizQuestions = []; // Clear questions
+    }
+}
+
+// Update max points from quiz questions
+function updateMaxPointsFromQuestions() {
+    const totalPoints = createQuizQuestions.reduce((sum, q) => sum + (parseInt(q.points) || 0), 0);
+    const maxPointsInput = document.getElementById('max_points');
+    // Set to total points, or 1 if no questions yet (minimum for form validation)
+    maxPointsInput.value = totalPoints > 0 ? totalPoints : 1;
+}
+
+// Add question in create modal
+function addCreateQuizQuestion() {
+    const newQuestion = {
+        id: null,
+        question_text: '',
+        question_type: 'multiple_choice',
+        points: 1,
+        order: createQuizQuestions.length + 1,
+        options: [{ option_text: '', is_correct: false }]
+    };
+    
+    createQuizQuestions.push(newQuestion);
+    renderCreateQuizQuestions();
+}
+
+// Render create quiz questions
+function renderCreateQuizQuestions() {
+    const container = document.getElementById('create_quiz_questions_list');
+    
+    if (createQuizQuestions.length === 0) {
+        container.innerHTML = '<div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>';
+        updateMaxPointsFromQuestions(); // Update even when empty
+        return;
+    }
+    
+    container.innerHTML = createQuizQuestions.map((question, index) => {
+        return createQuestionHTMLForCreate(question, index);
+    }).join('');
+    
+    // Update max points whenever questions are rendered
+    updateMaxPointsFromQuestions();
+}
+
+// Create question HTML for create modal
+function createQuestionHTMLForCreate(question, index) {
+    const questionNumber = index + 1;
+    const tempId = question.id || `temp-${createQuestionIdCounter++}`;
+    
+    let optionsHTML = '';
+    
+    if (question.question_type === 'multiple_choice' || question.question_type === 'true_false') {
+        const options = question.options || (question.question_type === 'true_false' ? 
+            [{option_text: 'True', is_correct: false}, {option_text: 'False', is_correct: false}] : 
+            [{option_text: '', is_correct: false}]);
+        
+        optionsHTML = `
+            <div class="question-options">
+                <h5>Answer Options:</h5>
+                <div class="options-list">
+                    ${options.map((opt, optIndex) => `
+                        <div class="option-item">
+                            <input type="radio" 
+                                   name="correct-create-${tempId}" 
+                                   ${opt.is_correct ? 'checked' : ''}
+                                   onchange="markCreateCorrectOption(${index}, ${optIndex})">
+                            <input type="text" 
+                                   value="${opt.option_text || ''}" 
+                                   placeholder="Option ${optIndex + 1}"
+                                   onchange="updateCreateOptionText(${index}, ${optIndex}, this.value)"
+                                   ${question.question_type === 'true_false' ? 'readonly' : ''}>
+                            ${question.question_type !== 'true_false' ? `
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeCreateOption(${index}, ${optIndex})">✕</button>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                ${question.question_type !== 'true_false' ? `
+                    <button type="button" class="btn btn-secondary btn-sm add-option-btn" onclick="addCreateOption(${index})">
+                        ➕ Add Option
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="quiz-question-item">
+            <div class="question-header">
+                <span class="question-number">Question ${questionNumber}</span>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteCreateQuestion(${index})">Delete</button>
+            </div>
+            
+            <div class="question-body">
+                <div class="form-row">
+                    <div class="form-group-inline">
+                        <label>Question Text *</label>
+                        <textarea 
+                            onchange="updateCreateQuestion(${index}, 'question_text', this.value)"
+                            placeholder="Enter your question here..."
+                        >${question.question_text || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-group-inline">
+                        <label>Question Type *</label>
+                        <select onchange="updateCreateQuestion(${index}, 'question_type', this.value)">
+                            <option value="multiple_choice" ${question.question_type === 'multiple_choice' ? 'selected' : ''}>Multiple Choice</option>
+                            <option value="true_false" ${question.question_type === 'true_false' ? 'selected' : ''}>True/False</option>
+                            <option value="short_answer" ${question.question_type === 'short_answer' ? 'selected' : ''}>Short Answer</option>
+                            <option value="essay" ${question.question_type === 'essay' ? 'selected' : ''}>Essay</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group-inline">
+                        <label>Points *</label>
+                        <input type="number" 
+                               min="0" 
+                               step="0.5" 
+                               value="${question.points || 1}"
+                               onchange="updateCreateQuestion(${index}, 'points', this.value)">
+                    </div>
+                </div>
+                
+                ${optionsHTML}
+            </div>
+        </div>
+    `;
+}
+
+// Update create question
+function updateCreateQuestion(index, field, value) {
+    if (createQuizQuestions[index]) {
+        createQuizQuestions[index][field] = value;
+        
+        if (field === 'question_type') {
+            if (value === 'true_false') {
+                createQuizQuestions[index].options = [
+                    { option_text: 'True', is_correct: false },
+                    { option_text: 'False', is_correct: false }
+                ];
+            } else if (value === 'multiple_choice' && !createQuizQuestions[index].options) {
+                createQuizQuestions[index].options = [{ option_text: '', is_correct: false }];
+            } else if (value === 'short_answer' || value === 'essay') {
+                createQuizQuestions[index].options = [];
+            }
+            renderCreateQuizQuestions();
+        } else if (field === 'points') {
+            // Update max points when points change
+            updateMaxPointsFromQuestions();
+        }
+    }
+}
+
+function deleteCreateQuestion(index) {
+    if (confirm('Delete this question?')) {
+        createQuizQuestions.splice(index, 1);
+        renderCreateQuizQuestions();
+    }
+}
+
+function addCreateOption(questionIndex) {
+    if (!createQuizQuestions[questionIndex].options) {
+        createQuizQuestions[questionIndex].options = [];
+    }
+    createQuizQuestions[questionIndex].options.push({ option_text: '', is_correct: false });
+    renderCreateQuizQuestions();
+}
+
+function removeCreateOption(questionIndex, optionIndex) {
+    if (createQuizQuestions[questionIndex].options && createQuizQuestions[questionIndex].options.length > 1) {
+        createQuizQuestions[questionIndex].options.splice(optionIndex, 1);
+        renderCreateQuizQuestions();
+    } else {
+        alert('A question must have at least one option.');
+    }
+}
+
+function updateCreateOptionText(questionIndex, optionIndex, value) {
+    if (createQuizQuestions[questionIndex].options && createQuizQuestions[questionIndex].options[optionIndex]) {
+        createQuizQuestions[questionIndex].options[optionIndex].option_text = value;
+    }
+}
+
+function markCreateCorrectOption(questionIndex, optionIndex) {
+    if (createQuizQuestions[questionIndex].options) {
+        createQuizQuestions[questionIndex].options.forEach((opt, idx) => {
+            opt.is_correct = (idx === optionIndex);
+        });
+    }
+}
+
+// ==================== EDIT ASSIGNMENT - TAB SWITCHING ====================
+
+let currentEditAssignment = null;
+let editQuizQuestions = [];
+
+function switchEditTab(tabName) {
+    // Remove active class from all tabs
+    document.querySelectorAll('#editAssignmentModal .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('#editAssignmentModal .tab-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+    
+    // Activate clicked tab
+    document.querySelector(`#editAssignmentModal .tab-btn[data-tab="${tabName}"]`).classList.add('active');
+    const tabContent = document.getElementById(`${tabName}-tab`);
+    tabContent.style.display = 'block';
+    tabContent.classList.add('active');
+    
+    // Load content based on tab
+    if (tabName === 'edit-questions' && currentEditAssignment) {
+        // Questions are already loaded in populateEditForm, just render them
+        renderEditQuizQuestions();
+    } else if (tabName === 'edit-rubrics' && currentEditAssignment) {
+        loadRubrics(currentEditAssignment.id);
+    } else if (tabName === 'edit-analytics' && currentEditAssignment) {
+        loadAnalytics(currentEditAssignment.id);
+    } else if (tabName === 'edit-submissions' && currentEditAssignment) {
+        loadSubmissions(currentEditAssignment.id);
+    }
+}
+
+// Switch tabs in Create Assignment Modal
+window.switchCreateTab = function(tabName) {
+    // Remove active class from all tabs
+    document.querySelectorAll('#createAssignmentModal .tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('#createAssignmentModal .tab-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+    
+    // Activate clicked tab
+    document.querySelector(`#createAssignmentModal .tab-btn[data-tab="${tabName}"]`).classList.add('active');
+    const tabContent = document.getElementById(`${tabName}-tab`);
+    tabContent.style.display = 'block';
+    tabContent.classList.add('active');
+}
+
+// Render edit quiz questions
+window.renderEditQuizQuestions = function() {
+    console.log('renderEditQuizQuestions called');
+    console.log('editQuizQuestions:', editQuizQuestions);
+    
+    const container = document.getElementById('edit_quiz_questions_list');
+    
+    if (!container) {
+        console.error('Edit quiz questions container not found');
+        return;
+    }
+    
+    if (!editQuizQuestions || editQuizQuestions.length === 0) {
+        container.innerHTML = '<div class="no-questions-message">No questions yet. Add questions to this quiz/exam.</div>';
+        return;
+    }
+    
+    console.log('Starting to render questions...');
+    console.log('First question:', editQuizQuestions[0]);
+    
+    const html = editQuizQuestions.map((question, index) => {
+        return `
+            <div class="quiz-question-card" data-question-id="${question.id}">
+                <div class="question-header">
+                    <span class="question-number">Question ${index + 1}</span>
+                    <span class="question-points">${question.points} point${question.points !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="question-text">${question.question_text}</div>
+                <div class="question-type-badge">${formatQuestionType(question.question_type)}</div>
+                ${question.options && question.options.length > 0 ? `
+                    <div class="question-options">
+                        ${question.options.map(opt => `
+                            <div class="option-item ${opt.is_correct ? 'correct-answer' : ''}">
+                                ${opt.is_correct ? '✓ ' : ''}${opt.option_text}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+    
+    console.log('Generated HTML length:', html.length);
+    console.log('Setting innerHTML...');
+    container.innerHTML = html;
+    console.log('Questions rendered successfully');
+};
+
+// Format question type for display
+function formatQuestionType(type) {
+    const types = {
+        'multiple_choice': 'Multiple Choice',
+        'true_false': 'True/False',
+        'short_answer': 'Short Answer',
+        'essay': 'Essay'
+    };
+    return types[type] || type;
+}
+
+// Load submissions for grading
+async function loadSubmissions(assignmentId) {
+    try {
+        const response = await fetch(`/group/${window.groupData.id}/assignments/${assignmentId}/submissions`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load submissions');
+        }
+        
+        const data = await response.json();
+        renderSubmissions(data.submissions, data.stats);
+    } catch (error) {
+        console.error('Error loading submissions:', error);
+        document.getElementById('submissions-list').innerHTML = '<div class="no-submissions">Failed to load submissions</div>';
+    }
+}
+
+// Render submissions list
+function renderSubmissions(submissions, stats) {
+    const statsContainer = document.getElementById('submissions-stats');
+    const listContainer = document.getElementById('submissions-list');
+    
+    // Render stats
+    statsContainer.innerHTML = `
+        <strong>${stats.submitted}</strong> submitted | 
+        <strong>${stats.graded}</strong> graded | 
+        <strong>${stats.not_submitted}</strong> not submitted
+    `;
+    
+    // Render submissions
+    if (submissions.length === 0) {
+        listContainer.innerHTML = '<div class="no-submissions">No submissions yet</div>';
+        return;
+    }
+    
+    listContainer.innerHTML = submissions.map(submission => {
+        const statusClass = submission.status === 'graded' ? 'graded' : 
+                          submission.status === 'submitted' ? 'submitted' : 'not-submitted';
+        const statusText = submission.status === 'graded' ? 'Graded' :
+                          submission.status === 'submitted' ? 'Submitted' : 'Not Submitted';
+        
+        return `
+            <div class="submission-item" onclick="openGradeModal(${submission.student_id}, ${currentEditAssignment.id})">
+                <div class="submission-student-info">
+                    <div class="submission-student-avatar">
+                        ${submission.student_name.charAt(0)}
+                    </div>
+                    <div class="submission-student-details">
+                        <h4>${submission.student_name}</h4>
+                        <p>Submitted: ${submission.submitted_at || 'Not submitted'}</p>
+                    </div>
+                </div>
+                <div class="submission-meta">
+                    <span class="submission-status-indicator ${statusClass}">${statusText}</span>
+                    ${submission.grade !== null ? `<span class="submission-grade">${submission.grade}/${currentEditAssignment.max_points}</span>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Open grade modal - defined in grading.js
+// Function openGradeModal() is loaded from grading.js
+
+// Handle form submission for create assignment
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('createAssignmentForm');
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            const assignmentType = document.getElementById('assignment_type').value;
+            const maxPointsInput = document.getElementById('max_points');
+            
+            // If it's a quiz or exam, populate the hidden quiz_questions field
+            if (assignmentType === 'quiz' || assignmentType === 'exam') {
+                if (createQuizQuestions.length > 0) {
+                    document.getElementById('quiz_questions').value = JSON.stringify(createQuizQuestions);
+                }
+                
+                // Ensure max_points has a valid value (at least 1) even if auto-calculated is 0
+                if (!maxPointsInput.value || parseInt(maxPointsInput.value) < 1) {
+                    maxPointsInput.value = '1';
+                }
+                
+                // Temporarily enable the field for form submission
+                maxPointsInput.disabled = false;
+            }
+            
+            // Form will submit normally
+        });
+    }
+});
+
+// Intercept create assignment form submission to add rubrics
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('createAssignmentForm');
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            // Add rubrics data to hidden field before submission
+            if (createRubricCriteria && createRubricCriteria.length > 0) {
+                document.getElementById('create_rubrics_data').value = JSON.stringify(createRubricCriteria);
+            }
+        });
+    }
+});
+
+// Toggle late penalty field visibility
+function toggleLatePenalty() {
+    const allowLate = document.getElementById('allow_late_submissions').checked;
+    const penaltyGroup = document.getElementById('late_penalty_group');
+    
+    if (allowLate) {
+        penaltyGroup.style.display = 'block';
+    } else {
+        penaltyGroup.style.display = 'none';
+        document.getElementById('late_penalty_percentage').value = '0';
+    }
+}
+
+function toggleEditLatePenalty() {
+    const allowLate = document.getElementById('edit_allow_late_submissions').checked;
+    const penaltyGroup = document.getElementById('edit_late_penalty_group');
+    
+    if (allowLate) {
+        penaltyGroup.style.display = 'block';
+    } else {
+        penaltyGroup.style.display = 'none';
+        document.getElementById('edit_late_penalty_percentage').value = '0';
+    }
+}
+
+// Toggle resubmission controls
+function toggleResubmissions() {
+    const allowResubmissions = document.getElementById('allow_resubmissions').checked;
+    const maxAttemptsGroup = document.getElementById('max_attempts_group');
+    
+    if (allowResubmissions) {
+        maxAttemptsGroup.style.display = 'block';
+    } else {
+        maxAttemptsGroup.style.display = 'none';
+        document.getElementById('max_attempts').value = '1'; // Only 1 attempt if resubmissions disabled
+    }
+}
+
+function toggleEditResubmissions() {
+    const allowResubmissions = document.getElementById('edit_allow_resubmissions').checked;
+    const maxAttemptsGroup = document.getElementById('edit_max_attempts_group');
+    
+    if (allowResubmissions) {
+        maxAttemptsGroup.style.display = 'block';
+    } else {
+        maxAttemptsGroup.style.display = 'none';
+        document.getElementById('edit_max_attempts').value = '1'; // Only 1 attempt if resubmissions disabled
+    }
+}
+
+// ==================== Create Modal Rubrics ====================
+
+let createRubricCriteria = [];
+
+window.addCreateRubricCriterion = function() {
+    const criterion = {
+        id: Date.now(),
+        name: '',
+        description: '',
+        points: 0
+    };
+    
+    createRubricCriteria.push(criterion);
+    renderCreateRubrics();
+}
+
+function renderCreateRubrics() {
+    const container = document.getElementById('create-rubrics-list');
+    const noMessage = container.querySelector('.no-rubrics-message');
+    
+    if (createRubricCriteria.length === 0) {
+        if (noMessage) noMessage.style.display = 'block';
+        document.getElementById('create-rubric-total').style.display = 'none';
+        return;
+    }
+    
+    if (noMessage) noMessage.style.display = 'none';
+    
+    const html = createRubricCriteria.map((criterion, index) => `
+        <div class="rubric-criterion" data-criterion-id="${criterion.id}">
+            <div class="rubric-criterion-header">
+                <span class="criterion-number">Criterion ${index + 1}</span>
+                <button type="button" class="btn-remove-criterion" onclick="removeCreateRubricCriterion(${criterion.id})">
+                    ✕ Remove
+                </button>
+            </div>
+            <div class="rubric-criterion-body">
+                <div class="form-group">
+                    <label>Criterion Name *</label>
+                    <input type="text" 
+                           class="rubric-criterion-name" 
+                           value="${criterion.name}"
+                           placeholder="e.g., Content Quality, Organization, Grammar"
+                           onchange="updateCreateRubricCriterion(${criterion.id}, 'name', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="rubric-criterion-description" 
+                              rows="2" 
+                              placeholder="Describe what you're looking for in this criterion..."
+                              onchange="updateCreateRubricCriterion(${criterion.id}, 'description', this.value)">${criterion.description}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Maximum Points *</label>
+                    <input type="number" 
+                           class="rubric-criterion-points" 
+                           value="${criterion.points}"
+                           min="0" 
+                           max="1000" 
+                           step="0.5"
+                           placeholder="Points"
+                           onchange="updateCreateRubricCriterion(${criterion.id}, 'points', parseFloat(this.value) || 0)">
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = (noMessage ? noMessage.outerHTML : '') + html;
+    updateCreateRubricTotal();
+}
+
+window.removeCreateRubricCriterion = function(criterionId) {
+    createRubricCriteria = createRubricCriteria.filter(c => c.id !== criterionId);
+    renderCreateRubrics();
+}
+
+window.updateCreateRubricCriterion = function(criterionId, field, value) {
+    const criterion = createRubricCriteria.find(c => c.id === criterionId);
+    if (criterion) {
+        criterion[field] = value;
+        if (field === 'points') {
+            updateCreateRubricTotal();
+        }
+    }
+}
+
+function updateCreateRubricTotal() {
+    const total = createRubricCriteria.reduce((sum, c) => sum + (parseFloat(c.points) || 0), 0);
+    document.getElementById('create-rubric-total-points').textContent = total;
+    document.getElementById('create-rubric-total').style.display = total > 0 ? 'block' : 'none';
+    
+    // Update max points in Details tab if rubric has points
+    if (total > 0) {
+        const maxPointsInput = document.getElementById('max_points');
+        if (maxPointsInput) {
+            maxPointsInput.value = total;
+        }
+    }
+}
+
+// ==================== Create Modal Quiz Questions (in tab) ====================
+
+window.addCreateQuizQuestionInTab = function() {
+    // Reuse existing quiz question logic but for the tab
+    addCreateQuizQuestion();
+    // Also update the tab display
+    const tabContainer = document.getElementById('create_quiz_questions_tab_list');
+    const mainContainer = document.getElementById('create_quiz_questions_list');
+    if (tabContainer && mainContainer) {
+        tabContainer.innerHTML = mainContainer.innerHTML;
+    }
+}

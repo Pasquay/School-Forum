@@ -6,7 +6,14 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Group;
 use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
+use App\Models\QuizQuestion;
+use App\Models\QuizQuestionOption;
+use App\Models\StudentQuizResponse;
 use App\Models\InboxMessage;
+use App\Models\Rubric;
+use App\Models\RubricScore;
+use App\Models\SubmissionComment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -51,14 +58,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -170,14 +177,14 @@ class GroupController extends Controller
                         $groups->withCount(['posts' => function ($query) use ($date) {
                             $query->where('created_at', '>=', $date);
                         }])->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                            ->orderBy('posts_count', 'desc')
+                            ->orderBy('name', 'asc');
                     }
                 } else {
                     $groups->withCount('posts')
-                           ->having('posts_count', '>', 0)
-                           ->orderBy('posts_count', 'desc')
-                           ->orderBy('name', 'asc');
+                        ->having('posts_count', '>', 0)
+                        ->orderBy('posts_count', 'desc')
+                        ->orderBy('name', 'asc');
                 }
                 break;
             case 'members':
@@ -1078,38 +1085,134 @@ class GroupController extends Controller
         try {
             $group = Group::findOrFail($id);
 
+            // Auto-set submission_type for quiz/exam assignments
+            if (in_array($request->assignment_type, ['quiz', 'exam']) && empty($request->submission_type)) {
+                $request->merge(['submission_type' => 'quiz']);
+            }
+
             $validatedData = $request->validate([
                 'assignment_name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'max_points' => 'required|integer|min:0',
-                'assignment_type' => 'required|in:assignment,quiz,essay,discussion,exam,project',
-                'submission_type' => 'required|in:text,file,external_link',
+                'assignment_type' => 'required|in:assignment,quiz,essay,discussion,exam,project,homework,presentation',
+                'submission_type' => 'required|in:text,file,external_link,none,quiz',
+                'time_limit' => 'nullable|integer|min:1|max:600',
                 'visibility' => 'required|in:draft,published',
                 'date_assigned' => 'nullable|date',
                 'date_due' => 'required|date|after_or_equal:date_assigned',
                 'close_date' => 'nullable|date|after_or_equal:date_due',
             ]);
 
+            // Support alternate front-end field name 'date_close'
+            if ($request->filled('date_close') && empty($validatedData['close_date'] ?? null)) {
+                $validatedData['close_date'] = $request->input('date_close');
+            }
+
+            // Convert datetime fields from Pacific time to UTC for storage
+            foreach (['date_assigned', 'date_due', 'close_date'] as $dateField) {
+                if (isset($validatedData[$dateField]) && !empty($validatedData[$dateField])) {
+                    try {
+                        $pacificDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $validatedData[$dateField], 'America/Los_Angeles');
+                        $validatedData[$dateField] = $pacificDate->setTimezone('UTC')->toDateTimeString();
+                    } catch (\Exception $e) {
+                        Log::error("Error converting {$dateField} in create: " . $e->getMessage());
+                    }
+                }
+            }
+
+            // Handle allow_late_submissions checkbox (same as update method)
+            if ($request->has('allow_late_submissions')) {
+                $value = $request->input('allow_late_submissions');
+                $validatedData['allow_late_submissions'] = in_array($value, [1, '1', 'true', true], true);
+            } else {
+                $validatedData['allow_late_submissions'] = false;
+            }
+
             $validatedData['created_by'] = Auth::id();
             $validatedData['group_id'] = $group->id;
 
-            // Temporary fix: Set description to null to avoid constraint violation
-            if (isset($validatedData['description'])) {
-                $validatedData['description'] = null;
-            }
-
             $assignment = Assignment::create($validatedData);
 
-            // Future: Add rubrics and notifications
+            // Handle quiz questions if assignment is quiz/exam
+            if (in_array($request->assignment_type, ['quiz', 'exam']) && $request->has('quiz_questions')) {
+                $quizQuestions = json_decode($request->quiz_questions, true);
+                $totalPoints = 0;
 
-            return response()->json([
-                'message' => 'Assignment created successfully!',
-                'assignment' => $assignment
-            ], 201);
+                if ($quizQuestions && is_array($quizQuestions)) {
+                    foreach ($quizQuestions as $index => $questionData) {
+                        $questionPoints = $questionData['points'] ?? 1;
+                        $totalPoints += $questionPoints;
+
+                        $question = $assignment->quizQuestions()->create([
+                            'question_text' => $questionData['question_text'],
+                            'question_type' => $questionData['question_type'],
+                            'points' => $questionPoints,
+                            'order' => $index + 1,
+                        ]);
+
+                        // Handle options for multiple choice/checkbox questions
+                        if (isset($questionData['options']) && is_array($questionData['options'])) {
+                            foreach ($questionData['options'] as $optionData) {
+                                $question->options()->create([
+                                    'option_text' => $optionData['option_text'],
+                                    'is_correct' => $optionData['is_correct'] ?? false,
+                                ]);
+                            }
+                        }
+                    }
+
+                    // Auto-update max_points based on total question points
+                    if ($totalPoints > 0) {
+                        $assignment->max_points = $totalPoints;
+                        $assignment->save();
+                    }
+                }
+            }
+
+            // Handle file attachments
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    $path = $file->store('assignment_attachments', 'public');
+
+                    $assignment->attachments()->create([
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_path' => $path,
+                        'file_type' => $file->getClientMimeType(),
+                        'file_size' => $file->getSize(),
+                    ]);
+                }
+            }
+
+            // Handle rubrics if provided
+            if ($request->has('rubrics_data') && !empty($request->rubrics_data)) {
+                $rubrics = json_decode($request->rubrics_data, true);
+                $totalRubricPoints = 0;
+
+                if ($rubrics && is_array($rubrics)) {
+                    foreach ($rubrics as $rubricData) {
+                        if (!empty($rubricData['name']) && isset($rubricData['points'])) {
+                            $assignment->rubrics()->create([
+                                'criterion_name' => $rubricData['name'],
+                                'criterion_description' => $rubricData['description'] ?? '',
+                                'points' => $rubricData['points'],
+                            ]);
+                            $totalRubricPoints += $rubricData['points'];
+                        }
+                    }
+
+                    // Update max_points to match rubric total if rubrics were added
+                    if ($totalRubricPoints > 0) {
+                        $assignment->max_points = $totalRubricPoints;
+                        $assignment->save();
+                    }
+                }
+            }
+
+            return back()->with('success', 'Assignment created successfully!');
         } catch (ValidationException $e) {
-            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to create assignment', 'error' => $e->getMessage()], 500);
+            return back()->with('error', 'Failed to create assignment: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -1153,7 +1256,27 @@ class GroupController extends Controller
                 ->get();
 
             // Format assignments for frontend
-            $formattedAssignments = $assignments->map(function ($assignment) use ($membership, $group) {
+            $formattedAssignments = $assignments->map(function ($assignment) use ($membership, $group, $user) {
+                // Get student submission status if user is a student
+                $submissionStatus = null;
+                if ($membership->role !== 'owner' && $membership->role !== 'moderator') {
+                    $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
+                        ->where('student_id', $user->id)
+                        ->first();
+
+                    if ($submission) {
+                        if ($submission->status === 'graded') {
+                            $submissionStatus = 'graded';
+                        } elseif ($submission->status === 'submitted') {
+                            $submissionStatus = $submission->is_late ? 'submitted_late' : 'submitted';
+                        } else {
+                            $submissionStatus = 'draft';
+                        }
+                    } else {
+                        $submissionStatus = 'not_submitted';
+                    }
+                }
+
                 return [
                     'id' => $assignment->id,
                     'assignment_name' => $assignment->assignment_name,
@@ -1162,14 +1285,19 @@ class GroupController extends Controller
                     'submission_type' => $assignment->submission_type,
                     'max_points' => $assignment->max_points,
                     'visibility' => $assignment->visibility,
-                    'date_assigned' => $assignment->date_assigned ? $assignment->date_assigned->format('M j, Y g:i A') : null,
-                    'date_due' => $assignment->date_due->format('M j, Y g:i A'),
-                    'close_date' => $assignment->close_date ? $assignment->close_date->format('M j, Y g:i A') : null,
+                    'date_assigned' => $assignment->date_assigned
+                        ? $assignment->date_assigned->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
+                        : null,
+                    'date_due' => $assignment->date_due->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s'),
+                    'close_date' => $assignment->close_date
+                        ? $assignment->close_date->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
+                        : null,
                     'creator_name' => $assignment->creator->name,
                     'is_overdue' => $assignment->is_overdue,
                     'is_closed' => $assignment->is_closed,
                     'created_at' => $assignment->created_at->format('M j, Y g:i A'),
                     'can_edit' => $group->owner_id === Auth::id() || $membership->role === 'moderator',
+                    'submission_status' => $submissionStatus,
                 ];
             });
 
@@ -1273,13 +1401,16 @@ class GroupController extends Controller
                 'assignment_type' => $assignment->assignment_type,
                 'submission_type' => $assignment->submission_type,
                 'max_points' => $assignment->max_points,
+                'time_limit' => $assignment->time_limit,
                 'visibility' => $assignment->visibility,
                 'date_assigned' => $assignment->date_assigned
-                    ? $assignment->date_assigned->format('M j, Y g:i A')
+                    ? $assignment->date_assigned->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
                     : null,
-                'date_due' => $assignment->date_due ? $assignment->date_due->format('M j, Y g:i A') : null,
+                'date_due' => $assignment->date_due
+                    ? $assignment->date_due->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
+                    : null,
                 'close_date' => $assignment->close_date
-                    ? $assignment->close_date->format('M j, Y g:i A')
+                    ? $assignment->close_date->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
                     : null,
                 'creator_name' => $assignment->creator ? $assignment->creator->name : 'Unknown',
                 'creator_id' => $assignment->created_by,
@@ -1288,7 +1419,42 @@ class GroupController extends Controller
                 'created_at' => $assignment->created_at->format('M j, Y g:i A'),
                 'submission_count' => $submissionCount,
                 'group_name' => $assignment->group ? $assignment->group->name : 'Unknown',
+                'allow_late_submissions' => $assignment->allow_late_submissions,
+                'late_penalty_percentage' => $assignment->late_penalty_percentage,
             ];
+
+            // Add quiz questions if it's a quiz or exam
+            if (in_array($assignment->assignment_type, ['quiz', 'exam'])) {
+                $quizQuestions = $assignment->quizQuestions()->with('options')->orderBy('order')->get();
+                $formattedAssignment['quiz_questions'] = $quizQuestions->map(function ($question) {
+                    return [
+                        'id' => $question->id,
+                        'question_text' => $question->question_text,
+                        'question_type' => $question->question_type,
+                        'points' => $question->points,
+                        'order' => $question->order,
+                        'options' => $question->options->map(function ($option) {
+                            return [
+                                'id' => $option->id,
+                                'option_text' => $option->option_text,
+                                'is_correct' => $option->is_correct,
+                            ];
+                        })
+                    ];
+                });
+            }
+
+            // Add attachments
+            $formattedAssignment['attachments'] = $assignment->attachments->map(function ($attachment) {
+                return [
+                    'id' => $attachment->id,
+                    'file_name' => $attachment->file_name,
+                    'file_path' => $attachment->file_path,
+                    'file_type' => $attachment->file_type,
+                    'file_size' => $attachment->file_size,
+                    'download_url' => asset('storage/' . $attachment->file_path),
+                ];
+            });
 
             Log::info("DEBUG: Successfully formatted assignment response");
 
@@ -1350,6 +1516,10 @@ class GroupController extends Controller
 
             // Step 4: Log incoming data
             Log::info("DEBUG UPDATE: Request data: " . json_encode($request->all()));
+            Log::info("DEBUG UPDATE: allow_late_submissions in request? " . ($request->has('allow_late_submissions') ? 'YES' : 'NO'));
+            if ($request->has('allow_late_submissions')) {
+                Log::info("DEBUG UPDATE: allow_late_submissions raw value: " . var_export($request->input('allow_late_submissions'), true));
+            }
 
             // Step 5: Validate data (temporarily exclude description to test)
             $validatedData = $request->validate([
@@ -1357,20 +1527,57 @@ class GroupController extends Controller
                 // 'description' => 'nullable|string|max:1000',  // TEMPORARILY DISABLED
                 'max_points' => 'sometimes|required|integer|min:0',
                 'assignment_type' => 'sometimes|required|in:assignment,quiz,essay,discussion,exam,project,homework,presentation',
-                'submission_type' => 'sometimes|required|in:text,file,link,none',
+                'submission_type' => 'sometimes|required|in:text,file,external_link,none,quiz',
                 'visibility' => 'sometimes|required|in:draft,published',
                 'date_assigned' => 'nullable|date',
                 'date_due' => 'sometimes|required|date|after_or_equal:date_assigned',
                 'close_date' => 'nullable|date|after_or_equal:date_due',
-                'external_link' => 'nullable|url'
+                'late_penalty_percentage' => 'nullable|numeric|min:0|max:100'
             ]);
 
-            Log::info("DEBUG UPDATE: Validated data (no description): " . json_encode($validatedData));
-            Log::info("DEBUG UPDATE: Validated data: " . json_encode($validatedData));
+            // Support alternate front-end field name 'date_close'
+            if ($request->filled('date_close') && empty($validatedData['close_date'] ?? null)) {
+                $validatedData['close_date'] = $request->input('date_close');
+            }
 
-            // Step 6: Update assignment (excluding description for now)
+            // Handle allow_late_submissions separately since HTML checkboxes send strings
+            if ($request->has('allow_late_submissions')) {
+                $value = $request->input('allow_late_submissions');
+                $validatedData['allow_late_submissions'] = in_array($value, [1, '1', 'true', true], true);
+                Log::info("DEBUG UPDATE: allow_late_submissions - Raw value: {$value}, Converted to: " . ($validatedData['allow_late_submissions'] ? 'true' : 'false'));
+            } else {
+                // If not present in request at all, explicitly set to false
+                $validatedData['allow_late_submissions'] = false;
+                Log::info("DEBUG UPDATE: allow_late_submissions not in request, setting to false");
+            }
+
+            // Convert datetime fields from Pacific time to UTC for storage
+            // The form sends dates without timezone info (e.g., "2025-10-14T18:52")
+            // We need to interpret these as Pacific time and convert to UTC
+            foreach (['date_assigned', 'date_due', 'close_date'] as $dateField) {
+                if (isset($validatedData[$dateField]) && !empty($validatedData[$dateField])) {
+                    try {
+                        // Parse as Pacific time and convert to UTC
+                        $pacificDate = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $validatedData[$dateField], 'America/Los_Angeles');
+                        $validatedData[$dateField] = $pacificDate->setTimezone('UTC')->toDateTimeString();
+                        Log::info("DEBUG UPDATE: Converted {$dateField} from Pacific to UTC: " . $validatedData[$dateField]);
+                    } catch (\Exception $e) {
+                        Log::error("DEBUG UPDATE: Error converting {$dateField}: " . $e->getMessage());
+                    }
+                }
+            }
+
+            Log::info("DEBUG UPDATE: Validated data: " . json_encode($validatedData));
+            Log::info("DEBUG UPDATE: allow_late_submissions in validatedData: " . var_export($validatedData['allow_late_submissions'] ?? 'NOT SET', true));
+
+            // Step 6: Update assignment
             $assignment->update($validatedData);
-            Log::info("DEBUG UPDATE: Assignment updated successfully (without description)");
+
+            // Verify the update was saved
+            $assignment->refresh();
+            Log::info("DEBUG UPDATE: Assignment updated successfully");
+            Log::info("DEBUG UPDATE: After update - allow_late_submissions from model: " . var_export($assignment->allow_late_submissions, true));
+            Log::info("DEBUG UPDATE: After update - raw DB value: " . var_export($assignment->getAttributes()['allow_late_submissions'] ?? 'NOT SET', true));
 
             // Step 7: Load relationships and format response
             $assignment->load(['creator', 'group']);
@@ -1391,11 +1598,13 @@ class GroupController extends Controller
                 'max_points' => $assignment->max_points,
                 'visibility' => $assignment->visibility,
                 'date_assigned' => $assignment->date_assigned
-                    ? $assignment->date_assigned->format('M j, Y g:i A')
+                    ? $assignment->date_assigned->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
                     : null,
-                'date_due' => $assignment->date_due ? $assignment->date_due->format('M j, Y g:i A') : null,
+                'date_due' => $assignment->date_due
+                    ? $assignment->date_due->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
+                    : null,
                 'close_date' => $assignment->close_date
-                    ? $assignment->close_date->format('M j, Y g:i A')
+                    ? $assignment->close_date->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s')
                     : null,
                 'creator_name' => $assignment->creator ? $assignment->creator->name : 'Unknown',
                 'is_overdue' => $assignment->is_overdue,
@@ -1409,12 +1618,12 @@ class GroupController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Assignment updated successfully!',
-                'assignment' => $formattedAssignment,
-                'redirect' => route('group.show', $groupId)
+                'assignment' => $formattedAssignment
             ], 200);
         } catch (ValidationException $e) {
             Log::error("DEBUG UPDATE: Validation error: " . json_encode($e->errors()));
             return response()->json([
+                'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
@@ -1422,9 +1631,8 @@ class GroupController extends Controller
             Log::error('DEBUG UPDATE: Update assignment error: ' . $e->getMessage());
             Log::error('DEBUG UPDATE: Stack trace: ' . $e->getTraceAsString());
             return response()->json([
-                'message' => 'Failed to update assignment',
-                'error' => $e->getMessage(),
-                'debug' => true
+                'success' => false,
+                'message' => 'Failed to update assignment: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -1497,19 +1705,1095 @@ class GroupController extends Controller
 
             Log::info("DEBUG DELETE: Assignment deleted successfully");
 
-            return response()->json([
-                'success' => true,
-                'message' => "Assignment '{$assignmentName}' has been deleted successfully!",
-                'deleted_id' => $assignmentId
-            ], 200);
+            return back()->with('success', "Assignment '{$assignmentName}' has been deleted successfully!");
         } catch (\Exception $e) {
             Log::error('DEBUG DELETE: Delete assignment error: ' . $e->getMessage());
             Log::error('DEBUG DELETE: Stack trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Failed to delete assignment: ' . $e->getMessage());
+        }
+    }
+
+    // ==================== STUDENT ASSIGNMENT SUBMISSION METHODS ====================
+
+    public function getMySubmission(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::with(['quizQuestions.options'])->findOrFail($assignmentId);
+
+            // Check if user is member of group
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            // Get or create draft submission
+            $submission = AssignmentSubmission::with(['quizResponses.selectedOption'])
+                ->where('assignment_id', $assignmentId)
+                ->where('student_id', $user->id)
+                ->first();
+
+            if (!$submission) {
+                // Create a new draft submission
+                $submission = AssignmentSubmission::create([
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $user->id,
+                    'status' => 'draft'
+                ]);
+            }
+
+            // Check if can submit: not closed, not already submitted, and (before due date OR late submissions allowed)
+            $isPastDue = method_exists($assignment, 'isPastDuePacific')
+                ? $assignment->isPastDuePacific()
+                : (now() > $assignment->date_due);
+            $canSubmit = !$assignment->is_closed
+                && ($submission->status === 'draft' || is_null($submission->date_submitted))
+                && (!$isPastDue || $assignment->allow_late_submissions);
+
+            // Format assignment dates to Pacific time for frontend
+            $formattedAssignment = $assignment->toArray();
+            if ($assignment->date_assigned) {
+                $formattedAssignment['date_assigned'] = $assignment->date_assigned->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s');
+            }
+            if ($assignment->date_due) {
+                $formattedAssignment['date_due'] = $assignment->date_due->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s');
+            }
+            if ($assignment->close_date) {
+                $formattedAssignment['close_date'] = $assignment->close_date->setTimezone('America/Los_Angeles')->format('Y-m-d\TH:i:s');
+            }
+
+            return response()->json([
+                'assignment' => $formattedAssignment,
+                'submission' => $submission,
+                'can_submit' => $canSubmit
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get my submission error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to load submission'], 500);
+        }
+    }
+
+    public function saveDraft(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check membership
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            // Get or create submission
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $user->id
+                ],
+                ['status' => 'draft']
+            );
+
+            // Update based on submission type
+            if ($assignment->submission_type === 'text') {
+                $submission->submission_text = $request->input('submission_text');
+            } elseif ($assignment->submission_type === 'external_link') {
+                $submission->external_link = $request->input('external_link');
+            } elseif ($assignment->submission_type === 'quiz') {
+                // Save quiz responses as draft
+                $responses = $request->input('quiz_responses', []);
+                foreach ($responses as $questionId => $response) {
+                    StudentQuizResponse::updateOrCreate(
+                        [
+                            'submission_id' => $submission->id,
+                            'question_id' => $questionId
+                        ],
+                        [
+                            'selected_option_id' => $response['selected_option_id'] ?? null,
+                            'text_response' => $response['text_response'] ?? null
+                        ]
+                    );
+                }
+            }
+
+            $submission->save();
+
+            return response()->json([
+                'message' => 'Draft saved successfully',
+                'submission' => $submission
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Save draft error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to save draft'], 500);
+        }
+    }
+
+    public function submitAssignment(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::with('quizQuestions.options')->findOrFail($assignmentId);
+
+            // Check membership
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return back()->with('error', 'You are not a member of this group');
+            }
+
+            // Check if assignment is closed
+            if ($assignment->is_closed) {
+                return back()->with('error', 'This assignment is closed and no longer accepting submissions');
+            }
+
+            // Check if late and late submissions not allowed (compare in Pacific time if helper exists)
+            $isPastDue = method_exists($assignment, 'isPastDuePacific')
+                ? $assignment->isPastDuePacific()
+                : (now() > $assignment->date_due);
+
+            // Detailed debugging
+            Log::info("DEBUG SUBMIT: Assignment '{$assignment->assignment_name}' (ID: {$assignment->id})");
+            Log::info("DEBUG SUBMIT: Server timezone: " . date_default_timezone_get());
+            Log::info("DEBUG SUBMIT: Current time (now()): " . now()->toDateTimeString() . " [TZ: " . now()->timezone->getName() . "]");
+            Log::info("DEBUG SUBMIT: Current time (Carbon UTC): " . \Carbon\Carbon::now('UTC')->toDateTimeString());
+            Log::info("DEBUG SUBMIT: Current time (Carbon Pacific): " . \Carbon\Carbon::now('America/Los_Angeles')->toDateTimeString());
+            Log::info("DEBUG SUBMIT: Due date: " . $assignment->date_due->toDateTimeString() . " [TZ: " . $assignment->date_due->timezone->getName() . "]");
+            Log::info("DEBUG SUBMIT: Due date in Pacific: " . $assignment->date_due->copy()->setTimezone('America/Los_Angeles')->toDateTimeString());
+            Log::info("DEBUG SUBMIT: isPastDue: " . ($isPastDue ? 'YES' : 'NO'));
+            Log::info("DEBUG SUBMIT: allow_late_submissions value: " . var_export($assignment->allow_late_submissions, true));
+            Log::info("DEBUG SUBMIT: allow_late_submissions type: " . gettype($assignment->allow_late_submissions));
+            Log::info("DEBUG SUBMIT: Raw DB value: " . var_export($assignment->getAttributes()['allow_late_submissions'] ?? 'NOT SET', true));
+
+            // Explicitly cast to boolean to ensure proper comparison
+            $allowLateSubmissions = (bool) $assignment->allow_late_submissions;
+            Log::info("DEBUG SUBMIT: Casted allow_late_submissions: " . ($allowLateSubmissions ? 'TRUE' : 'FALSE'));
+
+            if ($isPastDue && !$allowLateSubmissions) {
+                Log::info("DEBUG SUBMIT: BLOCKING submission - past due and late submissions not allowed");
+                return back()->with('error', 'This assignment no longer accepts submissions after the due date.');
+            }
+
+            Log::info("DEBUG SUBMIT: ALLOWING submission");
+
+            // Get or create submission
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $user->id
+                ],
+                ['status' => 'draft']
+            );
+
+            // Check if resubmitting
+            if ($submission->status === 'submitted') {
+                $submission->attempt_number += 1;
+            }
+
+            // Update submission based on type
+            if ($assignment->submission_type === 'text') {
+                $validated = $request->validate([
+                    'submission_text' => 'required|string'
+                ]);
+                $submission->submission_text = $validated['submission_text'];
+            } elseif ($assignment->submission_type === 'external_link') {
+                $validated = $request->validate([
+                    'external_link' => 'required|url'
+                ]);
+                $submission->external_link = $validated['external_link'];
+            } elseif ($assignment->submission_type === 'file') {
+                $validated = $request->validate([
+                    'file' => 'required|file|max:10240' // 10MB max
+                ]);
+
+                // Store file
+                $path = $request->file('file')->store('assignment_submissions', 'public');
+                $submission->file_path = $path;
+            } elseif ($assignment->assignment_type === 'quiz' || $assignment->assignment_type === 'exam') {
+                // Handle quiz/exam submission
+                $responses = json_decode($request->input('quiz_responses', '{}'), true);
+                $totalPoints = 0;
+                $earnedPoints = 0;
+
+                foreach ($assignment->quizQuestions as $question) {
+                    $totalPoints += $question->points;
+
+                    if (isset($responses[$question->id])) {
+                        $responseData = $responses[$question->id];
+
+                        $quizResponse = StudentQuizResponse::updateOrCreate(
+                            [
+                                'submission_id' => $submission->id,
+                                'question_id' => $question->id
+                            ],
+                            [
+                                'selected_option_id' => $responseData['selected_option_id'] ?? null,
+                                'text_response' => $responseData['text_response'] ?? null
+                            ]
+                        );
+
+                        // Auto-grade MC and TF questions
+                        if (in_array($question->question_type, ['multiple_choice', 'true_false'])) {
+                            $selectedOption = QuizQuestionOption::find($responseData['selected_option_id'] ?? null);
+                            if ($selectedOption && $selectedOption->is_correct) {
+                                $quizResponse->is_correct = true;
+                                $quizResponse->points_earned = $question->points;
+                                $earnedPoints += $question->points;
+                            } else {
+                                $quizResponse->is_correct = false;
+                                $quizResponse->points_earned = 0;
+                            }
+                            $quizResponse->save();
+                        }
+                    }
+                }
+
+                // Set grade for auto-gradable quizzes
+                if ($totalPoints > 0) {
+                    $submission->grade = ($earnedPoints / $totalPoints) * $assignment->max_points;
+                }
+            }
+
+            // Check if late submission (validation already done above, this is just for tracking)
+            $isLate = $isPastDue;
+
+            // Calculate late penalty if applicable
+            $latePenalty = 0;
+            if ($isLate && $assignment->late_penalty_percentage > 0 && $submission->grade) {
+                $latePenalty = ($submission->grade * $assignment->late_penalty_percentage) / 100;
+                $submission->late_penalty_applied = $latePenalty;
+                $submission->grade -= $latePenalty;
+            }
+
+            // Mark as submitted
+            $submission->status = 'submitted';
+            $submission->date_submitted = now();
+            $submission->is_late = $isLate;
+            $submission->save();
+
+            $message = 'Assignment submitted successfully!';
+            if ($isLate && $latePenalty > 0) {
+                $message .= ' Note: A late penalty of ' . number_format($latePenalty, 2) . ' points was applied.';
+            } elseif ($isLate) {
+                $message .= ' Note: This submission was submitted after the due date.';
+            }
+
+            return back()->with('success', $message);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Submit assignment error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to submit assignment: ' . $e->getMessage());
+        }
+    }
+
+    // ==================== TEACHER GRADING - VIEW SUBMISSIONS ====================
+
+    public function getAssignmentSubmissions(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                return response()->json(['message' => 'You do not have permission to view submissions'], 403);
+            }
+
+            // Get all group members
+            $groupMembers = DB::table('group_members')
+                ->join('users', 'group_members.user_id', '=', 'users.id')
+                ->where('group_members.group_id', $groupId)
+                ->where('group_members.role', 'member') // Only get students
+                ->select('users.id', 'users.name', 'users.email')
+                ->get();
+
+            // Get all submissions for this assignment
+            $submissions = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->with('student')
+                ->get()
+                ->keyBy('student_id');
+
+            // Build submissions array with all students
+            $submissionsArray = [];
+            foreach ($groupMembers as $member) {
+                $submission = $submissions->get($member->id);
+
+                $submissionsArray[] = [
+                    'student_id' => $member->id,
+                    'student_name' => $member->name,
+                    'student_email' => $member->email,
+                    'status' => $submission ? $submission->status : 'not_submitted',
+                    'grade' => $submission ? $submission->grade : null,
+                    'submitted_at' => $submission && $submission->date_submitted ?
+                        $submission->date_submitted->format('M j, Y g:i A') : null,
+                    'is_late' => $submission ? $submission->is_late : false,
+                ];
+            }
+
+            // Calculate stats
+            $stats = [
+                'total' => count($groupMembers),
+                'submitted' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'submitted' || $s['status'] === 'graded')),
+                'graded' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'graded')),
+                'not_submitted' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'not_submitted')),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'submissions' => $submissionsArray,
+                'stats' => $stats
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get assignment submissions error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch submissions'], 500);
+        }
+    }
+
+    // Get single student submission for grading
+    public function getStudentSubmission(Request $request, $groupId, $assignmentId, $studentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+            $student = User::findOrFail($studentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership || !in_array($membership->role, ['owner', 'moderator'])) {
+                if ($assignment->creator_id !== $user->id) {
+                    return response()->json(['message' => 'Unauthorized'], 403);
+                }
+            }
+
+            // Get or create submission
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId
+                ],
+                [
+                    'status' => 'not_submitted'
+                ]
+            );
+
+            // Load quiz responses if it's a quiz
+            if ($assignment->assignment_type === 'quiz' || $assignment->assignment_type === 'exam') {
+                $submission->load('quizResponses');
+                Log::info('Quiz responses loaded', [
+                    'submission_id' => $submission->id,
+                    'responses_count' => $submission->quizResponses->count()
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'submission' => $submission,
+                'assignment' => $assignment->load('quizQuestions.options'),
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get student submission error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete assignment',
-                'error' => $e->getMessage()
+                'message' => 'Failed to fetch submission: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    // Grade student submission
+    public function gradeSubmission(Request $request, $groupId, $assignmentId, $studentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership || !in_array($membership->role, ['owner', 'moderator'])) {
+                if ($assignment->creator_id !== $user->id) {
+                    return response()->json(['message' => 'Unauthorized'], 403);
+                }
+            }
+
+            // Validate input
+            $validated = $request->validate([
+                'grade' => 'required|numeric|min:0|max:' . $assignment->max_points,
+                'teacher_feedback' => 'nullable|string'
+            ]);
+
+            // Find submission
+            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('student_id', $studentId)
+                ->firstOrFail();
+
+            // Update submission
+            $submission->grade = $validated['grade'];
+            $submission->teacher_feedback = $validated['teacher_feedback'] ?? null;
+            $submission->status = 'graded';
+            $submission->graded_at = now();
+            $submission->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Grade saved successfully',
+                'submission' => $submission
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Grade submission error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save grade: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // ==================== TEACHER QUIZ MANAGEMENT METHODS ====================
+
+    public function getQuizQuestions(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $questions = QuizQuestion::where('assignment_id', $assignmentId)
+                ->with('options')
+                ->orderBy('order')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'questions' => $questions
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get quiz questions error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch quiz questions'], 500);
+        }
+    }
+
+    public function saveQuizQuestions(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                return response()->json(['message' => 'You do not have permission to edit this quiz'], 403);
+            }
+
+            $validated = $request->validate([
+                'questions' => 'required|array',
+                'questions.*.id' => 'nullable|integer',
+                'questions.*.question_text' => 'required|string',
+                'questions.*.question_type' => 'required|in:multiple_choice,true_false,short_answer,essay',
+                'questions.*.points' => 'required|numeric|min:0',
+                'questions.*.options' => 'nullable|array',
+                'questions.*.options.*.option_text' => 'required|string',
+                'questions.*.options.*.is_correct' => 'required|boolean',
+            ]);
+
+            // Delete all existing questions and options for this assignment
+            QuizQuestion::where('assignment_id', $assignmentId)->delete();
+
+            // Create new questions
+            foreach ($validated['questions'] as $index => $questionData) {
+                $question = QuizQuestion::create([
+                    'assignment_id' => $assignmentId,
+                    'question_text' => $questionData['question_text'],
+                    'question_type' => $questionData['question_type'],
+                    'points' => $questionData['points'],
+                    'order' => $index + 1
+                ]);
+
+                // Add options for MC/TF questions
+                if (isset($questionData['options']) && !empty($questionData['options'])) {
+                    foreach ($questionData['options'] as $optIndex => $optionData) {
+                        QuizQuestionOption::create([
+                            'question_id' => $question->id,
+                            'option_text' => $optionData['option_text'],
+                            'is_correct' => $optionData['is_correct'],
+                            'order' => $optIndex + 1
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Quiz questions saved successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Save quiz questions error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to save quiz questions', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function addQuizQuestion(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check if user is owner/moderator/creator
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                return response()->json(['message' => 'You do not have permission to edit this quiz'], 403);
+            }
+
+            $validated = $request->validate([
+                'question_text' => 'required|string',
+                'question_type' => 'required|in:multiple_choice,true_false,short_answer,essay',
+                'points' => 'required|integer|min:1',
+                'order' => 'required|integer|min:0',
+                'correct_answer' => 'nullable|string',
+                'options' => 'required_if:question_type,multiple_choice,true_false|array',
+                'options.*.option_text' => 'required|string',
+                'options.*.is_correct' => 'required|boolean',
+                'options.*.order' => 'required|integer|min:0'
+            ]);
+
+            $question = QuizQuestion::create([
+                'assignment_id' => $assignmentId,
+                'question_text' => $validated['question_text'],
+                'question_type' => $validated['question_type'],
+                'points' => $validated['points'],
+                'order' => $validated['order'],
+                'correct_answer' => $validated['correct_answer'] ?? null
+            ]);
+
+            // Add options for MC/TF questions
+            if (isset($validated['options'])) {
+                foreach ($validated['options'] as $optionData) {
+                    QuizQuestionOption::create([
+                        'question_id' => $question->id,
+                        'option_text' => $optionData['option_text'],
+                        'is_correct' => $optionData['is_correct'],
+                        'order' => $optionData['order']
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Question added successfully',
+                'question' => $question->load('options')
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Add quiz question error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to add question'], 500);
+        }
+    }
+
+    public function updateQuizQuestion(Request $request, $groupId, $assignmentId, $questionId)
+    {
+        try {
+            $user = Auth::user();
+            $question = QuizQuestion::with('options')->findOrFail($questionId);
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check permissions
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                return response()->json(['message' => 'You do not have permission to edit this quiz'], 403);
+            }
+
+            $validated = $request->validate([
+                'question_text' => 'sometimes|required|string',
+                'question_type' => 'sometimes|required|in:multiple_choice,true_false,short_answer,essay',
+                'points' => 'sometimes|required|integer|min:1',
+                'order' => 'sometimes|required|integer|min:0',
+                'correct_answer' => 'nullable|string',
+                'options' => 'sometimes|array',
+                'options.*.id' => 'nullable|exists:quiz_question_options,id',
+                'options.*.option_text' => 'required|string',
+                'options.*.is_correct' => 'required|boolean',
+                'options.*.order' => 'required|integer|min:0'
+            ]);
+
+            $question->update($validated);
+
+            // Update options if provided
+            if (isset($validated['options'])) {
+                // Delete old options not in the new list
+                $newOptionIds = collect($validated['options'])->pluck('id')->filter();
+                $question->options()->whereNotIn('id', $newOptionIds)->delete();
+
+                foreach ($validated['options'] as $optionData) {
+                    if (isset($optionData['id'])) {
+                        QuizQuestionOption::where('id', $optionData['id'])->update([
+                            'option_text' => $optionData['option_text'],
+                            'is_correct' => $optionData['is_correct'],
+                            'order' => $optionData['order']
+                        ]);
+                    } else {
+                        QuizQuestionOption::create([
+                            'question_id' => $question->id,
+                            'option_text' => $optionData['option_text'],
+                            'is_correct' => $optionData['is_correct'],
+                            'order' => $optionData['order']
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'message' => 'Question updated successfully',
+                'question' => $question->load('options')
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Update quiz question error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to update question'], 500);
+        }
+    }
+
+    public function deleteQuizQuestion(Request $request, $groupId, $assignmentId, $questionId)
+    {
+        try {
+            $user = Auth::user();
+            $question = QuizQuestion::findOrFail($questionId);
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check permissions
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            $userRole = $membership->role;
+            $isCreator = $assignment->created_by == $user->id;
+
+            if (!$isCreator && $userRole !== 'owner' && $userRole !== 'moderator') {
+                return response()->json(['message' => 'You do not have permission to edit this quiz'], 403);
+            }
+
+            $question->delete();
+
+            return response()->json([
+                'message' => 'Question deleted successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Delete quiz question error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to delete question'], 500);
+        }
+    }
+
+    // ==================== RUBRIC SYSTEM ====================
+
+    public function getRubrics(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $assignment = Assignment::with('rubrics')->findOrFail($assignmentId);
+
+            return response()->json([
+                'rubrics' => $assignment->rubrics,
+                'total_points' => $assignment->getRubricTotalPoints()
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get rubrics error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch rubrics'], 500);
+        }
+    }
+
+    public function saveRubrics(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check permissions
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership || !in_array($membership->role, ['owner', 'moderator']) && $assignment->created_by != $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $validated = $request->validate([
+                'rubrics' => 'required|array',
+                'rubrics.*.id' => 'nullable|exists:rubrics,id',
+                'rubrics.*.criteria_name' => 'required|string|max:255',
+                'rubrics.*.description' => 'nullable|string',
+                'rubrics.*.max_points' => 'required|numeric|min:0',
+                'rubrics.*.order' => 'required|integer|min:0'
+            ]);
+
+            // Delete rubrics not in the new list
+            $rubricIds = collect($validated['rubrics'])->pluck('id')->filter();
+            $assignment->rubrics()->whereNotIn('id', $rubricIds)->delete();
+
+            // Create or update rubrics
+            foreach ($validated['rubrics'] as $rubricData) {
+                if (isset($rubricData['id'])) {
+                    Rubric::where('id', $rubricData['id'])->update([
+                        'criteria_name' => $rubricData['criteria_name'],
+                        'description' => $rubricData['description'] ?? null,
+                        'max_points' => $rubricData['max_points'],
+                        'order' => $rubricData['order']
+                    ]);
+                } else {
+                    Rubric::create([
+                        'assignment_id' => $assignmentId,
+                        'criteria_name' => $rubricData['criteria_name'],
+                        'description' => $rubricData['description'] ?? null,
+                        'max_points' => $rubricData['max_points'],
+                        'order' => $rubricData['order']
+                    ]);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Rubrics saved successfully',
+                'rubrics' => $assignment->fresh()->rubrics
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Save rubrics error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to save rubrics'], 500);
+        }
+    }
+
+    public function gradeWithRubric(Request $request, $groupId, $assignmentId, $studentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::with('rubrics')->findOrFail($assignmentId);
+            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('student_id', $studentId)
+                ->firstOrFail();
+
+            // Check permissions
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership || !in_array($membership->role, ['owner', 'moderator']) && $assignment->created_by != $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $validated = $request->validate([
+                'rubric_scores' => 'required|array',
+                'rubric_scores.*.rubric_id' => 'required|exists:rubrics,id',
+                'rubric_scores.*.points_earned' => 'required|numeric|min:0',
+                'rubric_scores.*.feedback' => 'nullable|string',
+                'overall_feedback' => 'nullable|string'
+            ]);
+
+            // Delete old rubric scores for this submission
+            $submission->rubricScores()->delete();
+
+            // Save new rubric scores
+            $totalPoints = 0;
+            foreach ($validated['rubric_scores'] as $scoreData) {
+                RubricScore::create([
+                    'rubric_id' => $scoreData['rubric_id'],
+                    'submission_id' => $submission->id,
+                    'points_earned' => $scoreData['points_earned'],
+                    'feedback' => $scoreData['feedback'] ?? null
+                ]);
+                $totalPoints += $scoreData['points_earned'];
+            }
+
+            // Update submission grade and status
+            $submission->update([
+                'grade' => $totalPoints,
+                'teacher_feedback' => $validated['overall_feedback'] ?? $submission->teacher_feedback,
+                'status' => 'graded',
+                'graded_at' => now()
+            ]);
+
+            return response()->json([
+                'message' => 'Graded successfully with rubric',
+                'submission' => $submission->load('rubricScores.rubric')
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Grade with rubric error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to grade submission'], 500);
+        }
+    }
+
+    // ==================== RESUBMISSION SYSTEM ====================
+
+    public function getAllSubmissionAttempts(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Get all submission attempts for this user
+            $attempts = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('student_id', $user->id)
+                ->orderBy('attempt_number', 'desc')
+                ->get();
+
+            $canResubmit = false;
+            if ($assignment->allow_resubmission) {
+                $latestAttempt = $attempts->first();
+                $attemptCount = $attempts->count();
+                $maxAttempts = $assignment->max_resubmissions ?? PHP_INT_MAX;
+
+                // Can resubmit if: latest is graded, not past due (or late allowed), and under max attempts
+                $canResubmit = $latestAttempt
+                    && $latestAttempt->status === 'graded'
+                    && $attemptCount < $maxAttempts
+                    && (!$assignment->isPastDuePacific() || $assignment->allow_late_submissions);
+            }
+
+            return response()->json([
+                'attempts' => $attempts,
+                'can_resubmit' => $canResubmit,
+                'max_attempts' => $assignment->max_resubmissions,
+                'current_attempt_number' => $attempts->count()
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get submission attempts error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch attempts'], 500);
+        }
+    }
+
+    // ==================== ANALYTICS DASHBOARD ====================
+
+    public function getAssignmentAnalytics(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check permissions (only teachers)
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership || !in_array($membership->role, ['owner', 'moderator']) && $assignment->created_by != $user->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            // Get all graded submissions
+            $submissions = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('status', 'graded')
+                ->whereNotNull('grade')
+                ->get();
+
+            if ($submissions->isEmpty()) {
+                return response()->json([
+                    'message' => 'No graded submissions yet',
+                    'stats' => null
+                ], 200);
+            }
+
+            $grades = $submissions->pluck('grade')->toArray();
+            sort($grades);
+
+            // Calculate statistics
+            $count = count($grades);
+            $sum = array_sum($grades);
+            $average = $sum / $count;
+
+            // Median
+            $middle = floor($count / 2);
+            $median = $count % 2 === 0
+                ? ($grades[$middle - 1] + $grades[$middle]) / 2
+                : $grades[$middle];
+
+            // Standard deviation
+            $variance = array_sum(array_map(function ($grade) use ($average) {
+                return pow($grade - $average, 2);
+            }, $grades)) / $count;
+            $stdDev = sqrt($variance);
+
+            // Grade distribution (A, B, C, D, F based on percentage)
+            $maxPoints = $assignment->max_points;
+            $distribution = [
+                'A' => 0, // 90-100%
+                'B' => 0, // 80-89%
+                'C' => 0, // 70-79%
+                'D' => 0, // 60-69%
+                'F' => 0  // <60%
+            ];
+
+            foreach ($grades as $grade) {
+                $percentage = ($grade / $maxPoints) * 100;
+                if ($percentage >= 90) $distribution['A']++;
+                elseif ($percentage >= 80) $distribution['B']++;
+                elseif ($percentage >= 70) $distribution['C']++;
+                elseif ($percentage >= 60) $distribution['D']++;
+                else $distribution['F']++;
+            }
+
+            return response()->json([
+                'stats' => [
+                    'total_submissions' => $count,
+                    'average' => round($average, 2),
+                    'median' => round($median, 2),
+                    'std_dev' => round($stdDev, 2),
+                    'min' => min($grades),
+                    'max' => max($grades),
+                    'distribution' => $distribution,
+                    'max_points' => $maxPoints
+                ],
+                'submissions' => $submissions->map(function ($sub) {
+                    return [
+                        'student_name' => $sub->student->name,
+                        'grade' => $sub->grade,
+                        'is_late' => $sub->is_late,
+                        'submitted_at' => $sub->date_submitted
+                    ];
+                })
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get analytics error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch analytics'], 500);
+        }
+    }
+
+    // ==================== SUBMISSION COMMENTS/FEEDBACK ====================
+
+    public function addSubmissionComment(Request $request, $groupId, $assignmentId, $studentId)
+    {
+        try {
+            $user = Auth::user();
+            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('student_id', $studentId)
+                ->firstOrFail();
+
+            $validated = $request->validate([
+                'comment_text' => 'required|string',
+                'is_private' => 'nullable|boolean'
+            ]);
+
+            $comment = SubmissionComment::create([
+                'submission_id' => $submission->id,
+                'user_id' => $user->id,
+                'comment_text' => $validated['comment_text'],
+                'is_private' => $validated['is_private'] ?? false
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment added successfully',
+                'comment' => $comment->load('user')
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Add comment error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to add comment'], 500);
+        }
+    }
+
+    public function getSubmissionComments(Request $request, $groupId, $assignmentId, $studentId)
+    {
+        try {
+            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
+                ->where('student_id', $studentId)
+                ->firstOrFail();
+
+            $comments = $submission->comments()->with('user')->get();
+
+            return response()->json([
+                'comments' => $comments
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Get comments error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to fetch comments'], 500);
         }
     }
 }

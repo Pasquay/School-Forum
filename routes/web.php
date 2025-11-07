@@ -93,6 +93,46 @@ Route::controller(GroupController::class)->group(function () {
     Route::post('/group/{id}/join', 'joinGroup')->middleware('auth'); // join a group
     Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth')->name('group.leave'); // leave a group
     Route::get('/group/{id}/settings', 'showGroupSettings')->middleware('auth'); // manage a group/go to group settings
+
+    //ASSignments - MUST come before other /group/{id} routes to avoid conflicts
+    Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth')->name('group.createAssignment'); // create assignment
+    Route::get('/group/{id}/assignments', 'getAssignments')->middleware('auth'); // get assignments for a group
+    Route::get('/group/{groupId}/assignments/{assignmentId}', 'getAssignment')->middleware('auth')->name('group.getAssignment'); // get single assignment
+    Route::post('/group/{groupId}/assignments/{assignmentId}', 'updateAssignment')->middleware('auth')->name('group.updateAssignment'); // update assignment
+    Route::delete('/group/{groupId}/assignments/{assignmentId}', 'deleteAssignment')->middleware('auth')->name('group.deleteAssignment'); // delete assignment
+
+    // Student Assignment Submissions
+    Route::post('/group/{groupId}/assignments/{assignmentId}/submit', 'submitAssignment')->middleware('auth')->name('group.submitAssignment'); // submit assignment
+    Route::post('/group/{groupId}/assignments/{assignmentId}/save-draft', 'saveDraft')->middleware('auth')->name('group.saveDraft'); // save draft
+    Route::get('/group/{groupId}/assignments/{assignmentId}/my-submission', 'getMySubmission')->middleware('auth')->name('group.getMySubmission'); // get my submission
+
+    // Teacher - View All Submissions
+    Route::get('/group/{groupId}/assignments/{assignmentId}/submissions', 'getAssignmentSubmissions')->middleware('auth')->name('group.getAssignmentSubmissions'); // get all submissions for assignment
+    Route::get('/group/{groupId}/assignments/{assignmentId}/submissions/{studentId}', 'getStudentSubmission')->middleware('auth')->name('group.getStudentSubmission'); // get single student submission
+    Route::post('/group/{groupId}/assignments/{assignmentId}/submissions/{studentId}/grade', 'gradeSubmission')->middleware('auth')->name('group.gradeSubmission'); // grade student submission
+
+    // Quiz Management (for teachers)
+    Route::get('/group/{groupId}/assignments/{assignmentId}/quiz-questions', 'getQuizQuestions')->middleware('auth')->name('group.getQuizQuestions'); // get quiz questions
+    Route::post('/group/{groupId}/assignments/{assignmentId}/quiz-questions', 'saveQuizQuestions')->middleware('auth')->name('group.saveQuizQuestions'); // bulk save quiz questions
+    Route::post('/group/{groupId}/assignments/{assignmentId}/quiz/questions', 'addQuizQuestion')->middleware('auth')->name('group.addQuizQuestion'); // add quiz question
+    Route::put('/group/{groupId}/assignments/{assignmentId}/quiz/questions/{questionId}', 'updateQuizQuestion')->middleware('auth')->name('group.updateQuizQuestion'); // update quiz question
+    Route::delete('/group/{groupId}/assignments/{assignmentId}/quiz/questions/{questionId}', 'deleteQuizQuestion')->middleware('auth')->name('group.deleteQuizQuestion'); // delete quiz question
+
+    // Rubric System
+    Route::get('/group/{groupId}/assignments/{assignmentId}/rubrics', 'getRubrics')->middleware('auth')->name('group.getRubrics'); // get rubrics
+    Route::post('/group/{groupId}/assignments/{assignmentId}/rubrics', 'saveRubrics')->middleware('auth')->name('group.saveRubrics'); // save rubrics
+    Route::post('/group/{groupId}/assignments/{assignmentId}/submissions/{studentId}/grade-rubric', 'gradeWithRubric')->middleware('auth')->name('group.gradeWithRubric'); // grade with rubric
+
+    // Resubmission System
+    Route::get('/group/{groupId}/assignments/{assignmentId}/attempts', 'getAllSubmissionAttempts')->middleware('auth')->name('group.getAllSubmissionAttempts'); // get all submission attempts
+
+    // Analytics Dashboard
+    Route::get('/group/{groupId}/assignments/{assignmentId}/analytics', 'getAssignmentAnalytics')->middleware('auth')->name('group.getAssignmentAnalytics'); // get assignment analytics
+
+    // Submission Comments/Feedback
+    Route::post('/group/{groupId}/assignments/{assignmentId}/submissions/{studentId}/comments', 'addSubmissionComment')->middleware('auth')->name('group.addSubmissionComment'); // add submission comment
+    Route::get('/group/{groupId}/assignments/{assignmentId}/submissions/{studentId}/comments', 'getSubmissionComments')->middleware('auth')->name('group.getSubmissionComments'); // get submission comments
+
     Route::get('/group/{id}', 'showGroup')->middleware('auth')->name('group.show'); // show a group's page
     // Group management routes
     Route::put('/group/{id}', 'update')->middleware('auth')->name('group.update'); // update group settings
@@ -103,12 +143,6 @@ Route::controller(GroupController::class)->group(function () {
     Route::put('/group/{id}/permissions', 'updatePermissions')->middleware('auth')->name('group.updatePermissions'); // update permissions
     Route::post('/group/{id}/transfer', 'transferOwnership')->middleware('auth')->name('group.transferOwnership'); // transfer ownership
     Route::delete('/group/{id}', 'destroy')->middleware('auth')->name('group.destroy'); // delete group
-    //ASSignments
-    Route::post('/group/{id}/create-assignment', 'createAssignment')->middleware('auth')->name('group.createAssignment'); // create assignment
-    Route::get('/group/{id}/assignments', 'getAssignments')->middleware('auth'); // get assignments for a group
-    Route::get('/group/{groupId}/assignments/{assignmentId}', 'getAssignment')->middleware('auth')->name('group.getAssignment'); // get single assignment
-    Route::post('/group/{groupId}/assignments/{assignmentId}', 'updateAssignment')->middleware('auth')->name('group.updateAssignment'); // update assignment
-    Route::delete('/group/{groupId}/assignments/{assignmentId}', 'deleteAssignment')->middleware('auth')->name('group.deleteAssignment'); // delete assignment
 });
 
 Route::controller(InboxMessageController::class)->group(function () {

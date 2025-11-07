@@ -9,7 +9,6 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
     align-items: center;
     justify-content: center;
 }
@@ -20,12 +19,12 @@
 
 .settings-modal {
     background-color: white;
-    border-radius: 12px;
+    border-radius: 8px;
     width: 90%;
     max-width: 800px;
     max-height: 90vh;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
 }
@@ -33,11 +32,11 @@
 .modal-header {
     background: var(--color-pakistan-green);
     color: white;
-    padding: 20px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 12px 12px 0 0;
+    border-radius: 8px 8px 0 0;
 }
 
 .modal-header h2 {
@@ -77,30 +76,31 @@
 
 .settings-nav {
     display: flex;
-    border-bottom: 2px solid #eee;
-    background: #f8f9fa;
-    padding: 0 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background: white;
+    padding: 0;
     margin: 0;
 }
 
 .tab-btn {
     background: none;
     border: none;
-    padding: 15px 20px;
+    padding: 12px 24px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     color: #666;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s;
-    position: relative;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
 }
 
-.tab-btn.active,
-.tab-btn:hover {
+.tab-btn.active {
     color: var(--color-pakistan-green);
     border-bottom-color: var(--color-pakistan-green);
-    background: rgba(76, 175, 80, 0.05);
+}
+
+.tab-btn:hover:not(.active) {
+    color: #333;
 }
 
 
@@ -108,7 +108,7 @@
 
 .tab-content {
     display: none;
-    padding: 30px;
+    padding: 24px;
 }
 
 .tab-content.active {
@@ -118,16 +118,16 @@
 .tab-content h3 {
     margin-top: 0;
     color: var(--color-pakistan-green);
-    font-size: 20px;
-    margin-bottom: 25px;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
 }
 
 .tab-content h4 {
     color: var(--color-pakistan-green);
-    margin: 25px 0 15px 0;
-    font-size: 16px;
+    margin: 20px 0 12px 0;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -135,14 +135,14 @@
 /* Form Styles */
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 500;
-    color: #333;
+    color: #374151;
     font-size: 14px;
 }
 
@@ -150,11 +150,11 @@
 .form-group textarea,
 .form-group select {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #ddd;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 14px;
-    transition: border-color 0.3s;
+    transition: border-color 0.2s;
     font-family: inherit;
 }
 
@@ -163,7 +163,6 @@
 .form-group select:focus {
     outline: none;
     border-color: var(--color-pakistan-green);
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .form-group textarea {
@@ -175,13 +174,13 @@
 /* Button Styles */
 
 .btn {
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s;
     text-decoration: none;
     display: inline-block;
     text-align: center;
@@ -189,8 +188,7 @@
 }
 
 .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0.9;
 }
 
 .btn-primary {

@@ -166,6 +166,7 @@
 
                     <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot your password?</a>
                     <button type="submit" class="sliding-btn">Sign In</button>
+                    <!-- <div wire:loading>Loading...</div> -->
                 </form>
             </div>
 
