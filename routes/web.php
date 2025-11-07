@@ -19,16 +19,16 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/logout', 'logout')->middleware('auth'); // user logout
     Route::get('/user/{id}', 'loadUser')->middleware('auth'); // load user
     Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth'); // load user settings
+    Route::post('/user/{id}/settings/update-public-information', 'updatePublicProfile')->middleware('auth')->name('user.updatePublicProfile'); // update public profile details
     Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
     Route::get('/user/{id}/deleted-overview', 'getUserDeletedOverview')->middleware('auth'); // load page 2+ deleted user overview
     Route::get('/user/{id}/deleted-comments-and-replies', 'getUserDeletedCommentsAndReplies')->middleware('auth'); // load page 2+ deleted user comments and replies
+    Route::get('/groups/{groupId}/search-users', 'searchUsers')->middleware('auth')->name('group.searchUsers'); // search for users by name
     // Password reset routes
     Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
     Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
     Route::post('/password/reset', 'resetPassword')->name('password.update'); // update password
-
-    Route::get('/groups/{groupId}/search-users', 'searchUsers')->middleware('auth')->name('group.searchUsers'); // search for users by name
 });
 
 Route::controller(PostController::class)->group(function () {

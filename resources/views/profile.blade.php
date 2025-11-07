@@ -943,7 +943,6 @@
             max-height: calc(100vh - 88px);
             overflow-y: auto;
         }
-
         .user-info {
             background-color: white;
             border-radius: 8px;
@@ -956,7 +955,6 @@
             gap: 1rem;
             width: 100%;
         }
-
         .user-info-row-1 {
             display: flex;
             justify-content: space-between;
@@ -965,7 +963,6 @@
             align-items: center;
             width: 100%;
         }
-
         .user-info-row-1 p {
             margin: 0;
             font-size: 20px; 
@@ -976,7 +973,6 @@
             text-decoration: none;
             transition: color 0.2s;
         }
-
         .user-name-role {
             display: flex;
             align-items: center;
@@ -989,7 +985,6 @@
             vertical-align: middle;
             object-fit: contain;
         }
-
         .user-info-row-1 button {
             min-width: 5rem;
             background-color: #4a90e2;
@@ -1001,7 +996,6 @@
             font-weight: 500;
             transition: background-color 0.2s;
         }
-
         .user-info-row-1 button:hover {
             background-color: #357abd;
         }
@@ -1010,10 +1004,7 @@
             display: flex;
             flex-direction: row;
             width: 100%;
-            padding: 0 0 1rem 0;
-            border-bottom: 1px solid #e1e1e1;
         }
-
         .user-info-row-2 p {
             margin: 0;
             line-height: 1.5;
@@ -1021,11 +1012,34 @@
             font-weight: 500;
             text-align: justify;
         }
-
         .user-info-row-2 span {
             color: #666;
             font-size: 16px;
             font-weight: 500;
+        }
+
+        .user-info-row-2-5 {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            max-width: 100%;
+            padding: 0 0 1rem 0;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .social-link {
+            display: inline-block;
+            max-width: 260px; /* adjust as needed */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+            color: #1565c0;
+            text-decoration: underline;
+            font-size: 0.98em;
+        }
+        .social-link:hover {
+            color: #0d47a1;
+            text-decoration: underline;
         }
 
         .user-info-row-3 {
@@ -1194,7 +1208,7 @@
     @include('components.navbar', ['active' => 'profile'])
     @include('components.success-header')
     @include('components.error-header')
-    <main>
+    <main> 
         <div class="left-side">
             <div class="nav" id='nav-1'>
                 <form action="#" method='GET' id='overview-form'>
@@ -1363,6 +1377,13 @@
                     <p><span>About:</span><br>
                     {{ $user->bio }}</p>
                 </div>
+                @if($user->social_links && count($user->social_links)>0)
+                    <div class="user-info-row-2-5">
+                        @foreach($user->social_links as $link)
+                            <a href="{{ $link }}" class="social-link" target="_blank" rel="noopener noreferrer">{{ $link }}</a>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="user-info-row-3">
                     <div class="contributionContainer">
                         <p><span>Contributions:</span><br>{{ $postCount + $commentCount + $replyCount }}</p>

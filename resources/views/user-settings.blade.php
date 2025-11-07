@@ -12,7 +12,7 @@
             * {
                 margin: 0;
                 padding: 0;
-                box-sizing: border-box;
+              box-sizing: border-box;
             }
 
             body {
@@ -79,17 +79,19 @@
         /* SETTINGS NAV */
             .settings-nav {
                 background-color: white;
-                width: 100%; /* Use full width */
-                max-width: none; /* Remove max-width constraint */
+                width: 100%;
+                max-width: none;
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 padding: 1rem;
                 display: flex;
+                justify-content: flex-start;  /* Add this to align left */
+                gap: 0.5rem;  /* Add gap instead of margins */
                 transition: transform 0.2s ease;
             }
 
             .settings-nav button.first {
-                margin-left: 0;
+                margin-left: 0;  /* Keep this for consistency */
             }
 
             .settings-nav button {
@@ -101,14 +103,17 @@
                 font-weight: 500;
                 font-size: medium;
                 transition: color 0.2s;
-                padding: 0.5rem 1rem;
-                margin: 0 0.6rem;
-                flex: 1;
+                padding: 0.75rem 1.5rem;  /* Increase vertical, reduce horizontal padding */
+                margin: 0;  /* Remove margins since we're using gap */
+                flex: none;  /* Remove flex: 1 to stop buttons from stretching */
                 text-align: center;
+                border-radius: 0.5rem;  /* Add border-radius to all buttons */
+                white-space: nowrap;  /* Prevent text wrapping */
             }
 
             .settings-nav button:hover {
                 color: #4a90e2;
+                background-color: #f8f9fa;  /* Add subtle hover background */
             }
 
             .settings-nav button.active {
@@ -118,18 +123,17 @@
                 color: #4a90e2;
                 background-color: #eaf4fb;
                 text-decoration: none;
-                font-weight: 500;
                 font-size: medium;
-                transition: color 0.2s;
+                transition: all 0.2s ease;  /* Smooth all transitions */
             }
 
             .settings-nav button.active:hover {
-                color: #666;
-                background-color: #e9eef3;
+                color: #357abd;  /* Darker blue on hover */
+                background-color: #dae9f6;  /* Slightly darker background */
             }
 
         /* SETTINGS COLUMNS */
-            .account-column,
+            .groups-column,
             .profile-column, 
             .preferences-column {
                 width: 100%; /* Use full width */
@@ -150,7 +154,66 @@
                 font-style: italic;
                 padding: 3rem 0;
             }
+            /* Form Fields - Match Create Group Style */
+                h3 {
+                    margin: 0 0 0.4rem 0;
+                }
 
+                .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    margin-bottom: 1rem;
+                }
+                
+                .form-group label {
+                    font-weight: 500;
+                    color: #333;
+                    font-size: 1rem;
+                    margin-bottom: 0.25rem;
+                }
+                
+                .form-group input,
+                .form-group textarea {
+                    padding: 0.75rem;
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    font-size: 0.9rem;
+                    background: #fff;
+                    transition: border-color 0.2s;
+                }
+                
+                .form-group input:focus,
+                .form-group textarea:focus {
+                    border-color: #4a90e2;
+                    outline: none;
+                }
+                
+                .form-group small {
+                    color: #888;
+                    font-size: 0.85rem;
+                    margin-top: -0.25rem;
+                }
+            /* Save Changes Button Style */
+                .sliding-btn {
+                    background-color: #4a90e2;
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 0.75rem 1rem;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.08);
+                    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+                    align-self: flex-start;
+                }
+                
+                .sliding-btn:hover,
+                .sliding-btn:focus {
+                    background-color: #357abd;
+                    color: #fff;
+                    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.15);
+                    outline: none;
+                }
         /* RESPONSIVE */
             @media (max-width: 768px) {
                 main {
@@ -164,7 +227,7 @@
                 
                 .settings-header,
                 .settings-nav,
-                .account-column,
+                .groups-column,
                 .profile-column,
                 .preferences-column {
                     padding: 1.5rem; /* Reduce padding on mobile */
@@ -183,44 +246,38 @@
                 <div class="header-separator"></div>
             </div>
             <div class="settings-nav">
-                <form action="#" method='GET' id='account-form'>
-                    @csrf
-                    <button type="submit" class='active first'>Account</button>
-                </form>
-                <form action="#" method='GET' id='profile-form'>
-                    @csrf
-                    <button type="submit">Profile</button>
-                </form>
-                <form action="#" method='GET' id='preferences-form'>
-                    @csrf
-                    <button type="submit">Preferences</button>
-                </form>
+                <button type="submit" data-tab="profile" class='active first'>Profile</button>
+                <button type="submit" data-tab="preferences">Preferences</button>
+                <button type="submit" data-tab="groups">Groups</button>
             </div>
 
-            <div class="account-column" id='account-column'>
-                <h2>Account Settings</h2>
-                <div class="settings-placeholder">
-                    Features:<br>
-                        Account (system security and acc details)<br>
-                            -change email<br>
-                            -change password<br>
-                            -link account<br>
-                                -google<br>
-                                -facebook<br>
-                            -delete account
-                </div>
-            </div>
-
-            <div class="profile-column" id='profile-column' style='display:none;'>
+            <div class="profile-column" id='profile-column'>
                 <h2>Profile Settings</h2>
-                <div class="settings-placeholder">
-                    Features:<br>
-                        Profile (Whats publicly displayed in your page)<br>
-                            -change username<br>
-                            -change bio<br>
-                            -change birthday<br>
-                            -manage social links<br>
-                            -show what groups you follow?
+                <div class="header-separator"></div>
+                <div class="profile-public-information">
+                    <h3>Public Information</h3>
+                    <form id="publicProfileForm" method="POST" action="{{ route('user.updatePublicProfile', ['id' => Auth::id()]) }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" name="bio" rows="3" maxlength="200" placeholder="Tell us about yourself...">{{ Auth::user()->bio ?? '' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="social_links">Social Links</label>
+                            <input type="url" name="social_links[]" value="{{ Auth::user()->social_links[0] ?? '' }}" placeholder="https://yourprofile.com" />
+                            <input type="url" name="social_links[]" value="{{ Auth::user()->social_links[1] ?? '' }}" placeholder="https://yourprofile.com" />
+                            <input type="url" name="social_links[]" value="{{ Auth::user()->social_links[2] ?? '' }}" placeholder="https://yourprofile.com" />
+                            <small>Paste up to 3 links to your social profiles.</small>
+                        </div>
+                        <button type="submit" class="sliding-btn">Save Changes</button>
+                    </form>
+                </div>
+                <div class="header-separator"></div>
+                <div class="profile-account-security">
+                    <h3>Account & Security</h3>
+                            -Change email<br>
+                            -Change Password<br>
+                            -Link Google<br>
                 </div>
             </div>
 
@@ -235,66 +292,68 @@
                             -starred communities
                 </div>
             </div>
+
+            <div class="groups-column" id='groups-column' style='display:none;'>
+                <h2>Groups Settings</h2>
+                <div class="settings-placeholder">
+                    Features:<br>
+                        manage groups
+                </div>
+            </div>
         </div>
     </main>
+    @include('components.back-to-top-button')
 </body>
 <script>
     // VARIABLES
-        const userID = document.body.dataset.userId;
+    const userID = document.body.dataset.userId;
 
-    // NAVIGATION
-        const settingsNav = document.querySelector('.settings-nav');
-        
-        const accountForm = settingsNav.querySelector('#account-form');
-        const accountBtn = settingsNav.querySelector('#account-form button');
-        const accountCol = document.querySelector('.account-column');
-        
-        const profileForm = settingsNav.querySelector('#profile-form');
-        const profileBtn = settingsNav.querySelector('#profile-form button');
-        const profileCol = document.querySelector('.profile-column');
+    // NAVIGATION ELEMENTS
+    const navButtons = document.querySelectorAll('.settings-nav button');
+    const profileCol = document.querySelector('.profile-column');
+    const preferencesCol = document.querySelector('.preferences-column');
+    const groupsCol = document.querySelector('.groups-column');
 
-        const preferencesForm = settingsNav.querySelector('#preferences-form');
-        const preferencesBtn = settingsNav.querySelector('#preferences-form button');
-        const preferencesCol = document.querySelector('.preferences-column');
+    // NAVIGATION FUNCTION
+    function showTab(tabName) {
+        // Hide all columns
+        groupsCol.style.display = 'none';
+        profileCol.style.display = 'none';
+        preferencesCol.style.display = 'none';
+        
+        // Remove active class from all buttons
+        navButtons.forEach(btn => btn.classList.remove('active'));
+        
+        // Show selected column and activate button
+        const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+        
+        switch(tabName) {
+            case 'groups':
+                groupsCol.style.display = 'flex';
+                break;
+            case 'profile':
+                profileCol.style.display = 'flex';
+                break;
+            case 'preferences':
+                preferencesCol.style.display = 'flex';
+                break;
+        }
+        
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
 
     // NAVIGATION EVENT LISTENERS
-        // Account
-        accountForm.addEventListener('submit', (e) => {
+    navButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
             e.preventDefault();
-            if(!accountBtn.classList.contains('active')){
-                accountBtn.classList.add('active');
-                accountCol.style.display = 'flex';
-            }
-            profileBtn.classList.remove('active');
-            profileCol.style.display = 'none';
-            preferencesBtn.classList.remove('active');
-            preferencesCol.style.display = 'none';
+            const tabName = button.dataset.tab;
+            showTab(tabName);
         });
+    });
 
-        // Profile
-        profileForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            accountBtn.classList.remove('active');
-            accountCol.style.display = 'none';
-            if(!profileBtn.classList.contains('active')){
-                profileBtn.classList.add('active');
-                profileCol.style.display = 'flex';
-            }
-            preferencesBtn.classList.remove('active');
-            preferencesCol.style.display = 'none';
-        });
-
-        // Preferences
-        preferencesForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            accountBtn.classList.remove('active');
-            accountCol.style.display = 'none';
-            profileBtn.classList.remove('active');
-            profileCol.style.display = 'none';
-            if(!preferencesBtn.classList.contains('active')){
-                preferencesBtn.classList.add('active');
-                preferencesCol.style.display = 'flex';
-            }
-        });
+    // Initialize - show profile tab by default
+    showTab('profile');
 </script>
 </html>

@@ -295,7 +295,7 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post ' . $status . ' successfully');
         }
     }
-
+    
     public function edit($id, Request $request)
     {
         $postData = $request->validate([
@@ -311,8 +311,8 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post edited successfully');
         } else {
             return redirect()->back()->with('error', 'Invalid credentials');
-        }
-    }
+        }       
+    } 
 
     public function delete($id)
     {

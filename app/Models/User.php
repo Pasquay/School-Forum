@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'bio',
+        'social_links',
         'photo',
         'role',
     ];
@@ -49,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'social_links' => 'array',
         ];
     }
 
@@ -111,7 +113,7 @@ class User extends Authenticatable
     }
 
     public function isOwnerOf(Group $group): bool
-    {
+    { 
         return $group->owner_id === $this->id;
     }
 

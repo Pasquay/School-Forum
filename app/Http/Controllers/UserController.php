@@ -439,6 +439,24 @@ class UserController extends Controller
         }
     }
 
+    public function updatePublicProfile($id, Request $request){
+        $user = User::findOrFail($id);
+        if($user->id != Auth::id()) return redirect()->back()->with('error', 'Invalid credentials');
+
+        $userData = $request->validate([
+            'bio' => ['nullable', 'string', 'max:200'],
+            'social_links' => ['nullable', 'array', 'max:3'],
+            'social_links.*' => ['nullable', 'url', 'max:255'],
+        ]);
+
+        $user->fill($userData);
+
+        if(!$user->isDirty()) return redirect()->back()->with('error', 'No changes made');
+
+        $user->save();
+        return redirect()->back()->with('success', 'Profile updated successfully');
+    }
+
     public function getUserOverview($id)
     {
         $user = User::findOrFail($id);
