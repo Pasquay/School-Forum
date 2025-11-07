@@ -43,58 +43,60 @@
                 </div>
                 @endif
             </div>
-            <div class="group-info options">
-                <div class="group-actions">
-                    <p class="group-name">{{ $group->name }}</p>
-                    <div class="right-actions">
-                        <div id="star-mute-forms">
-                            @if($membership)
-                            <form action="/group/toggleStar/{{ $group->id }}" method="POST" id="star-form">
-                                @csrf
-                                <button class="star">
-                                    <img
-                                        src="
+            <div class="group-name-section">
+                <p class="group-name">{{ $group->name }}</p>
+                <div class="group-info options">
+                    <div class="group-actions">
+                        <div class="right-actions">
+                            <div id="star-mute-forms">
+                                @if($membership)
+                                <form action="/group/toggleStar/{{ $group->id }}" method="POST" id="star-form">
+                                    @csrf
+                                    <button class="star">
+                                        <img
+                                            src="
                                             @if($membership->pivot->is_starred === 1)
                                                 {{ asset('/icons/star.png') }}
                                             @else
                                                 {{ asset('/icons/star-alt.png') }}
                                             @endif
                                         "
-                                        alt="star">
-                                </button>
-                            </form>
-                            <form action="/group/toggleMute/{{ $group->id }}" method="POST" id="mute-form">
-                                @csrf
-                                <button class="mute">
-                                    <img
-                                        src="
+                                            alt="star">
+                                    </button>
+                                </form>
+                                <form action="/group/toggleMute/{{ $group->id }}" method="POST" id="mute-form">
+                                    @csrf
+                                    <button class="mute">
+                                        <img
+                                            src="
                                             @if($membership->pivot->is_muted === 1)
                                                 {{ asset('/icons/mute.png') }}
                                             @else
                                                 {{ asset('/icons/mute-alt.png') }}
                                             @endif
                                         "
-                                        alt="Mute">
-                                </button>
-                            </form>
-                            @endif
-                        </div>
-                        <form action="" method="POST" id="join-leave-form">
-                            @csrf
-                            @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
-                            <button type="submit" class="manage-button">Manage</button>
-                            @elseif($membership)
-                            <button type="submit" class="leave-button">Leave</button>
-                            @elseif(!$membership && !$group->is_private)
-                            <button type="submit" class="join-button">Join</button>
-                            @else
-                            <button type="submit" class="request-button"
-                                @if($group->requested)
-                                disabled
+                                            alt="Mute">
+                                    </button>
+                                </form>
                                 @endif
-                                >Request to Join</button>
-                            @endif
-                        </form>
+                            </div>
+                            <form action="" method="POST" id="join-leave-form">
+                                @csrf
+                                @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
+                                <button type="submit" class="manage-button">Manage</button>
+                                @elseif($membership)
+                                <button type="submit" class="leave-button">Leave</button>
+                                @elseif(!$membership && !$group->is_private)
+                                <button type="submit" class="join-button">Join</button>
+                                @else
+                                <button type="submit" class="request-button"
+                                    @if($group->requested)
+                                    disabled
+                                    @endif
+                                    >Request to Join</button>
+                                @endif
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
