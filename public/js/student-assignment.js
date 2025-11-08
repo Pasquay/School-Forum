@@ -33,6 +33,12 @@ function parseLocalDateTime(dateString) {
     }
 }
 
+// DOM helpers to avoid null.style errors
+function $(id) { return document.getElementById(id); }
+function setDisplay(id, value) { const el = $(id); if (el) { el.style.display = value; } else { console.warn('Missing element:', id); } }
+function showEl(id) { setDisplay(id, 'block'); }
+function hideEl(id) { setDisplay(id, 'none'); }
+
 // Open student assignment modal
 function openStudentAssignmentModal(assignmentId) {
     const modal = document.getElementById('studentAssignmentModal');
@@ -228,25 +234,30 @@ function showSubmittedView(assignment, submission) {
     try {
         console.log('showSubmittedView called with:', { assignment, submission });
         
-        document.getElementById('submitted-view').style.display = 'block';
-        document.getElementById('assignment-submission-form').style.display = 'none';
-        document.getElementById('closed-message').style.display = 'none';
+        // Guarded show/hide to prevent null.style errors if markup changes
+        showEl('submitted-view');
+        hideEl('assignment-submission-form');
+        hideEl('closed-message');
 
         // Submission date
-        const submittedDate = document.getElementById('submitted-date');
-        if (submission.date_submitted) {
-            submittedDate.textContent = new Date(submission.date_submitted).toLocaleString();
-        } else {
-            submittedDate.textContent = 'N/A';
+        const submittedDate = $('submitted-date');
+        if (submittedDate) {
+            if (submission.date_submitted) {
+                submittedDate.textContent = new Date(submission.date_submitted).toLocaleString();
+            } else {
+                submittedDate.textContent = 'N/A';
+            }
         }
 
         // Late badge
-        if (submission.is_late) {
-            document.getElementById('late-badge').style.display = 'inline';
-        }
+        if (submission.is_late) { setDisplay('late-badge', 'inline'); }
 
         // Display submitted content
-        const contentDisplay = document.getElementById('submission-content-display');
+        const contentDisplay = $('submission-content-display');
+        if (!contentDisplay) {
+            console.warn('Missing element: submission-content-display');
+            return;
+        }
     if (assignment.submission_type === 'text') {
         contentDisplay.innerHTML = submission.submission_text || '<em>No text submitted</em>';
     } else if (assignment.submission_type === 'file') {
@@ -269,15 +280,15 @@ function showSubmittedView(assignment, submission) {
 
     // Show grade if graded
     if (submission.status === 'graded' && submission.grade !== null) {
-        document.getElementById('grade-display').style.display = 'block';
+        showEl('grade-display');
         // Convert grade to number in case it's a string from the database
         const gradeValue = parseFloat(submission.grade);
-        document.getElementById('grade-value').textContent = gradeValue.toFixed(2);
-        document.getElementById('grade-max').textContent = assignment.max_points;
+        const gv = $('grade-value'); if (gv) gv.textContent = gradeValue.toFixed(2);
+        const gm = $('grade-max'); if (gm) gm.textContent = assignment.max_points;
         
         if (submission.teacher_feedback) {
-            document.getElementById('teacher-feedback').innerHTML = 
-                `<strong>Feedback:</strong><br>${submission.teacher_feedback}`;
+            const tf = $('teacher-feedback');
+            if (tf) tf.innerHTML = `<strong>Feedback:</strong><br>${submission.teacher_feedback}`;
         }
     }
 
@@ -289,16 +300,16 @@ function showSubmittedView(assignment, submission) {
     
     if (isQuizOrExam) {
         // Show message that quizzes/exams cannot be retaken
-        document.getElementById('no-retake-message').style.display = 'block';
-        document.getElementById('resubmit-btn').style.display = 'none';
+        showEl('no-retake-message');
+        setDisplay('resubmit-btn', 'none');
     } else if (now < dueDate && !assignment.is_closed) {
         // Show resubmit button for other assignment types
-        document.getElementById('resubmit-btn').style.display = 'inline-block';
-        document.getElementById('no-retake-message').style.display = 'none';
+        setDisplay('resubmit-btn', 'inline-block');
+        hideEl('no-retake-message');
     } else {
         // Hide both if past due date or closed
-        document.getElementById('resubmit-btn').style.display = 'none';
-        document.getElementById('no-retake-message').style.display = 'none';
+        setDisplay('resubmit-btn', 'none');
+        hideEl('no-retake-message');
     }
     } catch (error) {
         console.error('Error in showSubmittedView:', error);
