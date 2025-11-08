@@ -18,7 +18,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/register', 'register'); // user register
     Route::post('/logout', 'logout')->middleware('auth'); // user logout
     Route::get('/user/{id}', 'loadUser')->middleware('auth'); // load user
-    Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth'); // load user settings
+    Route::get('/user/{id}/settings', 'loadSettings')->middleware('auth')->name('user.settings'); // load user settings
     Route::post('/user/{id}/settings/update-public-information', 'updatePublicProfile')->middleware('auth')->name('user.updatePublicProfile'); // update public profile details
     Route::get('/user/{id}/overview', 'getUserOverview')->middleware('auth'); // load page 2+ user overview
     Route::get('/user/{id}/comments-and-replies', 'getUserCommentsAndReplies')->middleware('auth'); // load page 2+ user comments and replies
@@ -29,6 +29,9 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/password/email', 'sendPasswordResetEmail')->name('password.email'); // send reset email
     Route::get('/password/reset/{token}', 'showResetForm')->name('password.reset'); // show reset form
     Route::post('/password/reset', 'resetPassword')->name('password.update'); // update password
+    // Google Account Link Routes
+    Route::post('/user/link-google', 'redirectToGoogle')->middleware('auth')->name('user.linkGoogle'); // redirect to Google Auth
+    Route::get('/user/link-google/callback', 'handleGoogleCallback')->middleware('auth')->name('user.linkGoogle.callback'); // Save the Google Auth Data
 });
 
 Route::controller(PostController::class)->group(function () {

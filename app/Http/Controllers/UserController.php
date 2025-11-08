@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Container\Attributes\DB;
 use Illuminate\Support\Facades\Password;
+use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\CommentController;
 use Illuminate\Validation\ValidationException;
@@ -763,7 +764,7 @@ class UserController extends Controller
                 'token' => 'required',
                 'email' => 'required|email',
                 'password' => 'required|min:8|confirmed',
-                'accepted_terms' => 'required|in:1',
+                // 'accepted_terms' => 'required|in:1',
             ]);
 
             $status = Password::reset(
@@ -823,5 +824,33 @@ class UserController extends Controller
                 'users' => [],
             ], 500);
         }
+    }
+
+    // Google Account Link Methods
+    public function redirectToGoogle()
+    {
+        $user = Auth::user();
+        if($user->google_id) return redirect()->back()->with('error', 'Google account already linked');
+
+        session(['link_google_user_id' => $user->id]);
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback(Request $request)
+    {
+        $googleUser = Socialite::driver('google')->user();
+        $userId = session('link_google_user_id');
+        $user = User::findOrFail($userId);
+
+        if($user->google_id) 
+            return redirect()->route('user.settings', ['id' => $user->id])->with('error', 'Google account already linked.');
+
+        if(User::where('google_id', $googleUser->id)->exists()) 
+            return redirect()->route('user.settings', ['id' => $user->id])->with('error', 'This Google account already linked to another user.');
+
+        $user->google_id = $googleUser->id;
+        $user->save();
+
+        return redirect()->route('user.settings', ['id' => $user->id])->with('success', 'Google account linked successfully!');
     }
 }

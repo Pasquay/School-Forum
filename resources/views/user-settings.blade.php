@@ -138,7 +138,7 @@
             .preferences-column {
                 width: 100%; /* Use full width */
                 max-width: none; /* Remove max-width constraint */
-                margin: 1.5rem 0 1.5rem 0;
+                margin: 1.5rem 0 0 0;
                 padding: 2rem;
                 background-color: white;
                 border-radius: 8px;
@@ -153,6 +153,11 @@
                 color: #666;
                 font-style: italic;
                 padding: 3rem 0;
+            }
+
+            .profile-account-security .form-group {
+                padding: 0;
+                margin: 0;
             }
             /* Form Fields - Match Create Group Style */
                 h3 {
@@ -193,6 +198,10 @@
                     color: #888;
                     font-size: 0.85rem;
                     margin-top: -0.25rem;
+                }
+
+                .form-group.bottom {
+                    margin: 0;
                 }
             /* Save Changes Button Style */
                 .sliding-btn {
@@ -245,11 +254,6 @@
                 <h1>Settings</h1>
                 <div class="header-separator"></div>
             </div>
-            <div class="settings-nav">
-                <button type="submit" data-tab="profile" class='active first'>Profile</button>
-                <button type="submit" data-tab="preferences">Preferences</button>
-                <button type="submit" data-tab="groups">Groups</button>
-            </div>
 
             <div class="profile-column" id='profile-column'>
                 <h2>Profile Settings</h2>
@@ -275,85 +279,37 @@
                 <div class="header-separator"></div>
                 <div class="profile-account-security">
                     <h3>Account & Security</h3>
-                            -Change email<br>
-                            -Change Password<br>
-                            -Link Google<br>
+                    <form method="POST" action="{{ route('password.email') }}">
+                        @csrf
+                        <div class="form-group">
+                            <input type="hidden" name="email" value="{{ Auth::user()->email }}">
+                            <label for="reset-password">Reset Password</label>
+                            <small>Tip: Use a strong, unique password with a minimum of 8 characters for your account.</small>
+                            <button type="submit" class="sliding-btn" name="reset-password" style="background:#ff9800; margin: 0;">Send Password Reset Email</button>
+                        </div>
+                    </form>
                 </div>
-            </div>
-
-            <div class="preferences-column" id='preferences-column' style='display:none;'>
-                <h2>Preferences</h2>
-                <div class="settings-placeholder">
-                    Features:<br>
-                        Preferences (Default startup page on login)<br>
-                            -startup page (home/profile/chosen group)<br>
-                            -muted communities<br>
-                            -followed communities<br>
-                            -starred communities
-                </div>
-            </div>
-
-            <div class="groups-column" id='groups-column' style='display:none;'>
-                <h2>Groups Settings</h2>
-                <div class="settings-placeholder">
-                    Features:<br>
-                        manage groups
+                <div class="form-group bottom">
+                    <label>Link Google Account</label>
+                    <small>Linking is only available if your account is not already connected to Google.</small>
+                    @if(Auth::user()->google_id)
+                        <button class="sliding-btn" style="background:#e0e0e0; color:#888; cursor:not-allowed;" disabled>
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="height:1em;vertical-align:middle;margin-right:0.5em;">
+                            Google Account Linked
+                        </button>
+                    @else
+                        <form method="POST" action="{{ route('user.linkGoogle') }}">
+                            @csrf
+                            <button type="submit" class="sliding-btn" style="background:#fff; color:#444; border:1px solid #ddd;">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="height:1em;vertical-align:middle;margin-right:0.5em;">
+                                Link Google Account
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
     </main>
     @include('components.back-to-top-button')
 </body>
-<script>
-    // VARIABLES
-    const userID = document.body.dataset.userId;
-
-    // NAVIGATION ELEMENTS
-    const navButtons = document.querySelectorAll('.settings-nav button');
-    const profileCol = document.querySelector('.profile-column');
-    const preferencesCol = document.querySelector('.preferences-column');
-    const groupsCol = document.querySelector('.groups-column');
-
-    // NAVIGATION FUNCTION
-    function showTab(tabName) {
-        // Hide all columns
-        groupsCol.style.display = 'none';
-        profileCol.style.display = 'none';
-        preferencesCol.style.display = 'none';
-        
-        // Remove active class from all buttons
-        navButtons.forEach(btn => btn.classList.remove('active'));
-        
-        // Show selected column and activate button
-        const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
-        
-        switch(tabName) {
-            case 'groups':
-                groupsCol.style.display = 'flex';
-                break;
-            case 'profile':
-                profileCol.style.display = 'flex';
-                break;
-            case 'preferences':
-                preferencesCol.style.display = 'flex';
-                break;
-        }
-        
-        if (activeButton) {
-            activeButton.classList.add('active');
-        }
-    }
-
-    // NAVIGATION EVENT LISTENERS
-    navButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const tabName = button.dataset.tab;
-            showTab(tabName);
-        });
-    });
-
-    // Initialize - show profile tab by default
-    showTab('profile');
-</script>
 </html>

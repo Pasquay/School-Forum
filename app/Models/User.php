@@ -28,6 +28,7 @@ class User extends Authenticatable
         'social_links',
         'photo',
         'role',
+        'google_id',
     ];
 
     /**
