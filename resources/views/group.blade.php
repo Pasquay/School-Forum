@@ -800,111 +800,119 @@
                     <form action="" method="POST" id="editAssignmentForm">
                         @csrf
                         <input type="hidden" name="assignment_id" id="edit_assignment_id" value="">
+                        <div class="form-section-header">Basic Info</div>
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="edit_assignment_name">Assignment Name *</label>
+                                <input type="text" id="edit_assignment_name" name="assignment_name" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="edit_assignment_name">Assignment Name *</label>
-                            <input type="text" id="edit_assignment_name" name="assignment_name" required>
+                            <div class="form-group">
+                                <label for="edit_description">Description</label>
+                                <textarea id="edit_description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_assignment_type">Assignment Type *</label>
+                                <select id="edit_assignment_type" name="assignment_type" required>
+                                    <option value="">Select type...</option>
+                                    <option value="essay">Essay</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="project">Project</option>
+                                    <option value="homework">Homework</option>
+                                    <option value="exam">Exam</option>
+                                    <option value="presentation">Presentation</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_submission_type">Submission Type *</label>
+                                <select id="edit_submission_type" name="submission_type" required>
+                                    <option value="">Select submission type...</option>
+                                    <option value="text">Text Submission</option>
+                                    <option value="file">File Upload</option>
+                                    <option value="external_link">External Link</option>
+                                    <option value="none">No Submission Required</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="edit_description">Description</label>
-                            <textarea id="edit_description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
+                        <div class="form-section-header">Scoring & Dates</div>
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="edit_max_points">Maximum Points *</label>
+                                <input type="number" id="edit_max_points" name="max_points" min="1" max="1000" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_date_assigned">Date Assigned</label>
+                                <input type="datetime-local" id="edit_date_assigned" name="date_assigned">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_date_due">Due Date *</label>
+                                <input type="datetime-local" id="edit_date_due" name="date_due" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="edit_date_close">Close Date</label>
+                                <input type="datetime-local" id="edit_date_close" name="date_close">
+                                <small class="form-text">Optional: When to stop accepting submissions</small>
+                            </div>
+
+                            <div class="form-group toggle-row">
+                                <label>
+                                    <input type="hidden" name="allow_late_submissions" value="0">
+                                    <input type="checkbox" id="edit_allow_late_submissions" name="allow_late_submissions" value="1" onchange="toggleEditLatePenalty()">
+                                    Allow Late Submissions
+                                </label>
+                                <small class="form-text form-note">Students can submit after the due date</small>
+                            </div>
+
+                            <div class="form-group" id="edit_late_penalty_group">
+                                <label for="edit_late_penalty_percentage">Late Penalty (%)</label>
+                                <input type="number" id="edit_late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" placeholder="e.g., 10">
+                                <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
+                            </div>
+
+                            <div class="form-group toggle-row">
+                                <label>
+                                    <input type="hidden" name="allow_resubmissions" value="0">
+                                    <input type="checkbox" id="edit_allow_resubmissions" name="allow_resubmissions" value="1" onchange="toggleEditResubmissions()">
+                                    Allow Resubmissions
+                                </label>
+                                <small class="form-text form-note">Students can resubmit after receiving a grade</small>
+                            </div>
+
+                            <div class="form-group" id="edit_max_attempts_group">
+                                <label for="edit_max_attempts">Maximum Attempts</label>
+                                <select id="edit_max_attempts" name="max_attempts">
+                                    <option value="-1">Unlimited</option>
+                                    <option value="1">1 (No resubmissions)</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                </select>
+                                <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="edit_assignment_type">Assignment Type *</label>
-                            <select id="edit_assignment_type" name="assignment_type" required>
-                                <option value="">Select type...</option>
-                                <option value="essay">Essay</option>
-                                <option value="quiz">Quiz</option>
-                                <option value="project">Project</option>
-                                <option value="homework">Homework</option>
-                                <option value="exam">Exam</option>
-                                <option value="presentation">Presentation</option>
-                            </select>
-                        </div>
+                        <div class="form-section-header">Resources & Visibility</div>
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="edit_external_link">External Link</label>
+                                <input type="url" id="edit_external_link" name="external_link" placeholder="https://example.com">
+                                <small class="form-text form-note">Optional: Link to external resources</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="edit_submission_type">Submission Type *</label>
-                            <select id="edit_submission_type" name="submission_type" required>
-                                <option value="">Select submission type...</option>
-                                <option value="text">Text Submission</option>
-                                <option value="file">File Upload</option>
-                                <option value="external_link">External Link</option>
-                                <option value="none">No Submission Required</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_max_points">Maximum Points *</label>
-                            <input type="number" id="edit_max_points" name="max_points" min="1" max="1000" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_date_assigned">Date Assigned</label>
-                            <input type="datetime-local" id="edit_date_assigned" name="date_assigned">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_date_due">Due Date *</label>
-                            <input type="datetime-local" id="edit_date_due" name="date_due" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_date_close">Close Date</label>
-                            <input type="datetime-local" id="edit_date_close" name="date_close">
-                            <small class="form-text">Optional: When to stop accepting submissions</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>
-                                <input type="hidden" name="allow_late_submissions" value="0">
-                                <input type="checkbox" id="edit_allow_late_submissions" name="allow_late_submissions" value="1" onchange="toggleEditLatePenalty()">
-                                Allow Late Submissions
-                            </label>
-                            <small class="form-text">Students can submit after the due date</small>
-                        </div>
-
-                        <div class="form-group" id="edit_late_penalty_group">
-                            <label for="edit_late_penalty_percentage">Late Penalty (%)</label>
-                            <input type="number" id="edit_late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" placeholder="e.g., 10">
-                            <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>
-                                <input type="hidden" name="allow_resubmissions" value="0">
-                                <input type="checkbox" id="edit_allow_resubmissions" name="allow_resubmissions" value="1" onchange="toggleEditResubmissions()">
-                                Allow Resubmissions
-                            </label>
-                            <small class="form-text">Students can resubmit after receiving a grade</small>
-                        </div>
-
-                        <div class="form-group" id="edit_max_attempts_group">
-                            <label for="edit_max_attempts">Maximum Attempts</label>
-                            <select id="edit_max_attempts" name="max_attempts">
-                                <option value="-1">Unlimited</option>
-                                <option value="1">1 (No resubmissions)</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                            </select>
-                            <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_external_link">External Link</label>
-                            <input type="url" id="edit_external_link" name="external_link" placeholder="https://example.com">
-                            <small class="form-text">Optional: Link to external resources</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="edit_visibility">Visibility *</label>
-                            <select id="edit_visibility" name="visibility" required>
-                                <option value="draft">Draft (Only visible to you)</option>
-                                <option value="published">Published (Visible to all members)</option>
-                            </select>
+                            <div class="form-group">
+                                <label for="edit_visibility">Visibility *</label>
+                                <select id="edit_visibility" name="visibility" required>
+                                    <option value="draft">Draft (Only visible to you)</option>
+                                    <option value="published">Published (Visible to all members)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-buttons">
@@ -924,8 +932,9 @@
                 <!-- Questions Tab (for Quiz/Exam) -->
                 <div id="edit-questions-tab" class="tab-content" style="display: none;">
                     <div class="quiz-builder-container">
-                        <div class="quiz-instructions">
-                            <p>Add or edit questions for your quiz/exam. Changes are saved automatically.</p>
+                        <div class="quiz-builder-divider quiz-instructions">
+                            <h3 class="section-title">Quiz/Exam Questions</h3>
+                            <p class="section-note">Add or edit questions for your quiz/exam. Changes are saved automatically.</p>
                         </div>
 
                         <div id="edit_quiz_questions_list" class="quiz-questions-list">
@@ -933,7 +942,7 @@
                         </div>
 
                         <div class="add-question-section">
-                            <button type="button" class="btn btn-primary" onclick="addEditQuizQuestion()">Add Question</button>
+                            <button type="button" class="btn btn-secondary" onclick="addEditQuizQuestion()">Add Question</button>
                         </div>
 
                         <div class="form-buttons">
@@ -947,8 +956,8 @@
                 <div id="edit-rubrics-tab" class="tab-content" style="display: none;">
                     <div class="rubrics-container">
                         <div class="rubrics-header">
-                            <h3>Grading Rubric</h3>
-                            <p style="color: #666; margin-bottom: 20px;">Create criteria to grade submissions consistently. Total rubric points will override the assignment's max points.</p>
+                            <h3 class="section-title">Grading Rubric</h3>
+                            <p class="section-note">Create criteria to grade submissions consistently. Total rubric points will override the assignment's max points.</p>
                         </div>
 
                         <div id="rubrics-list" class="rubrics-list">
@@ -971,21 +980,21 @@
                     <div class="analytics-container">
                         <div class="analytics-header">
                             <h3>Assignment Analytics</h3>
-                            <p style="color: #666; margin-bottom: 20px;">View performance statistics and grade distribution for this assignment.</p>
+                            <p class="section-note">View performance statistics and grade distribution for this assignment.</p>
                         </div>
 
                         <!-- Loading State -->
-                        <div id="analytics-loading" style="text-align: center; padding: 40px; display: none;">
+                        <div id="analytics-loading" class="analytics-loading hidden">
                             <p>Loading analytics...</p>
                         </div>
 
                         <!-- No Data State -->
-                        <div id="analytics-no-data" style="text-align: center; padding: 40px; color: #999; display: none;">
+                        <div id="analytics-no-data" class="analytics-no-data hidden">
                             <p>No graded submissions yet. Analytics will appear once you grade student work.</p>
                         </div>
 
                         <!-- Analytics Content -->
-                        <div id="analytics-content" style="display: none;">
+                        <div id="analytics-content" class="hidden">
                             <!-- Statistics Cards -->
                             <div class="analytics-stats-grid">
                                 <div class="stat-card">
