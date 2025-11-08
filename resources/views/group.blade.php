@@ -115,6 +115,7 @@
                 </div>
             </div>
             <div class="content">
+                <h3>Posts</h3>
                 <div class="menu">
                     <a href="#" class="link active" id="search-btn">
                         <span class="link-icon">
@@ -240,7 +241,7 @@
                 <!-- Content Tabs -->
                 <div class="content-tabs">
                     <button class="main-tab-btn active" data-tab="posts">Posts</button>
-                    <button class="main-tab-btn" data-tab="assignments">Assignments</button>
+                    <button class="main-tab-btn" data-tab="assignments">All Assignments</button>
                 </div>
 
                 <!-- Posts Tab Content -->
@@ -558,169 +559,202 @@
 
     <!-- Create Assignments Modal -->
     <div id="createAssignmentModal" class="modal" style="display: none;">
-        <div class="modal-content settings-modal">
+        <div class="modal-content settings-modal edit-assignment-modal">
             <div class="modal-header">
                 <h2>Create New Assignment</h2>
                 <button class="close-modal" onclick="closeCreateAssignmentModal()">&times;</button>
             </div>
 
-            <!-- Tabs Navigation -->
-            <div class="settings-nav">
-                <button class="tab-btn active" data-tab="create-details" onclick="switchCreateTab('create-details')">Details</button>
-                <button class="tab-btn" data-tab="create-questions" id="create-questions-tab-btn" style="display: none;" onclick="switchCreateTab('create-questions')">Questions</button>
-                <button class="tab-btn" data-tab="create-rubrics" onclick="switchCreateTab('create-rubrics')">Rubrics</button>
-            </div>
+            <!-- Tabs removed for a simpler single-page form -->
 
             <div class="modal-body">
-                <!-- Details Tab -->
-                <div id="create-details-tab" class="tab-content active">
+                <!-- Unified Details Content -->
+                <div id="create-details-tab" class="tab-content active" style="display:block;">
                     <form action="{{ route('group.createAssignment', $group->id) }}" method="POST" id="createAssignmentForm" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="form-group">
-                            <label for="assignment_name">Assignment Name *</label>
-                            <input type="text" id="assignment_name" name="assignment_name" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="description">Description</label>
-                            <textarea id="description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="assignment_type">Assignment Type *</label>
-                            <select id="assignment_type" name="assignment_type" required onchange="handleAssignmentTypeChange()">
-                                <option value="">Select type...</option>
-                                <option value="essay">Essay</option>
-                                <option value="quiz">Quiz</option>
-                                <option value="project">Project</option>
-                                <option value="homework">Homework</option>
-                                <option value="exam">Exam</option>
-                                <option value="presentation">Presentation</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group" id="time_limit_group" style="display: none;">
-                            <label for="time_limit">Time Limit (minutes)</label>
-                            <input type="number" id="time_limit" name="time_limit" min="1" max="600" placeholder="e.g., 60 minutes">
-                            <small class="form-text" style="color: #999;">
-                                Optional: Set a time limit for students to complete this quiz/exam.
-                            </small>
-                        </div>
-
-                        <div class="form-group" id="submission_type_group">
-                            <label for="submission_type">Submission Type <span id="submission_type_required">*</span></label>
-                            <select id="submission_type" name="submission_type">
-                                <option value="">Select submission type...</option>
-                                <option value="text">Text Submission</option>
-                                <option value="file">File Upload</option>
-                                <option value="external_link">External Link</option>
-                                <option value="none">No Submission Required</option>
-                                <option value="quiz" style="display: none;">Quiz</option>
-                            </select>
-                            <small class="form-text" id="quiz_submission_note" style="display: none; color: #999;">
-                                Submission type is automatically set to "quiz" for Quiz and Exam assignments.
-                            </small>
-                        </div>
-
-                        <!-- Quiz Builder Section (hidden by default) -->
-                        <div id="create_quiz_builder_section" style="display: none;">
-                            <div class="quiz-builder-divider">
-                                <h3 style="color: var(--color-pakistan-green); margin: 20px 0 15px;">Quiz/Exam Questions</h3>
-                                <p style="color: #666; margin-bottom: 20px;">Add questions below. You can also add questions after creating the assignment.</p>
+                        <div class="form-section-header">Basic Info</div>
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="assignment_name">Assignment Name *</label>
+                                <input type="text" id="assignment_name" name="assignment_name" required>
                             </div>
 
-                            <div id="create_quiz_questions_list" class="quiz-questions-list">
-                                <div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea id="description" name="description" rows="4" placeholder="Assignment instructions and details..."></textarea>
                             </div>
 
-                            <div class="add-question-section">
-                                <button type="button" class="btn btn-secondary" onclick="addCreateQuizQuestion()">
-                                    ➕ Add Question
-                                </button>
+                            <div class="form-group">
+                                <label for="assignment_type">Assignment Type *</label>
+                                <select id="assignment_type" name="assignment_type" required onchange="handleAssignmentTypeChange()">
+                                    <option value="">Select type...</option>
+                                    <option value="essay">Essay</option>
+                                    <option value="quiz">Quiz</option>
+                                    <option value="project">Project</option>
+                                    <option value="homework">Homework</option>
+                                    <option value="exam">Exam</option>
+                                    <option value="presentation">Presentation</option>
+                                </select>
                             </div>
-                        </div>
 
-                        <div class="form-group" id="max_points_group">
-                            <label for="max_points">Maximum Points *</label>
-                            <input type="number" id="max_points" name="max_points" min="1" max="1000" required>
-                            <small class="form-text" id="auto_points_note" style="display: none; color: var(--color-pakistan-green);">
-                                Points will be automatically calculated from quiz questions.
-                            </small>
-                        </div>
+                            <div class="form-group" id="time_limit_group" style="display: none;">
+                                <label for="time_limit">Time Limit (minutes)</label>
+                                <input type="number" id="time_limit" name="time_limit" min="1" max="600" placeholder="e.g., 60 minutes">
+                                <small class="form-text form-note">Optional: Set a time limit for students to complete this quiz/exam.</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="date_assigned">Date Assigned</label>
-                            <input type="datetime-local" id="date_assigned" name="date_assigned" value="{{ now()->format('Y-m-d\TH:i') }}">
-                        </div>
+                            <div class="form-group" id="submission_type_group">
+                                <label for="submission_type">Submission Type <span id="submission_type_required">*</span></label>
+                                <select id="submission_type" name="submission_type">
+                                    <option value="">Select submission type...</option>
+                                    <option value="text">Text Submission</option>
+                                    <option value="file">File Upload</option>
+                                    <option value="external_link">External Link</option>
+                                    <option value="none">No Submission Required</option>
+                                    <option value="quiz" style="display: none;">Quiz</option>
+                                </select>
+                                <small class="form-text form-note" id="quiz_submission_note" style="display: none;">
+                                    Submission type is automatically set to "quiz" for Quiz and Exam assignments.
+                                </small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="date_due">Due Date *</label>
-                            <input type="datetime-local" id="date_due" name="date_due" required>
-                        </div>
+                            <!-- Quiz Builder Section (hidden by default) -->
+                            <div id="create_quiz_builder_section" style="display: none;">
+                                <div class="quiz-builder-divider">
+                                    <h3 class="section-title">Quiz/Exam Questions</h3>
+                                    <p class="section-note">Add questions below. You can also add questions after creating the assignment.</p>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="date_close">Close Date</label>
-                            <input type="datetime-local" id="date_close" name="date_close">
-                            <small class="form-text">Optional: When to stop accepting submissions</small>
-                        </div>
+                                <div id="create_quiz_questions_list" class="quiz-questions-list">
+                                    <div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>
+                                </div>
 
-                        <div class="form-group">
-                            <label>
-                                <input type="hidden" name="allow_late_submissions" value="0">
-                                <input type="checkbox" id="allow_late_submissions" name="allow_late_submissions" value="1" checked onchange="toggleLatePenalty()">
-                                Allow Late Submissions
-                            </label>
-                            <small class="form-text">Students can submit after the due date</small>
-                        </div>
+                                <div class="add-question-section">
+                                    <button type="button" class="btn btn-secondary" onclick="addCreateQuizQuestion()">
+                                        Add Question
+                                    </button>
+                                </div>
+                            </div>
+                        </div><!-- /form-section Basic Info -->
 
-                        <div class="form-group" id="late_penalty_group">
-                            <label for="late_penalty_percentage">Late Penalty (%)</label>
-                            <input type="number" id="late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" value="0" placeholder="e.g., 10">
-                            <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
-                        </div>
+                        <div class="form-section-header">Scoring & Dates</div>
+                        <div class="form-section">
 
-                        <div class="form-group">
-                            <label>
-                                <input type="hidden" name="allow_resubmissions" value="0">
-                                <input type="checkbox" id="allow_resubmissions" name="allow_resubmissions" value="1" checked onchange="toggleResubmissions()">
-                                Allow Resubmissions
-                            </label>
-                            <small class="form-text">Students can resubmit after receiving a grade</small>
-                        </div>
+                            <div class="form-group" id="max_points_group">
+                                <label for="max_points">Maximum Points *</label>
+                                <input type="number" id="max_points" name="max_points" min="1" max="1000" required>
+                                <small class="form-text" id="auto_points_note" style="display: none; color: var(--color-pakistan-green);">
+                                    Points will be automatically calculated from quiz questions.
+                                </small>
+                            </div>
 
-                        <div class="form-group" id="max_attempts_group">
-                            <label for="max_attempts">Maximum Attempts</label>
-                            <select id="max_attempts" name="max_attempts">
-                                <option value="-1">Unlimited</option>
-                                <option value="1">1 (No resubmissions)</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                            </select>
-                            <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="date_assigned">Date Assigned</label>
+                                <input type="datetime-local" id="date_assigned" name="date_assigned" value="{{ now()->format('Y-m-d\TH:i') }}">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="external_link">External Link</label>
-                            <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
-                            <small class="form-text">Optional: Link to external resources</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="date_due">Due Date *</label>
+                                <input type="datetime-local" id="date_due" name="date_due" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="attachments">Attach Files</label>
-                            <input type="file" id="attachments" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip">
-                            <small class="form-text">Optional: Attach reference materials, rubrics, examples, etc. (Max 10MB per file)</small>
-                        </div>
+                            <div class="form-group">
+                                <label for="date_close">Close Date</label>
+                                <input type="datetime-local" id="date_close" name="date_close">
+                                <small class="form-text">Optional: When to stop accepting submissions</small>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="visibility">Visibility *</label>
-                            <select id="visibility" name="visibility" required>
-                                <option value="draft">Draft (Only visible to you)</option>
-                                <option value="published">Published (Visible to all members)</option>
-                            </select>
-                        </div>
+                            <div class="form-group toggle-row">
+                                <label>
+                                    <input type="hidden" name="allow_late_submissions" value="0">
+                                    <input type="checkbox" id="allow_late_submissions" name="allow_late_submissions" value="1" checked onchange="toggleLatePenalty()">
+                                    Allow Late Submissions
+                                </label>
+                                <small class="form-text form-note">Students can submit after the due date</small>
+                            </div>
+
+                            <div class="form-group" id="late_penalty_group">
+                                <label for="late_penalty_percentage">Late Penalty (%)</label>
+                                <input type="number" id="late_penalty_percentage" name="late_penalty_percentage" min="0" max="100" step="0.01" value="0" placeholder="e.g., 10">
+                                <small class="form-text">Percentage of points to deduct from late submissions (0-100)</small>
+                            </div>
+
+                            <div class="form-group toggle-row">
+                                <label>
+                                    <input type="hidden" name="allow_resubmissions" value="0">
+                                    <input type="checkbox" id="allow_resubmissions" name="allow_resubmissions" value="1" checked onchange="toggleResubmissions()">
+                                    Allow Resubmissions
+                                </label>
+                                <small class="form-text form-note">Students can resubmit after receiving a grade</small>
+                            </div>
+
+                            <div class="form-group" id="max_attempts_group">
+                                <label for="max_attempts">Maximum Attempts</label>
+                                <select id="max_attempts" name="max_attempts">
+                                    <option value="-1">Unlimited</option>
+                                    <option value="1">1 (No resubmissions)</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                </select>
+                                <small class="form-text">Total number of submission attempts allowed (including initial submission)</small>
+                            </div>
+                        </div><!-- /form-section Scoring & Dates -->
+
+                        <!-- Rubrics right after scoring -->
+                        <div class="form-section-header">Rubrics</div>
+                        <div class="form-section">
+                            <div class="rubrics-container">
+                                <div class="rubrics-header">
+                                    <h3 class="section-title">Grading Rubric</h3>
+                                    <p class="section-note">Create grading criteria for this assignment. Students will see this rubric. Total rubric points will override the max points setting.</p>
+                                </div>
+
+                                <div id="create-rubrics-list" class="rubrics-list">
+                                    <div class="no-rubrics-message empty-message">
+                                        <p>No rubric criteria yet. Click "Add Criterion" to get started.</p>
+                                        <p class="small-note">Rubrics help ensure consistent grading and set clear expectations for students.</p>
+                                    </div>
+                                </div>
+
+                                <div class="rubric-actions">
+                                    <button type="button" class="btn btn-secondary" onclick="addCreateRubricCriterion()">
+                                        Add Criterion
+                                    </button>
+                                </div>
+
+                                <div id="create-rubric-total" class="rubric-total" style="display: none;">
+                                    <strong>Total Points: <span id="create-rubric-total-points">0</span></strong>
+                                </div>
+                            </div>
+                        </div><!-- /form-section Rubrics -->
+
+                        <div class="form-section-header">Resources & Visibility</div>
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="external_link">External Link</label>
+                                <input type="url" id="external_link" name="external_link" placeholder="https://example.com">
+                                <small class="form-text form-note">Optional: Link to external resources</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="attachments">Attach Files</label>
+                                <input type="file" id="attachments" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip">
+                                <small class="form-text">Optional: Attach reference materials, rubrics, examples, etc. (Max 10MB per file)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="visibility">Visibility *</label>
+                                <select id="visibility" name="visibility" required>
+                                    <option value="draft">Draft (Only visible to you)</option>
+                                    <option value="published">Published (Visible to all members)</option>
+                                </select>
+                            </div>
+                        </div><!-- /form-section Resources & Visibility -->
+
+                        <!-- Removed duplicate Rubrics block -->
 
                         <!-- Hidden field for quiz questions JSON -->
                         <input type="hidden" id="quiz_questions" name="quiz_questions" value="">
@@ -735,52 +769,9 @@
                     </form>
                 </div>
 
-                <!-- Questions Tab (for Quiz/Exam types) -->
-                <div id="create-questions-tab" class="tab-content" style="display: none;">
-                    <div class="quiz-builder-section">
-                        <div class="quiz-builder-header">
-                            <h3>Quiz/Exam Questions</h3>
-                            <p style="color: #666; margin-bottom: 20px;">Add questions for this quiz or exam. Points will be automatically calculated.</p>
-                        </div>
+                <!-- Questions Tab removed: questions are created inline in Basic Info when quiz/exam -->
 
-                        <div id="create_quiz_questions_tab_list" class="quiz-questions-list">
-                            <div class="no-questions-message">No questions yet. Click "Add Question" to get started.</div>
-                        </div>
 
-                        <div class="add-question-section">
-                            <button type="button" class="btn btn-primary" onclick="addCreateQuizQuestionInTab()">
-                                ➕ Add Question
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Rubrics Tab -->
-                <div id="create-rubrics-tab" class="tab-content" style="display: none;">
-                    <div class="rubrics-container">
-                        <div class="rubrics-header">
-                            <h3>Grading Rubric</h3>
-                            <p style="color: #666; margin-bottom: 20px;">Create grading criteria for this assignment. Students will see this rubric. Total rubric points will override the max points setting.</p>
-                        </div>
-
-                        <div id="create-rubrics-list" class="rubrics-list">
-                            <div class="no-rubrics-message" style="text-align: center; padding: 40px; color: #999;">
-                                <p>📋 No rubric criteria yet. Click "Add Criterion" to get started.</p>
-                                <p style="font-size: 0.9em; margin-top: 10px;">Rubrics help ensure consistent grading and set clear expectations for students.</p>
-                            </div>
-                        </div>
-
-                        <div class="rubric-actions">
-                            <button type="button" class="btn btn-secondary" onclick="addCreateRubricCriterion()">
-                                ➕ Add Criterion
-                            </button>
-                        </div>
-
-                        <div id="create-rubric-total" class="rubric-total" style="display: none;">
-                            <strong>Total Points: <span id="create-rubric-total-points">0</span></strong>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -788,7 +779,7 @@
 
     <!-- Edit Assignment Modal -->
     <div id="editAssignmentModal" class="modal" style="display: none;">
-        <div class="modal-content settings-modal">
+        <div class="modal-content settings-modal edit-assignment-modal">
             <div class="modal-header">
                 <h2>Edit Assignment</h2>
                 <button class="close-modal" onclick="closeEditAssignmentModal()">&times;</button>
@@ -942,9 +933,7 @@
                         </div>
 
                         <div class="add-question-section">
-                            <button type="button" class="btn btn-primary" onclick="addEditQuizQuestion()">
-                                ➕ Add Question
-                            </button>
+                            <button type="button" class="btn btn-primary" onclick="addEditQuizQuestion()">Add Question</button>
                         </div>
 
                         <div class="form-buttons">
@@ -967,12 +956,8 @@
                         </div>
 
                         <div class="rubric-actions">
-                            <button type="button" class="btn btn-secondary" onclick="addRubricCriterion()">
-                                ➕ Add Criterion
-                            </button>
-                            <button type="button" class="btn btn-primary" onclick="saveRubrics()">
-                                💾 Save Rubric
-                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="addRubricCriterion()">Add Criterion</button>
+                            <button type="button" class="btn btn-primary" onclick="saveRubrics()">Save Rubric</button>
                         </div>
 
                         <div id="rubric-total" class="rubric-total" style="display: none;">
@@ -996,7 +981,7 @@
 
                         <!-- No Data State -->
                         <div id="analytics-no-data" style="text-align: center; padding: 40px; color: #999; display: none;">
-                            <p>📊 No graded submissions yet. Analytics will appear once you grade student work.</p>
+                            <p>No graded submissions yet. Analytics will appear once you grade student work.</p>
                         </div>
 
                         <!-- Analytics Content -->

@@ -6,7 +6,7 @@
             <button class="close-modal" onclick="closeGradingModal()">&times;</button>
         </div>
 
-        <div class="modal-body" style="padding: 0;">
+        <div class="modal-body">
             <!-- Student Info Header -->
             <div class="grading-student-header">
                 <div class="grading-student-info">
@@ -56,21 +56,8 @@
                             <span id="grading-file-name">file.pdf</span>
                         </div>
                         <div class="file-actions">
-                            <a id="grading-file-download" href="#" download class="btn btn-secondary btn-sm">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                Download
-                            </a>
-                            <button id="grading-file-preview" class="btn btn-secondary btn-sm" onclick="previewFile()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                                Preview
-                            </button>
+                            <a id="grading-file-download" href="#" download class="btn btn-secondary btn-sm">Download</a>
+                            <button id="grading-file-preview" class="btn btn-secondary btn-sm" onclick="previewFile()">Preview</button>
                         </div>
                     </div>
                     <div id="grading-file-preview-container" style="display: none; margin-top: 20px;">
@@ -97,7 +84,7 @@
             </div>
 
             <!-- Rubric Grading Interface (loaded dynamically if rubric exists) -->
-            <div id="rubric-grading-interface-container" style="padding: 24px; border-bottom: 1px solid #e5e7eb; display: none;">
+            <div id="rubric-grading-interface-container" class="rubric-grading-interface" style="display: none;">
                 <!-- Rubric grading interface will be rendered here by rubric-system.js -->
             </div>
 
@@ -151,9 +138,7 @@
                                         <input type="checkbox" id="comment-is-private">
                                         <span>Private (Teacher notes - not visible to student)</span>
                                     </label>
-                                    <button type="button" class="btn btn-primary btn-sm" id="add-feedback-btn">
-                                        💬 Add Feedback
-                                    </button>
+                                    <button type="button" class="btn btn-primary btn-sm" id="add-feedback-btn">Add Feedback</button>
                                 </div>
                             </div>
                         </div>
@@ -163,14 +148,7 @@
                         <button type="button" class="btn btn-secondary" onclick="closeGradingModal()">
                             Cancel
                         </button>
-                        <button type="submit" class="btn btn-primary" id="submit-grade-btn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                <polyline points="7 3 7 8 15 8"></polyline>
-                            </svg>
-                            Save Grade
-                        </button>
+                        <button type="submit" class="btn btn-primary" id="submit-grade-btn">Save Grade</button>
                     </div>
                 </form>
             </div>
@@ -182,6 +160,10 @@
     .grading-modal {
         max-width: 900px;
         max-height: 90vh;
+    }
+
+    .modal-body {
+        padding: 0;
     }
 
     .grading-student-header {
@@ -241,6 +223,11 @@
         border-bottom: 1px solid #e5e7eb;
         max-height: 400px;
         overflow-y: auto;
+    }
+
+    .rubric-grading-interface {
+        padding: 24px;
+        border-bottom: 1px solid #e5e7eb;
     }
 
     .grading-content-section h4 {

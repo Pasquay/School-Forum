@@ -19,9 +19,7 @@
 
                 <!-- Add Question Button -->
                 <div class="add-question-section">
-                    <button type="button" class="btn btn-primary" onclick="addQuizQuestion()">
-                        ➕ Add Question
-                    </button>
+                    <button type="button" class="btn btn-primary" onclick="addQuizQuestion()">Add Question</button>
                 </div>
 
                 <!-- Action Buttons -->

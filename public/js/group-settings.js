@@ -39,13 +39,36 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load sidebar assignments on page load
     loadSidebarAssignments();
     
-    document.querySelectorAll('.tab-btn').forEach(btn => {/* Lines 16-25 omitted */});
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetTab = this.dataset.tab;
+            
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
 
     // Close modal when clicking outside
-    document.getElementById('groupSettingsModal').addEventListener('click', function(e) {/* Lines 29-32 omitted */});
+    const groupSettingsModal = document.getElementById('groupSettingsModal');
+    if (groupSettingsModal) {
+        groupSettingsModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGroupSettingsModal();
+            }
+        });
+    }
 
     // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {/* Lines 36-39 omitted */});
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeGroupSettingsModal();
+        }
+    });
 });
 
 // Transfer modal functions (if needed later)
@@ -377,7 +400,35 @@ function displaySidebarAssignments(assignments) {
     
     if (!sidebarList) return;
     
-    const assignmentsHtml = assignments.map(assignment => createSidebarAssignmentHTML(assignment)).join('');
+    // Filter out assignments that are 10+ days late or closed
+    const now = new Date();
+    const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
+    
+    const filteredAssignments = assignments.filter(assignment => {
+        // If assignment is closed, don't show it
+        if (assignment.is_closed) return false;
+        
+        // If assignment has a close_date and it's passed, don't show it
+        if (assignment.close_date) {
+            const closeDate = new Date(assignment.close_date);
+            if (closeDate < now) return false;
+        }
+        
+        // If assignment is more than 10 days overdue, don't show it
+        if (assignment.date_due) {
+            const dueDate = new Date(assignment.date_due);
+            if (dueDate < tenDaysAgo) return false;
+        }
+        
+        return true;
+    });
+    
+    if (filteredAssignments.length === 0) {
+        sidebarList.innerHTML = '<div class="no-assignments"><p>No active assignments...</p></div>';
+        return;
+    }
+    
+    const assignmentsHtml = filteredAssignments.map(assignment => createSidebarAssignmentHTML(assignment)).join('');
     sidebarList.innerHTML = assignmentsHtml;
 }
 
@@ -590,11 +641,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     statusBadges.push('<span class="status-badge status-overdue">Closed</span>');
                 }
                 const editButton = assignment.can_edit ? 
-                `<button class="edit-assignment-btn" onclick="openEditAssignmentModal(${assignment.id})">Edit</button>` : '';
+                `<button class="edit-assignment-btn" onclick="event.stopPropagation(); openEditAssignmentModal(${assignment.id})">Edit</button>` : '';
 
+                // Determine click handler based on user role
+                const clickHandler = assignment.can_edit ? 
+                    `onclick="openEditAssignmentModal(${assignment.id})"` : 
+                    `onclick="openStudentAssignmentModal(${assignment.id})"`;
 
                 return `
-            <div class="assignment-card">
+            <div class="assignment-card" ${clickHandler} style="cursor: pointer;">
                 <div class="assignment-header">
                     <h3 class="assignment-title">${assignment.assignment_name}</h3>
                     <span class="assignment-type">${assignment.assignment_type}</span>
