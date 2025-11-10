@@ -289,6 +289,80 @@ class GroupController extends Controller
         }
     }
 
+    public function showGroupsManager(Request $request)
+    {
+        $user = Auth::user();
+
+        // Search //set this up later
+        $search = '';
+
+        // Sorting
+        $sortBy = 'role'; // change this later
+        $asc = 1;
+        
+        // Filters 
+        //SET THESE UP LATER
+        $isMember = 1;
+        $isModerator = 1; 
+        $isOwner = 1; 
+        
+        $isAcademic = 1; 
+        $isSocial = 1;
+        $isPrivate = 1;
+
+        $isStarred = 1;
+        $isMuted = 1;
+
+        $groups = Group::query()
+                       ->join('group_members', function ($join) use ($user) {
+                            $join->on('groups.id', '=', 'group_members.group_id')
+                                 ->where('group_members.user_id', '=', $user->id);
+                       })
+                       ->select([
+                            'groups.*', 'group_members.role as user_role',
+                            'groups.*', 'group_members.is_starred as is_starred',
+                            'groups.*', 'group_members.is_muted as is_muted',
+                        ]);
+
+        // SEARCH HERE
+
+        // SORT HERE
+        switch($sortBy){
+            case 'role': default:
+                if($asc){
+                    $groups->orderByRaw("FIELD(user_role, 'owner', 'moderator', 'member')")
+                           ->orderBy('name', 'asc');
+                } else {
+                    $groups->orderByRaw("FIELD(user_role), 'member', 'moderator', 'owner')")
+                           ->orderBy('name', 'desc');
+                }
+                break;
+        }
+
+        // PAGINATION
+        $perPage = 10;
+        $currentPage = request('page', 1);
+
+        $groups = $groups->get();
+        $groupsCount = $groups->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $groupsItems = $groups->slice($offset, $perPage)->values();
+
+        $groups = new \Illuminate\Pagination\LengthAwarePaginator(
+            $groupsItems,
+            $groupsCount,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+
+        // RIGHT SIDE INFO
+
+        return view('group-manager', compact(
+            'groups',
+        ));
+    }
+    
     public function showGroup($id)
     {
         // Return to home page if $id is home group
@@ -507,6 +581,32 @@ class GroupController extends Controller
             'membership' => 0,
             'message' => 'Not a member of this group yet'
         ]);
+    }
+
+    public function leaveGroupAlt($id){
+        $user = User::findOrFail(Auth::id());
+        $membership = $user->groups()
+                           ->where('groups.id', $id)
+                           ->exists();
+
+        if(!$membership){
+            return response()->json([
+                'success' => false,
+                'membership' => 0,
+                'message' => 'Not a member of this group yet',
+            ]);
+        } else {
+            $user->groups()->detach($id);
+
+            $group = Group::findOrFail($id);
+            $group->update(['member_count' => $group->getMemberCount()]);
+
+            return response()->json([
+                'success' => true,
+                'membership' => 0,
+                'message' => 'You have left group "' . $group->name . '" successfully.',
+            ]);
+        }
     }
 
     public function showGroupSettings($id, Request $request)

@@ -22,6 +22,11 @@ function parseLocalDateTime(dateString) {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('settings') === '1') showGroupSettingsModal();
+});
+
 // Show Group Settings Modal
 function showGroupSettingsModal() {
     document.getElementById('groupSettingsModal').style.display = 'flex';

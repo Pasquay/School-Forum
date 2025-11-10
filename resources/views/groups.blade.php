@@ -390,6 +390,20 @@
             width: 100%;
         }
 
+        .manage-group-button {
+            width: 100%;
+            background-color: #4a90e2;
+            color: white;
+            margin-top: 0;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
         .groups-created, .groups-moderated, .groups-joined {
             width: 100%;
         }
@@ -439,7 +453,6 @@
             border-bottom: 1px solid #f0f0f0;
             display: block;
         }
-
     </style>
 </head>
 <body>
@@ -491,6 +504,7 @@
 
         <div class="right-side">
             <div class="user-info" id="user-info">
+                <button class="manage-group-button">Manage Groups</button>
                 <div class="groups-created">
                     <div class="section-header">
                         <p>Groups Created</p>
@@ -691,11 +705,6 @@
         // Event Listeners
             function addJoinLeaveEventListeners(){
                 const groups = document.querySelectorAll('.groups-list .group-info');
-                    groups.forEach(group => {
-                        // console.log(group);
-                        const test = group.querySelector('button');
-                        console.log(test);
-                    })
                     groups.forEach(group => {
                         const groupid = group.dataset.groupid;
                         const form = group.querySelector('form');
@@ -1349,6 +1358,12 @@
             function addRightGroupEventListeners(){
                 const rightGroups = document.querySelectorAll('.group-info-minimal');
                 rightGroups.forEach(group => {
+                // Manage Group Button
+                    const manageGroupButton = document.querySelector('.manage-group-button');
+                    manageGroupButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.location.href = "{{ route('groups.manager') }}";
+                    });
                 // Create Group button
                     const createGroupBtn = document.querySelector('.create-group-button');
                     createGroupBtn.addEventListener('click', (e) => {

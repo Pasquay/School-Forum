@@ -89,12 +89,14 @@ Route::controller(GroupController::class)->group(function () {
     Route::get('/groups', 'showGroups')->middleware('auth'); // show groups page
     Route::get('/groups/create', 'showCreateGroup')->middleware('auth'); // show group creation form
     Route::post('/groups/create-submit', 'createGroup')->middleware('auth'); // create group
+    Route::get('/groups/manage', 'showGroupsManager')->middleware('auth')->name('groups.manager'); // show groups manager page
     Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star/unstar a group
     Route::post('/group/toggleMute/{id}', 'toggleMute')->middleware('auth'); // mute/unmute a group
     Route::post('/group/{id}/request', 'requestToJoinGroup')->middleware('auth'); // request to join a group
-    Route::post('/group/{id}/join', 'joinGroup')->middleware('auth'); // join a group
+    Route::post('/group/{id}/join', 'joinGroup')->middleware('auth')->name('group.join'); // join a group
     Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth')->name('group.leave'); // leave a group
+    Route::post('/group/{id}/leave-alt', 'leaveGroupAlt')->middleware('auth')->name('group.leave.alt'); // leave a group via group manager
     Route::get('/group/{id}/settings', 'showGroupSettings')->middleware('auth'); // manage a group/go to group settings
 
     //ASSignments - MUST come before other /group/{id} routes to avoid conflicts
