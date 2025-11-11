@@ -165,6 +165,20 @@ function displayGradingSubmission(submission, assignment, student) {
     } else if (assignment.assignment_type === 'quiz' || assignment.assignment_type === 'exam') {
         displayQuizSubmission(submission, assignment);
     }
+    
+    // Attach event listener to add feedback button
+    const addFeedbackBtn = document.getElementById('add-feedback-btn');
+    if (addFeedbackBtn) {
+        // Remove any existing listeners by cloning the button
+        const newBtn = addFeedbackBtn.cloneNode(true);
+        addFeedbackBtn.parentNode.replaceChild(newBtn, addFeedbackBtn);
+        
+        // Add new event listener
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.addSubmissionComment();
+        });
+    }
 }
 
 // Display text submission
@@ -445,12 +459,14 @@ async function loadSubmissionComments(assignmentId, studentId) {
 
         const data = await response.json();
 
-        if (data.success) {
+        // Handle both response formats: {success: true, comments: [...]} or {comments: [...]}
+        if (data.comments) {
+            displayComments(data.comments);
+        } else if (data.success && data.comments) {
             displayComments(data.comments);
         }
     } catch (error) {
         console.error('Error loading comments:', error);
-        // Don't show error to user, just log it
     }
 }
 
@@ -476,13 +492,13 @@ function displayComments(comments) {
         return `
             <div class="comment-item ${comment.is_private ? 'private' : ''}">
                 <div class="comment-header">
-                    <span class="comment-author">${escapeHtml(comment.author_name)}</span>
+                    <span class="comment-author">${escapeHtml(comment.user?.name || 'Unknown')}</span>
                     <div class="comment-meta">
                         ${comment.is_private ? '<span class="comment-private-badge">Private</span>' : ''}
                         <span class="comment-date">${formattedDate}</span>
                     </div>
                 </div>
-                <div class="comment-text">${escapeHtml(comment.comment)}</div>
+                <div class="comment-text">${escapeHtml(comment.comment_text)}</div>
             </div>
         `;
     }).join('');
@@ -492,7 +508,7 @@ function displayComments(comments) {
 window.addSubmissionComment = async function() {
     const textarea = document.getElementById('new-comment-text');
     const privateCheckbox = document.getElementById('comment-is-private');
-    const addButton = document.querySelector('.add-comment-section .btn-primary');
+    const addButton = document.getElementById('add-feedback-btn');
 
     const commentText = textarea.value.trim();
 
@@ -540,8 +556,6 @@ window.addSubmissionComment = async function() {
 
             // Reload comments
             await loadSubmissionComments(currentGradingAssignment.id, currentGradingSubmission.student_id);
-
-            // Comments section is now always visible by default
         } else {
             throw new Error(data.message || 'Failed to add comment');
         }
@@ -560,13 +574,3 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
-
-// Attach event listener to add feedback button on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const addFeedbackBtn = document.getElementById('add-feedback-btn');
-    if (addFeedbackBtn) {
-        addFeedbackBtn.addEventListener('click', function() {
-            window.addSubmissionComment();
-        });
-    }
-});

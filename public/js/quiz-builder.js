@@ -100,7 +100,7 @@ function createQuestionHTML(question, index) {
                 </div>
                 ${question.question_type !== 'true_false' ? `
                     <button type="button" class="btn btn-secondary btn-sm add-option-btn" onclick="addOption(${index})">
-                        ➕ Add Option
+                        Add Option
                     </button>
                 ` : ''}
             </div>

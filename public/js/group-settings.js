@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add active class to clicked tab and corresponding content
             this.classList.add('active');
-            document.getElementById(targetTab).classList.add('active');
+            const targetElement = document.getElementById(targetTab);
+            if (targetElement) {
+                targetElement.classList.add('active');
+            }
         });
     });
 
@@ -433,19 +436,40 @@ function displaySidebarAssignments(assignments) {
         return;
     }
     
+    // Sort assignments by creation date (newest first)
+    filteredAssignments.sort((a, b) => {
+        const dateA = new Date(a.created_at);
+        const dateB = new Date(b.created_at);
+        return dateB - dateA; // Descending order (newest first)
+    });
+    
     const assignmentsHtml = filteredAssignments.map(assignment => createSidebarAssignmentHTML(assignment)).join('');
     sidebarList.innerHTML = assignmentsHtml;
 }
 
 function createSidebarAssignmentHTML(assignment) {
     const statusClasses = [];
-    if (assignment.is_overdue) statusClasses.push('overdue');
+    const hasSubmittedStatus = assignment.submission_status === 'submitted' || assignment.submission_status === 'graded';
+    // Only add overdue class if user is a student AND not already submitted/graded
+    if (assignment.is_overdue && !assignment.can_edit && !hasSubmittedStatus) statusClasses.push('overdue');
     if (assignment.is_closed) statusClasses.push('closed');
+    // Add submission state as a class to control card background color
+    if (assignment.submission_status) {
+        const submissionClass = {
+            'not_submitted': 'not-submitted',
+            'draft': 'draft',
+            'submitted': 'submitted',
+            'submitted_late': 'late',
+            'graded': 'graded'
+        }[assignment.submission_status];
+        if (submissionClass) statusClasses.push(submissionClass);
+    }
     
     const statusBadges = [];
     if (assignment.is_closed) {
         statusBadges.push('<span class="status-badge closed">Closed</span>');
-    } else if (assignment.is_overdue) {
+    } else if (assignment.is_overdue && !assignment.can_edit && !hasSubmittedStatus) {
+        // Show overdue badge only if not already submitted/graded
         statusBadges.push('<span class="status-badge overdue">Overdue</span>');
     } else {
         statusBadges.push('<span class="status-badge active">Active</span>');
@@ -637,8 +661,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     statusBadges.push('<span class="status-badge status-published">Published</span>');
                 }
-
-                if (assignment.is_overdue) {
+                // Only show overdue badge if user cannot edit (student perspective)
+                const hasSubmittedStatusCard = assignment.submission_status === 'submitted' || assignment.submission_status === 'graded';
+                if (assignment.is_overdue && !assignment.can_edit && !hasSubmittedStatusCard) {
                     statusBadges.push('<span class="status-badge status-overdue">Overdue</span>');
                 }
 
@@ -653,8 +678,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     `onclick="openEditAssignmentModal(${assignment.id})"` : 
                     `onclick="openStudentAssignmentModal(${assignment.id})"`;
 
+                // Add submission status class to card for coloring
+                const submissionClass = assignment.submission_status ? ({
+                    'not_submitted': 'not-submitted',
+                    'draft': 'draft',
+                    'submitted': 'submitted',
+                    'submitted_late': 'late',
+                    'graded': 'graded'
+                }[assignment.submission_status] || '') : '';
+
                 return `
-            <div class="assignment-card" ${clickHandler} style="cursor: pointer;">
+            <div class="assignment-card ${submissionClass}" ${clickHandler} style="cursor: pointer;">
                 <div class="assignment-header">
                     <h3 class="assignment-title">${assignment.assignment_name}</h3>
                     <span class="assignment-type">${assignment.assignment_type}</span>
@@ -1147,7 +1181,7 @@ function createQuestionHTMLForCreate(question, index) {
                 </div>
                 ${question.question_type !== 'true_false' ? `
                     <button type="button" class="btn btn-secondary btn-sm add-option-btn" onclick="addCreateOption(${index})">
-                        ➕ Add Option
+                        Add Option
                     </button>
                 ` : ''}
             </div>

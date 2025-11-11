@@ -23,15 +23,19 @@ class AssignmentSubmission extends Model
         'date_submitted',
         'grade',
         'teacher_feedback',
-        'graded_at'
+        'graded_at',
+        'quiz_started',
+        'time_remaining'
     ];
 
     protected $casts = [
         'date_submitted' => 'datetime',
         'graded_at' => 'datetime',
+        'quiz_started' => 'datetime',
         'grade' => 'decimal:2',
         'is_late' => 'boolean',
-        'attempt_number' => 'integer'
+        'attempt_number' => 'integer',
+        'time_remaining' => 'integer'
     ];
 
     // Relationships
