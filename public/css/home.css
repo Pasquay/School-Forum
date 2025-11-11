@@ -47,13 +47,13 @@
 
         .search input:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .search button {
             width: auto;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -66,7 +66,7 @@
         }
 
         .search button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
 
         .posts-column {
@@ -116,7 +116,18 @@
         }
 
         .post strong {
-            color: #4a90e2;
+            color: #2d4a2b;
+        }
+
+        .post a {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .post a:hover {
+            color: #133c06;
+            text-decoration: underline;
         }
 
         .create-post-form {
@@ -149,7 +160,7 @@
 
         .create-post-form button {
             width: 100%;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.75rem 1.5rem;
             border: none;
@@ -164,8 +175,8 @@
         .create-post-form input:focus,
         .create-post-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .create-post-form textarea {
@@ -246,14 +257,14 @@
         }
 
         .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .post-share-button {
@@ -376,7 +387,7 @@
         }
 
         .section-header button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
 
         .user-info .empty {

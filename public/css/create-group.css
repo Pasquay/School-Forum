@@ -92,8 +92,8 @@
                 .form-field textarea:focus,
                 .form-field select:focus {
                     outline: none;
-                    border-color: #4a90e2;
-                    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+                    border-color: #2d4a2b;
+                    box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.1);
                 }
 
                 .form-field input[type="file"] {
@@ -149,9 +149,9 @@
                 }
 
                 .file-input-label:hover {
-                    border-color: #4a90e2;
-                    background-color: #f0f7ff;
-                    color: #4a90e2;
+                    border-color: #2d4a2b;
+                    background-color: #e8f5e9;
+                    color: #2d4a2b;
                 }
 
                 .file-input-label.has-file {
@@ -218,8 +218,8 @@
                 .rule-item .rule-title:focus,
                 .rule-item .rule-description:focus {
                     outline: none;
-                    border-color: #4a90e2;
-                    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+                    border-color: #2d4a2b;
+                    box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.1);
                 }
 
                 .rule-.item .rule-description {
@@ -286,8 +286,8 @@
                 .resource-item .resource-title:focus,
                 .resource-item .resource-description:focus {
                     outline: none;
-                    border-color: #4a90e2;
-                    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+                    border-color: #2d4a2b;
+                    box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.1);
                 }
 
                 .resource-item .resource-description {
@@ -368,11 +368,11 @@
                 }
 
                 input:checked + .slider {
-                    background-color: #4a90e2;
+                    background-color: #2d4a2b;
                 }
 
                 input:focus + .slider {
-                    box-shadow: 0 0 1px #4a90e2;
+                    box-shadow: 0 0 1px #2d4a2b;
                 }
 
                 input:checked + .slider:before {
@@ -386,7 +386,7 @@
                 }
 
                 .row-8 button[type="submit"] {
-                    background-color: #4a90e2;
+                    background-color: #2d4a2b;
                     color: white;
                     border: none;
                     padding: 0.6rem 1.2rem;
@@ -398,7 +398,7 @@
                 }
                 
                 .row-8 button[type="submit"]:hover {
-                    background-color: #357abd;
+                    background-color: #133c06;
                 }
 
             /* Layout */
@@ -740,7 +740,7 @@
 
             /* Preview Join Button */
             .group-preview button {
-                background-color: #4a90e2;
+                background-color: #2d4a2b;
                 color: white;
                 padding: 0.5rem 1rem;
                 border-radius: 6px;
@@ -755,7 +755,7 @@
             }
 
             .group-preview button:hover {
-                background-color: #357abd;
+                background-color: #133c06;
             }
 
             /* Section Headers */

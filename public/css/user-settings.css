@@ -13,11 +13,11 @@
 
 
             #profile-nav-link {
-                color: #4a90e2;
+                color: #2d4a2b;
             }
 
             #profile-nav-link:hover {
-                color: #357abd;
+                color: #133c06;
             }
 
             main {
@@ -102,7 +102,7 @@
             }
 
             .settings-nav button:hover {
-                color: #4a90e2;
+                color: #2d4a2b;
                 background-color: #f8f9fa;  /* Add subtle hover background */
             }
 
@@ -110,16 +110,16 @@
                 border: 0;
                 border-radius: 0.5rem;
                 cursor: pointer;
-                color: #4a90e2;
-                background-color: #eaf4fb;
+                color: #2d4a2b;
+                background-color: #e8f5e9;
                 text-decoration: none;
                 font-size: medium;
                 transition: all 0.2s ease;  /* Smooth all transitions */
             }
 
             .settings-nav button.active:hover {
-                color: #357abd;  /* Darker blue on hover */
-                background-color: #dae9f6;  /* Slightly darker background */
+                color: #133c06;  /* Darker blue on hover */
+                background-color: #c8e6c9;  /* Slightly darker background */
             }
 
         /* SETTINGS COLUMNS */
@@ -180,7 +180,7 @@
                 
                 .form-group input:focus,
                 .form-group textarea:focus {
-                    border-color: #4a90e2;
+                    border-color: #2d4a2b;
                     outline: none;
                 }
                 
@@ -195,22 +195,22 @@
                 }
             /* Save Changes Button Style */
                 .sliding-btn {
-                    background-color: #4a90e2;
+                    background-color: #2d4a2b;
                     color: #fff;
                     border: none;
                     border-radius: 6px;
                     padding: 0.75rem 1rem;
                     cursor: pointer;
-                    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.08);
+                    box-shadow: 0 2px 4px rgba(45, 74, 43, 0.08);
                     transition: background 0.2s, color 0.2s, box-shadow 0.2s;
                     align-self: flex-start;
                 }
                 
                 .sliding-btn:hover,
                 .sliding-btn:focus {
-                    background-color: #357abd;
+                    background-color: #133c06;
                     color: #fff;
-                    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.15);
+                    box-shadow: 0 4px 8px rgba(45, 74, 43, 0.15);
                     outline: none;
                 }
         /* RESPONSIVE */

@@ -71,7 +71,7 @@
 
         .search-section input:focus {
             outline: none;
-            border-color: #4a90e2;
+            border-color: #2d4a2b;
         }
 
     /* LEFT NAV (SORT OPTIONS) */
@@ -106,15 +106,15 @@
         }
 
         .left-side .nav button:hover {
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .left-side .nav button.active {
             border: 0;
             border-radius: 0.5rem;
             cursor: pointer;
-            color: #4a90e2;
-            background-color: #eaf4fb;
+            color: #2d4a2b;
+            background-color: #e8f5e9;
             text-decoration: none;
             font-weight: 500;
             font-size: medium;
@@ -143,14 +143,14 @@
         }
 
         .sort-dropdown:hover {
-            color: #4a90e2;
+            color: #2d4a2b;
             background-color: #f8f9fa;
         }
 
         .sort-dropdown:focus {
             outline: none;
-            color: #4a90e2;
-            background-color: #eaf4fb;
+            color: #2d4a2b;
+            background-color: #e8f5e9;
         }
 
         .sort-dropdown option {
@@ -184,8 +184,8 @@
         
         .dropdown-toggle.active,
         .dropdown-toggle:focus {
-            color: #4a90e2;
-            background-color: #eaf4fb;
+            color: #2d4a2b;
+            background-color: #e8f5e9;
         }
         
         .dropdown-menu {
@@ -216,8 +216,8 @@
         
         .dropdown-menu button:hover,
         .dropdown-menu button.active {
-            background-color: #eaf4fb;
-            color: #4a90e2;
+            background-color: #e8f5e9;
+            color: #2d4a2b;
         }
 
     /* GROUPS LIST */
@@ -259,7 +259,7 @@
             width: 48px;
             height: 48px;
             border-radius: 8px;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -296,7 +296,7 @@
         }
 
         .join-btn, .leave-btn {
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 6px;
@@ -307,7 +307,7 @@
         }
 
         .join-btn:hover, .leave-btn:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
 
         .leave-btn {
@@ -382,7 +382,7 @@
 
         .manage-group-button {
             width: 100%;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             margin-top: 0;
             padding: 0.6rem 1rem;
@@ -418,7 +418,7 @@
 
         .section-header button {
             min-width: 5rem;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 8px;
@@ -429,7 +429,7 @@
         }
 
         .section-header button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
 
         .user-info .empty {

@@ -1,101 +1,100 @@
-<div 
-    class="group-info-minimal" 
+<div
+    class="group-info-minimal"
     id="group-info-minimal-{{ $group->id }}"
     data-type='{{ $group->pivot->role }}'
-    data-groupid='{{ $group->id }}'
->
+    data-groupid='{{ $group->id }}'>
     @if($group->photo)
-        <img src="{{ asset('storage/' . $group->photo) }}" alt="Group photo">
+    <img src="{{ asset('storage/' . $group->photo) }}" alt="Group photo">
     @else
-        <div class="group-default-photo">
-            {{ strtoupper(substr($group->name, 0, 1)) }}
-        </div>
+    <div class="group-default-photo">
+        {{ strtoupper(substr($group->name, 0, 1)) }}
+    </div>
     @endif
     <p>{{ $group->name }}</p>
-    <form 
+    <form
         action="/group/toggleStar/{{ $group->id }}"
-        method="post"
-    >
+        method="post">
         @csrf
-        <button class="star" 
+        <button class="star"
             @if(isset($group->notLoggedUser) && $group->notLoggedUser == 1)
-                disabled
+            disabled
             @endif
-        >
-            <img 
+            >
+            <img
                 src="
                     @if($group->pivot->is_starred === 1)
                         {{ asset('/icons/star.png') }}
                     @else
                         {{ asset('/icons/star-alt.png') }}
                     @endif
-                " 
-                alt="star" 
-                class="star"
-            >
+                "
+                alt="star"
+                class="star">
         </button>
     </form>
 </div>
 
 <style>
     /* Main */
-        .group-info-minimal {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .group-info-minimal {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
 
-        .group-info-minimal:last-child {
-            border-bottom: none;
-        }
+    .group-info-minimal:last-child {
+        border-bottom: none;
+    }
 
-        .group-info-minimal:hover {
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            margin: 0 -0.5rem;
-            padding: 0.75rem 0.5rem;
-        }
+    .group-info-minimal:hover {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        margin: 0 -0.5rem;
+        padding: 0.75rem 0.5rem;
+    }
+
     /* Group Photo */
-        .group-info-minimal .group-default-photo {
-            width: 32px;
-            height: 32px;
-            background-color: #4a90e2;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
-            border-radius: 8px;
-        }
+    .group-info-minimal .group-default-photo {
+        width: 32px;
+        height: 32px;
+        background-color: #2d4a2b;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+        border-radius: 8px;
+    }
 
-        .group-info-minimal img {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            flex-shrink: 0;
-            object-fit: cover;
-        }
+    .group-info-minimal img {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        object-fit: cover;
+    }
+
     /* Star */
-        .group-info-minimal form {
-            margin-left: auto;
-        }
+    .group-info-minimal form {
+        margin-left: auto;
+    }
 
-        .group-info-minimal .star {
-            background: none;
-            border: none;
-            padding: 0;
-            margin-left: auto;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
+    .group-info-minimal .star {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-left: auto;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
 
-        .group-info-minimal .star img {
-            width: 16px;
-            height: 16px;
-        }
+    .group-info-minimal .star img {
+        width: 16px;
+        height: 16px;
+    }
 </style>

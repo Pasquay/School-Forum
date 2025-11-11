@@ -47,7 +47,22 @@
         }
 
         .post strong {
-            color: #4a90e2;
+            color: #2d4a2b;
+        }
+
+        .post a,
+        .comment a,
+        .reply a {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .post a:hover,
+        .comment a:hover,
+        .reply a:hover {
+            color: #133c06;
+            text-decoration: underline;
         }
 
         .edit-indicator {
@@ -67,7 +82,7 @@
         }
 
         .back-button:hover {
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .post-top {
@@ -78,7 +93,7 @@
         }
 
         .edit-button {
-            color: #4a90e2;
+            color: #2d4a2b;
             background: none;
             border: none;
             font-weight: 500;
@@ -89,7 +104,7 @@
         }
 
         .edit-button:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .edit-button img {
@@ -100,7 +115,7 @@
         }
 
         .settings-button {
-            color: #4a90e2;
+            color: #2d4a2b;
             background: none;
             border: none;
             font-weight: 500;
@@ -111,7 +126,7 @@
         }
 
         .settings-button:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .settings-button img {
@@ -154,7 +169,7 @@
 
         .dropdown-item:hover {
             background-color: #f5f5f5;
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .show-dropdown {
@@ -196,14 +211,14 @@
             font-weight: 500;
             cursor: pointer;
             border: none;
-            background: #4a90e2;
+            background: #2d4a2b;
             color: white;
             transition: background-color 0.2s;
         }
         
         .pin-toggle-confirm-button:hover,
         .pin-home-toggle-confirm-button:hover {
-            background: #357abd;
+            background: #133c06;
         }
 
         .delete-form-buttons {
@@ -268,8 +283,8 @@
         .edit-post-form input:focus,
         .edit-post-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .edit-post-form textarea {
@@ -307,12 +322,12 @@
 
         .edit-confirm-btn {
             border: none;
-            background: #4a90e2;
+            background: #2d4a2b;
             color: white;
         }
 
         .edit-confirm-btn:hover {
-            background: #357abd;
+            background: #133c06;
         }
 
         #vote-container {
@@ -354,14 +369,14 @@
         }
 
         .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         /* Update comment-column class */
@@ -407,8 +422,8 @@
 
         .create-comment-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .comment {
@@ -446,14 +461,14 @@
         }
 
         .comment .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .comment .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
         
         .comment-top {
@@ -533,18 +548,18 @@
 
         .comment-settings-container .dropdown-item:hover {
             background-color: #f5f5f5;
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .edit-indicator {
@@ -581,8 +596,8 @@
 
         .comment-edit-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .comment-edit-form .edit-form-buttons {
@@ -656,7 +671,7 @@
 
         .edit-confirm-button {
             border: none;
-            background: #4a90e2;
+            background: #2d4a2b;
             color: white;
         }
 
@@ -673,7 +688,7 @@
         }
 
         .edit-confirm-button:hover {
-            background: #357abd;
+            background: #133c06;
         }
 
         .delete-confirm-button:hover {
@@ -777,7 +792,7 @@
         }
 
         .reply .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.85rem; /* Smaller username link */
@@ -785,7 +800,7 @@
         }
 
         .reply .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .reply .edit-indicator {
@@ -905,8 +920,8 @@
 
         .create-reply-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
         
         /* Reply Bottom Section Styling */
@@ -997,8 +1012,8 @@
 
         .reply-edit-form textarea:focus {
             outline: none;
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
         }
 
         .reply-edit-form .edit-form-buttons {

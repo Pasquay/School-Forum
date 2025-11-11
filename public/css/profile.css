@@ -50,15 +50,15 @@
         }
 
         .left-side .nav button:hover {
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .left-side .nav button.active {
             border: 0;
             border-radius: 0.5rem;
             cursor: pointer;
-            color: #4a90e2;
-            background-color: #eaf4fb;
+            color: #2d4a2b;
+            background-color: #e8f5e9;
             text-decoration: none;
             font-weight: 500;
             font-size: medium;
@@ -101,15 +101,15 @@
         }
 
         .left-side .nav.deleted button:hover {
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .left-side .nav.deleted button.active {
             border: 0;
             border-radius: 0.5rem;
             cursor: pointer;
-            color: #4a90e2;
-            background-color: #eaf4fb;
+            color: #2d4a2b;
+            background-color: #e8f5e9;
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
@@ -209,7 +209,7 @@
         }
 
         .post strong {
-            color: #4a90e2;
+            color: #2d4a2b;
         }
 
         .edit-indicator {
@@ -287,14 +287,14 @@
         }
 
         .username-link {
-            color: #4a90e2;
+            color: #2d4a2b;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
         }
 
         .username-link:hover {
-            color: #357abd;
+            color: #133c06;
         }
 
         .post-share-button {
@@ -336,7 +336,7 @@
         }
 
         .original-post-link:hover {
-            color: #357abd;
+            color: #133c06;
             text-decoration: underline;
         }
 
@@ -672,7 +672,7 @@
         }
         
         .original-comment-link:hover {
-            color: #357abd;
+            color: #133c06;
             text-decoration: underline;
         }  
 
@@ -958,7 +958,7 @@
             font-size: 20px; 
             flex: 1;
             line-height: 1.5;
-            color: #4a90e2;
+            color: #2d4a2b;
             font-weight: 500;
             text-decoration: none;
             transition: color 0.2s;
@@ -977,7 +977,7 @@
         }
         .user-info-row-1 button {
             min-width: 5rem;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.5rem 0.8rem;
             border-radius: 8px;
@@ -987,7 +987,7 @@
             transition: background-color 0.2s;
         }
         .user-info-row-1 button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
 
         .user-info-row-2 {
@@ -1118,7 +1118,7 @@
 
         .user-info-row-6 button {
             min-width: 5rem;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 8px;
@@ -1129,7 +1129,7 @@
         }
 
         .user-info-row-6 button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
         
         .user-bottom {
@@ -1167,7 +1167,7 @@
         
         .section-header button {
             min-width: 5rem;
-            background-color: #4a90e2;
+            background-color: #2d4a2b;
             color: white;
             padding: 0.3rem 0.8rem;
             border-radius: 8px;
@@ -1178,7 +1178,7 @@
         }
         
         .section-header button:hover {
-            background-color: #357abd;
+            background-color: #133c06;
         }
         
         .groups .empty {

@@ -46,15 +46,15 @@
         border-radius: 50%;
     }
 
-    input:checked + .slider {
-        background-color: #4a90e2;
+    input:checked+.slider {
+        background-color: #2d4a2b;
     }
 
-    input:focus + .slider {
-        box-shadow: 0 0 1px #4a90e2;
+    input:focus+.slider {
+        box-shadow: 0 0 1px #2d4a2b;
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
         transform: translateX(20px);
     }
 
