@@ -1,0 +1,1092 @@
+  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding-top: 72px;
+        }
+
+        .post-column {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .post {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .post small {
+            color: #666;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .post h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .post p {
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .post p:last-child {
+            margin-bottom: 0;
+        }
+
+        .post strong {
+            color: #2d4a2b;
+        }
+
+        .post a,
+        .comment a,
+        .reply a {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .post a:hover,
+        .comment a:hover,
+        .reply a:hover {
+            color: #133c06;
+            text-decoration: underline;
+        }
+
+        .edit-indicator {
+            color: #888;
+            font-style: italic;
+            margin-left: 0.5rem;
+        }
+
+        .back-button {
+            color: #666;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            transition: color 0.2s;
+        }
+
+        .back-button:hover {
+            color: #2d4a2b;
+        }
+
+        .post-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .edit-button {
+            color: #2d4a2b;
+            background: none;
+            border: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1rem;
+        }
+
+        .edit-button:hover {
+            color: #133c06;
+        }
+
+        .edit-button img {
+            display: block;
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .settings-button {
+            color: #2d4a2b;
+            background: none;
+            border: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1rem;
+        }
+
+        .settings-button:hover {
+            color: #133c06;
+        }
+
+        .settings-button img {
+            display: block;
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        .settings-container {
+            position: relative;
+            display: inline-block; /* Added to contain the dropdown */
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem); /* Added gap between button and dropdown */
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Increased opacity and spread */
+            padding: 0.5rem;
+            display: none;
+            min-width: 120px;
+            z-index: 1000; /* Added to ensure dropdown appears above other content */
+        }
+
+        .dropdown-item {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+            color: #2d4a2b;
+        }
+
+        .show-dropdown {
+            display: block;
+        }
+
+        .pin-form-buttons,
+        .pin-home-form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        
+        .pin-post-cancel,
+        .pin-post-home-cancel {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid #e1e1e1;
+            background: white;
+            color: #666;
+            transition: all 0.2s;
+        }
+        
+        .pin-post-cancel:hover,
+        .pin-post-home-cancel:hover {
+            border-color: #ccc;
+            color: #333;
+        }
+        
+        .pin-toggle-confirm-button,
+        .pin-home-toggle-confirm-button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            background: #2d4a2b;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .pin-toggle-confirm-button:hover,
+        .pin-home-toggle-confirm-button:hover {
+            background: #133c06;
+        }
+
+        .delete-form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%; /* Added to ensure full width */
+        }
+
+        .delete-cancel-btn,
+        .delete-confirm-btn {
+            flex: 1; /* Makes both buttons take up equal space */
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%; /* Ensures button fills its flex container */
+        }
+
+        .delete-cancel-btn {
+            border: 2px solid #e1e1e1;
+            background: white;
+            color: #666;
+        }
+
+        .delete-cancel-btn:hover {
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .delete-confirm-btn {
+            border: none;
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-confirm-btn:hover {
+            background: #c82333;
+        }
+
+        .edit-post-form {
+            margin-top: 1rem;
+        }
+
+        .edit-post-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .edit-post-form input,
+        .edit-post-form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .edit-post-form input:focus,
+        .edit-post-form textarea:focus {
+            outline: none;
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+        }
+
+        .edit-post-form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .edit-form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .edit-cancel-btn,
+        .edit-confirm-btn {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-cancel-btn {
+            border: 2px solid #e1e1e1;
+            background: white;
+            color: #666;
+        }
+
+        .edit-cancel-btn:hover {
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .edit-confirm-btn {
+            border: none;
+            background: #2d4a2b;
+            color: white;
+        }
+
+        .edit-confirm-btn:hover {
+            background: #133c06;
+        }
+
+        #vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #vote-container form {
+            margin: 0;
+        }
+
+        #vote-container button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #vote-container button:hover {
+            transform: scale(1.1);
+        }
+
+        #vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+
+        #vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .username-link {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .username-link:hover {
+            color: #133c06;
+        }
+
+        /* Update comment-column class */
+        .comment-column {
+            margin-top: 2rem;
+            width: 95%;  /* Make comments column slightly narrower */
+            margin-left: auto;  /* Center the narrower column */
+            margin-right: auto;
+        }
+
+        /* Optional: Add a subtle visual separator */
+        .post + .comment-column {
+            padding-top: 0.5rem;  /* Reduced from 1rem */
+            border-top: 1px solid #e1e1e1;
+        }
+
+        /* Add create comment form styles */
+        .create-comment-form {
+            margin-bottom: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.25rem;
+        }
+
+        .create-comment-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .create-comment-form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            min-height: 2.5rem;
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+
+        .create-comment-form textarea:focus {
+            outline: none;
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+        }
+
+        .comment {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment:last-child {
+            margin-bottom: 0;
+        }
+
+        .comment-top {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-content {
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .comment-content p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .comment .edit-indicator {
+            color: #888;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .comment .username-link {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .comment .username-link:hover {
+            color: #133c06;
+        }
+        
+        .comment-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .comment-metadata {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .comment-settings-container {
+            position: relative;
+            margin-left: 0.5rem;
+        }
+
+        .comment-settings-container .settings-button {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .comment-settings-container .settings-button img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .comment-settings-container .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem;
+            display: none;
+            min-width: 120px;
+            z-index: 1000;
+            margin-top: 0.25rem;
+        }
+
+        .comment-settings-container .dropdown-menu.show-dropdown {
+            display: block;
+        }
+
+        .comment-settings-container .dropdown-item {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comment-settings-container .dropdown-item:hover {
+            background-color: #f5f5f5;
+            color: #2d4a2b;
+        }
+
+        .username-link {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .username-link:hover {
+            color: #133c06;
+        }
+
+        .edit-indicator {
+            color: #888;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+        
+        /* Comment Edit Form - Full Width */
+        .comment-edit-form {
+            display: none;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .comment-edit-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            width: 100%;
+        }
+
+        .comment-edit-form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-edit-form textarea:focus {
+            outline: none;
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+        }
+
+        .comment-edit-form .edit-form-buttons {
+            display: flex;
+            flex-direction: row; /* Ensure buttons are in a row */
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        /* Comment Delete Form - Full Width with Side-by-Side Buttons */
+        .comment-delete-form {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 0.2rem;
+        }
+
+        .comment-delete-form .delete-form-buttons {
+            display: flex;
+            flex-direction: row; /* Explicit row layout */
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .comment-delete-form form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-delete-form .delete-buttons-container {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        /* Delete confirmation text styling */
+        .comment-delete-form p {
+            color: #444;
+            margin-bottom: -1rem;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        /* Button styles (shared with post forms) */
+        .edit-cancel-button,
+        .delete-cancel-button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid #e1e1e1;
+            background: white;
+            color: #666;
+            width: 100%
+        }
+
+        .edit-confirm-button,
+        .delete-confirm-button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-confirm-button {
+            border: none;
+            background: #2d4a2b;
+            color: white;
+        }
+
+        .delete-confirm-button {
+            border: none;
+            background: #dc3545;
+            color: white;
+        }
+
+        .edit-cancel-button:hover,
+        .delete-cancel-button:hover {
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .edit-confirm-button:hover {
+            background: #133c06;
+        }
+
+        .delete-confirm-button:hover {
+            background: #c82333;
+        }
+
+        /* Comment Vote Container Styling */
+        .comment-vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comment-vote-container form {
+            margin: 0;
+        }
+
+        .comment-vote-container button {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comment-vote-container button:hover {
+            transform: scale(1.1);
+        }
+
+        .comment-vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .comment-vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .comment-vote-container button:active {
+            transform: scale(0.95);
+        }
+
+        /* Reply Styling - Updated with white background and better spacing */
+        .reply {
+            background-color: white; /* Changed from #f8f9fa to white */
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            margin-top: 0.75rem;
+            margin-bottom: 1rem; /* Added bottom margin to prevent touching */
+            margin-left: 2rem; /* Indent from left */
+            margin-right: 0;
+            max-width: 95%; /* Increased from 90% to make it wider */
+            margin-left: auto; /* Push to the right */
+            border-left: 3px solid #e1e1e1; /* Subtle left border to show it's a reply */
+        }
+
+        .reply:last-child {
+            margin-bottom: 1rem; /* Ensure last reply also has bottom margin */
+        }
+
+        .reply-top {
+            color: #666;
+            font-size: 0.85rem; /* Slightly smaller than comment metadata */
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reply-metadata {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            font-size: 0.85rem; /* Smaller than comment metadata */
+            color: #666;
+        }
+
+        .reply-content {
+            color: #444;
+            line-height: 1.5;
+        }
+
+        .reply-content p {
+            margin: 0;
+            font-size: 0.9rem; /* Slightly smaller than comment content */
+        }
+
+        .reply .username-link {
+            color: #2d4a2b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem; /* Smaller username link */
+            transition: color 0.2s;
+        }
+
+        .reply .username-link:hover {
+            color: #133c06;
+        }
+
+        .reply .edit-indicator {
+            color: #888;
+            font-style: italic;
+            font-size: 0.8rem; /* Smaller edit indicator */
+        }
+
+        /* Comment hover effect - subtle and gentle */
+        .comment {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .comment:hover {
+            transform: translateY(-1px); /* Less movement than posts (-2px) */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08); /* Softer shadow than posts */
+        }
+
+        /* Reply hover effect - even more subtle */
+        .reply {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .reply:hover {
+            transform: translateY(-0.5px); /* Very subtle movement */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06); /* Very gentle shadow */
+        }
+        
+        /* Comment Bottom Section - Flex Layout */
+        .comment-bottom {
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* Space between vote container and replies form */
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e1e1e1; /* Line separator */
+        }
+
+        /* Ensure vote container doesn't grow */
+        .comment-vote-container {
+            flex-shrink: 0;
+        }   
+
+        /* Style the replies form to match vote arrows */
+        .comment-bottom form[action*="replies"] {
+            margin: 0;
+        }
+
+        .comment-bottom form[action*="replies"] button {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem; /* Space between icon and text */
+        }
+
+        .comment-bottom form[action*="replies"] button:hover {
+            transform: scale(1.1);
+        }
+
+        .comment-bottom form[action*="replies"] button:active {
+            transform: scale(0.95);
+        }
+        
+        /* Make chat icon same size as vote arrows */
+        .comment-bottom form[action*="replies"] img {
+            width: 18px;  /* Same as vote arrow icons */
+            height: 18px; /* Same as vote arrow icons */
+            margin-right: 2px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .post-bottom {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e1e1e1; /* Move border here */
+        }
+
+        .commentCount {
+            margin: 0 !important;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        .create-reply-form {
+            margin-bottom: 1.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.25rem;
+        }
+
+        .create-reply-form textarea {
+            width: 100%;
+            height: 2.2rem;
+            padding: 0.4rem 0.4rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1rem;
+            min-height: 1rem;
+            resize: vertical;
+            transition: all 0.2s ease;
+        }
+
+        .create-reply-form textarea:focus {
+            outline: none;
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+        }
+        
+        /* Reply Bottom Section Styling */
+        .reply-bottom {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e1e1e1;
+        }
+
+        /* Reply Vote Container Styling */
+        .reply-vote-container {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-shrink: 0;
+        }
+
+        .reply-vote-container form {
+            margin: 0;
+        }
+
+        .reply-vote-container button {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reply-vote-container button:hover {
+            transform: scale(1.1);
+        }
+
+        .reply-vote-container button:active {
+            transform: scale(0.95);
+        }
+
+        .reply-vote-container img {
+            width: 16px;
+            height: 16px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.2s ease;
+        }
+
+        .reply-vote-container p {
+            margin: 0;
+            min-width: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        /* Reply Edit Form */
+        .reply-edit-form {
+            display: flex;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .reply-edit-form form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            width: 100%;
+        }
+
+        .reply-edit-form textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .reply-edit-form textarea:focus {
+            outline: none;
+            border-color: #2d4a2b;
+            box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.15);
+        }
+
+        .reply-edit-form .edit-form-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        /* Reply Delete Form */
+        .reply-delete-form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 0.2rem;
+        }
+
+        .reply-delete-form form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reply-delete-form p {
+            color: #444;
+            margin-bottom: 0.1rem;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .reply-delete-form .delete-form-buttons {
+            display: flex;
+            flex-direction: row;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .reply-delete-form .delete-buttons-container {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .reply-settings-container {
+            position: relative;
+            display: inline-block; /* or flex, as needed */
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%; /* below the button */
+            right: 0;  /* align to the right edge */
+            z-index: 100;
+        }
+
+        .share-button {
+            font-size: 0.9rem;
+            background-color: white;
+            color: #333;
+            margin-top: 40px;
+            margin: 0;
+            padding: 0;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .share-button:hover {
+            transform:scale(1.1);
+        }
+
+        .share-button:active {
+            transform: scale(1.0);
+        }

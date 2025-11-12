@@ -55,15 +55,15 @@
 
                 <!-- Attachments Section -->
                 <div id="assignment-attachments-container" style="display: none; margin-top: 20px;">
-                    <h4 style="color: var(--color-pakistan-green); margin-bottom: 10px;">Attached Files</h4>
+                    <h4 style="color: var(--color-pakistan-green); margin-bottom: 10px;">📎 Attached Files</h4>
                     <div id="assignment-attachments-list" class="attachments-list">
                         <!-- Attachments will be inserted here -->
                     </div>
                 </div>
 
                 <div id="assignment-external-link-container" style="display: none;">
-                    <a id="assignment-external-link" href="#" target="_blank" class="external-link-btn btn btn-primary">
-                        View External Resource
+                    <a id="assignment-external-link" href="#" target="_blank" class="external-link-btn">
+                        📎 View External Resource
                     </a>
                 </div>
             </div>
@@ -91,12 +91,24 @@
                             </div>
                         </div>
 
+                        <!-- Teacher Comments/Feedback Section -->
+                        <div id="student-comments-section" style="display: none; margin-top: 20px;">
+                            <div class="comments-section">
+                                <div class="comments-header">
+                                    <h4>Teacher Feedback</h4>
+                                </div>
+                                <div id="student-comments-list" class="comments-list">
+                                    <!-- Comments will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="button" id="resubmit-btn" class="btn btn-secondary" onclick="enableResubmit()" style="display: none;">
                             Edit Submission
                         </button>
 
                         <div id="no-retake-message" style="display: none; margin-top: 15px; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; color: #856404;">
-                            <strong>Note:</strong> Quizzes and exams cannot be retaken once submitted.
+                            <strong>⚠️ Note:</strong> Quizzes and exams cannot be retaken once submitted.
                         </div>
                     </div>
                 </div>
@@ -137,141 +149,53 @@
                         </div>
                     </div>
 
-                    <!-- Closed Message -->
+                    <!-- File Upload -->
                     <div id="file-submission-container" style="display: none;">
                         <label for="file_upload">Upload File:</label>
                         <div class="file-upload-area" id="file-upload-area">
                             <input type="file" id="file_upload" name="file" accept="*/*">
                             <div class="upload-text">
-                                <p>Click to upload or drag and drop</p>
+                                <p>📎 Click to upload or drag and drop</p>
                                 <small>Maximum file size: 10MB</small>
-                                font-size: 16px;
-                                margin-bottom: 15px;
-                                line-height: 1.6;
-                                }
+                            </div>
+                        </div>
+                        <div id="file-name-display" style="display: none;"></div>
+                    </div>
 
-                                .quiz-option {
-                                display: flex;
-                                align-items: flex-start;
-                                padding: 12px;
-                                margin: 8px 0;
-                                border: 2px solid rgba(106, 142, 97, 0.2);
-                                border-radius: 12px;
-                                cursor: pointer;
-                                transition: all 0.15s ease;
-                                background: #fff;
-                                }
+                    <!-- External Link -->
+                    <div id="link-submission-container" style="display: none;">
+                        <label for="external_link_input">External Link:</label>
+                        <input type="url" id="external_link_input" name="external_link" placeholder="https://example.com">
+                        <small>Paste the link to your work (Google Docs, GitHub, etc.)</small>
+                    </div>
 
-                                .quiz-option:hover {
-                                background: #f9fafb;
-                                border-color: var(--color-sage);
-                                }
+                    <!-- Quiz -->
+                    <div id="quiz-submission-container" style="display: none;">
+                        <div id="quiz-questions-container">
+                            <!-- Quiz questions will be dynamically inserted here -->
+                        </div>
+                    </div>
 
-                                .quiz-option input[type="radio"] {
-                                margin-right: 12px;
-                                margin-top: 3px;
-                                }
+                    <!-- No Submission Required -->
+                    <div id="no-submission-container" style="display: none;">
+                        <p class="info-message">No submission required for this assignment.</p>
+                    </div>
 
-                                .quiz-option label {
-                                flex: 1;
-                                cursor: pointer;
-                                }
+                    <!-- Form Buttons -->
+                    <div class="form-buttons" id="submission-buttons">
+                        <button type="button" onclick="closeStudentAssignmentModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="button" onclick="saveDraft()" class="btn btn-secondary" id="save-draft-btn">Save Draft</button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Submit Assignment</button>
+                    </div>
+                </form>
 
-                                .quiz-text-answer {
-                                width: 100%;
-                                padding: 12px;
-                                border: 1px solid #ddd;
-                                border-radius: 4px;
-                                min-height: 100px;
-                                font-family: inherit;
-                                }
+                <!-- Closed Message -->
+                <div id="closed-message" style="display: none;">
+                    <p class="error-message">⚠️ This assignment is closed and no longer accepting submissions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                .info-message {
-                                text-align: center;
-                                padding: 40px;
-                                color: #666;
-                                font-size: 16px;
-                                }
-
-                                .error-message {
-                                text-align: center;
-                                padding: 16px;
-                                background: #fff1f2;
-                                color: #b91c1c;
-                                border-radius: 12px;
-                                border: 1px solid #fecaca;
-                                font-weight: 600;
-                                }
-
-                                .quiz-ready-box {
-                                background: #fff;
-                                border: 1px solid rgba(106, 142, 97, 0.35);
-                                border-radius: 12px;
-                                padding: 24px;
-                                margin: 16px 0;
-                                text-align: center;
-                                }
-
-                                .quiz-ready-box h3 {
-                                color: var(--color-pakistan-green);
-                                margin-bottom: 15px;
-                                }
-
-                                .quiz-ready-box p {
-                                margin: 10px 0;
-                                color: #555;
-                                }
-
-                                #timer-display {
-                                font-family: 'Courier New', monospace;
-                                padding: 5px 15px;
-                                background: #fff;
-                                border-radius: 8px;
-                                border: 2px solid var(--color-pakistan-green);
-                                }
-
-                                #timer-display.warning {
-                                color: #ff9800;
-                                border-color: #ff9800;
-                                }
-
-                                #timer-display.danger {
-                                color: #f44336;
-                                border-color: #f44336;
-                                animation: pulse 1s infinite;
-                                }
-
-                                @keyframes pulse {
-
-                                0%,
-                                100% {
-                                opacity: 1;
-                                }
-
-                                50% {
-                                opacity: 0.7;
-                                }
-                                }
-
-                                .form-buttons {
-                                display: flex;
-                                justify-content: flex-end;
-                                gap: 10px;
-                                margin-top: 20px;
-                                }
-
-                                /* Collapse/expand button styling */
-                                .btn-collapse {
-                                background: transparent;
-                                border: 1px solid rgba(106, 142, 97, 0.35);
-                                color: var(--color-dark-green);
-                                padding: 0.4rem 0.75rem;
-                                border-radius: 8px;
-                                cursor: pointer;
-                                font-weight: 600;
-                                }
-
-                                .btn-collapse:hover {
-                                border-color: var(--color-sage);
-                                }
-                                </style>
+<!-- Student assignment modal inline styles removed; now using consolidated group-styles.css -->

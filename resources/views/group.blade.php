@@ -9,9 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/group-styles.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/rubric-system.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/resubmission-system.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/analytics-dashboard.css') }}">
+    <!-- Consolidated rubric, resubmission history, and analytics styles into group-styles.css -->
 
     <!-- Quill.js Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -789,7 +787,6 @@
             <div class="settings-nav">
                 <button class="tab-btn active" data-tab="edit-details" onclick="switchEditTab('edit-details')">Details</button>
                 <button class="tab-btn" data-tab="edit-questions" id="edit-questions-tab-btn" style="display: none;" onclick="switchEditTab('edit-questions')">Questions</button>
-                <button class="tab-btn" data-tab="edit-rubrics" onclick="switchEditTab('edit-rubrics')">Rubrics</button>
                 <button class="tab-btn" data-tab="edit-analytics" onclick="switchEditTab('edit-analytics')">Analytics</button>
                 <button class="tab-btn" data-tab="edit-submissions" onclick="switchEditTab('edit-submissions')">Submissions</button>
             </div>
@@ -898,6 +895,29 @@
                             </div>
                         </div>
 
+                        <div class="form-section-header">Rubrics</div>
+                        <div class="form-section">
+                            <div class="rubrics-container">
+                                <div class="rubrics-header">
+                                    <h3 class="section-title">Grading Rubric</h3>
+                                    <p class="section-note">Create criteria to grade submissions consistently. Total rubric points will override the assignment's max points.</p>
+                                </div>
+
+                                <div id="rubrics-list" class="rubrics-list">
+                                    <!-- Rubrics will be loaded here -->
+                                </div>
+
+                                <div class="rubric-actions">
+                                    <button type="button" class="btn btn-secondary" onclick="addRubricCriterion()">Add Criterion</button>
+                                    <button type="button" class="btn btn-primary" onclick="saveRubrics()">Save Rubric</button>
+                                </div>
+
+                                <div id="rubric-total" class="rubric-total" style="display: none;">
+                                    <strong>Total Points: <span id="rubric-total-points">0</span></strong>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-section-header">Resources & Visibility</div>
                         <div class="form-section">
                             <div class="form-group">
@@ -948,29 +968,6 @@
                         <div class="form-buttons">
                             <button type="button" onclick="closeEditAssignmentModal()" class="btn btn-secondary">Close</button>
                             <button type="button" onclick="saveEditQuizQuestions()" class="btn btn-primary">Save All Questions</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Rubrics Tab -->
-                <div id="edit-rubrics-tab" class="tab-content" style="display: none;">
-                    <div class="rubrics-container">
-                        <div class="rubrics-header">
-                            <h3 class="section-title">Grading Rubric</h3>
-                            <p class="section-note">Create criteria to grade submissions consistently. Total rubric points will override the assignment's max points.</p>
-                        </div>
-
-                        <div id="rubrics-list" class="rubrics-list">
-                            <!-- Rubrics will be loaded here -->
-                        </div>
-
-                        <div class="rubric-actions">
-                            <button type="button" class="btn btn-secondary" onclick="addRubricCriterion()">Add Criterion</button>
-                            <button type="button" class="btn btn-primary" onclick="saveRubrics()">Save Rubric</button>
-                        </div>
-
-                        <div id="rubric-total" class="rubric-total" style="display: none;">
-                            <strong>Total Points: <span id="rubric-total-points">0</span></strong>
                         </div>
                     </div>
                 </div>

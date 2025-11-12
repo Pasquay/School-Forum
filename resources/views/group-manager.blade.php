@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -288,6 +289,7 @@
             }
     </style>
 </head>
+
 <body>
     @include('components.navbar', ['active' => ''])
     @include('components.success-header')
@@ -335,10 +337,10 @@
                 </div>
             </div>
 
-            @if($groups->count()>0) 
-                @foreach($groups as $group)
-                    @include('components.group-info-manager', ['group' => $group])
-                @endforeach
+            @if($groups->count()>0)
+            @foreach($groups as $group)
+            @include('components.group-info-manager', ['group' => $group])
+            @endforeach
             @endif
 
         </div>
@@ -351,9 +353,9 @@
                 no. of groups created
             </div>
             <div class="row-2">
-                no. of educational groups 
-                no. of social groups 
-                no. of private groups 
+                no. of educational groups
+                no. of social groups
+                no. of private groups
             </div>
             <div class="row-3">
                 no. of groups starred

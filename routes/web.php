@@ -12,8 +12,8 @@ use App\Http\Controllers\CommentVoteController;
 use App\Http\Controllers\InboxMessageController;
 
 Route::controller(UserController::class)->group(function () {
-    Route::get('/', 'showLanding'); // load login page
-    Route::post('/login', 'login'); // user login
+    Route::get('/', 'showLanding')->name('login'); // load login page
+    Route::post('/login', 'login')->name('login.submit'); // user login
     Route::post('/google-login', 'googleLogin'); // google login
     Route::post('/register', 'register'); // user register
     Route::post('/logout', 'logout')->middleware('auth'); // user logout
@@ -112,6 +112,8 @@ Route::controller(GroupController::class)->group(function () {
     Route::post('/group/{groupId}/assignments/{assignmentId}/submit', 'submitAssignment')->middleware('auth')->name('group.submitAssignment'); // submit assignment
     Route::post('/group/{groupId}/assignments/{assignmentId}/save-draft', 'saveDraft')->middleware('auth')->name('group.saveDraft'); // save draft
     Route::get('/group/{groupId}/assignments/{assignmentId}/my-submission', 'getMySubmission')->middleware('auth')->name('group.getMySubmission'); // get my submission
+    Route::post('/group/{groupId}/assignments/{assignmentId}/start-quiz', 'startQuiz')->middleware('auth')->name('group.startQuiz'); // start quiz timer
+    Route::post('/group/{groupId}/assignments/{assignmentId}/save-quiz-progress', 'saveQuizProgress')->middleware('auth')->name('group.saveQuizProgress'); // save quiz progress
 
     // Teacher - View All Submissions
     Route::get('/group/{groupId}/assignments/{assignmentId}/submissions', 'getAssignmentSubmissions')->middleware('auth')->name('group.getAssignmentSubmissions'); // get all submissions for assignment

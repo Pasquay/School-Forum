@@ -50,6 +50,14 @@ function openStudentAssignmentModal(assignmentId) {
 // Close student assignment modal
 function closeStudentAssignmentModal() {
     const modal = document.getElementById('studentAssignmentModal');
+    
+    // Save quiz progress before closing if it's a quiz/exam
+    if (currentAssignment && (currentAssignment.assignment_type === 'quiz' || currentAssignment.assignment_type === 'exam')) {
+        if (quizStartTime) { // Only save if quiz has been started
+            saveQuizProgress();
+        }
+    }
+    
     modal.classList.remove('show');
     modal.style.display = 'none';
     
@@ -292,6 +300,11 @@ function showSubmittedView(assignment, submission) {
         }
     }
 
+    // Load and display teacher comments/feedback
+    if (submission.student_id && assignment.id) {
+        loadStudentComments(assignment.id, submission.student_id);
+    }
+
     // Show resubmit button if allowed (before due date)
     // BUT NOT for quizzes/exams - they cannot be retaken
     const now = new Date();
@@ -525,23 +538,33 @@ function updateDueCountdown(dueDate) {
     const diff = dueDate - now;
     const countdown = document.getElementById('due-countdown');
 
-    if (diff < 0) {
-        countdown.textContent = '(Overdue)';
-        countdown.className = 'countdown urgent';
-    } else {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (!countdown) return;
 
-        if (days > 1) {
-            countdown.textContent = `(Due in ${days} days)`;
+    if (diff < 0) {
+        const status = currentSubmission ? currentSubmission.status : null;
+        // Suppress overdue label when already submitted or graded
+        if (status === 'submitted' || status === 'graded') {
+            countdown.textContent = '';
             countdown.className = 'countdown normal';
-        } else if (days === 1) {
-            countdown.textContent = `(Due in 1 day, ${hours} hours)`;
-            countdown.className = 'countdown warning';
         } else {
-            countdown.textContent = `(Due in ${hours} hours)`;
+            countdown.textContent = '(Overdue)';
             countdown.className = 'countdown urgent';
         }
+        return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    if (days > 1) {
+        countdown.textContent = `(Due in ${days} days)`;
+        countdown.className = 'countdown normal';
+    } else if (days === 1) {
+        countdown.textContent = `(Due in 1 day, ${hours} hours)`;
+        countdown.className = 'countdown warning';
+    } else {
+        countdown.textContent = `(Due in ${hours} hours)`;
+        countdown.className = 'countdown urgent';
     }
 }
 
@@ -695,6 +718,53 @@ async function autoSaveDraft() {
         updateAutoSaveIndicator('error');
     } finally {
         isAutoSaving = false;
+    }
+}
+
+// Save quiz progress (responses and timer state)
+async function saveQuizProgress() {
+    if (!currentAssignment || !currentSubmission) return;
+    
+    try {
+        // Collect current quiz responses
+        const quizResponses = {};
+        currentAssignment.quiz_questions.forEach(question => {
+            if (question.question_type === 'multiple_choice' || question.question_type === 'true_false') {
+                const selected = document.querySelector(`input[name="question_${question.id}"]:checked`);
+                if (selected) {
+                    quizResponses[question.id] = {
+                        selected_option_id: parseInt(selected.value)
+                    };
+                }
+            } else {
+                const textAnswer = document.querySelector(`textarea[name="question_${question.id}_text"]`);
+                if (textAnswer && textAnswer.value.trim()) {
+                    quizResponses[question.id] = {
+                        text_response: textAnswer.value
+                    };
+                }
+            }
+        });
+
+        // Save progress to server
+        const response = await fetch(`/group/${window.groupData.id}/assignments/${currentAssignment.id}/save-quiz-progress`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                quiz_responses: quizResponses,
+                time_remaining: quizTimeRemaining
+            })
+        });
+
+        if (!response.ok) {
+            console.error('Failed to save quiz progress');
+        }
+    } catch (error) {
+        console.error('Error saving quiz progress:', error);
     }
 }
 
@@ -905,8 +975,32 @@ function initializeQuillEditor() {
 }
 
 // Start timed quiz/exam
-function startTimedQuiz() {
+async function startTimedQuiz() {
     if (!currentAssignment || !currentAssignment.time_limit) return;
+    
+    // Save quiz start time to server
+    try {
+        const response = await fetch(`/group/${window.groupData.id}/assignments/${currentAssignment.id}/start-quiz`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to start quiz');
+        }
+        
+        const data = await response.json();
+        quizStartTime = new Date(data.quiz_started);
+        
+    } catch (error) {
+        console.error('Error starting quiz:', error);
+        alert('Failed to start quiz. Please try again.');
+        return;
+    }
     
     // Hide ready prompt
     document.getElementById('quiz-ready-prompt').style.display = 'none';
@@ -921,7 +1015,6 @@ function startTimedQuiz() {
     
     // Set time remaining (in seconds)
     quizTimeRemaining = currentAssignment.time_limit * 60;
-    quizStartTime = new Date();
     
     // Start the timer
     startQuizTimer();
@@ -958,7 +1051,7 @@ function startQuizTimer() {
         if (quizTimeRemaining <= 0) {
             stopQuizTimer();
             alert('Time is up! Your quiz/exam will be automatically submitted.');
-            submitAssignment(); // Auto-submit
+            submitQuiz(); // Auto-submit quiz
         }
     }, 1000);
 }
@@ -1159,5 +1252,74 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Load and display teacher comments/feedback for student
+ */
+async function loadStudentComments(assignmentId, studentId) {
+    try {
+        const response = await fetch(
+            `/group/${window.groupData.id}/assignments/${assignmentId}/submissions/${studentId}/comments`
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch comments');
+        }
+
+        const data = await response.json();
+
+        if (data.comments && data.comments.length > 0) {
+            // Filter out private comments (students shouldn't see those)
+            const visibleComments = data.comments.filter(comment => !comment.is_private);
+            
+            if (visibleComments.length > 0) {
+                displayStudentComments(visibleComments);
+                document.getElementById('student-comments-section').style.display = 'block';
+            } else {
+                document.getElementById('student-comments-section').style.display = 'none';
+            }
+        } else {
+            document.getElementById('student-comments-section').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading comments:', error);
+        document.getElementById('student-comments-section').style.display = 'none';
+    }
+}
+
+/**
+ * Display comments for student
+ */
+function displayStudentComments(comments) {
+    const commentsList = document.getElementById('student-comments-list');
+    
+    if (!comments || comments.length === 0) {
+        commentsList.innerHTML = '<p class="no-comments-message">No feedback yet.</p>';
+        return;
+    }
+
+    commentsList.innerHTML = comments.map(comment => {
+        const date = new Date(comment.created_at);
+        const formattedDate = date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        return `
+            <div class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author">${escapeHtml(comment.user?.name || 'Teacher')}</span>
+                    <div class="comment-meta">
+                        <span class="comment-date">${formattedDate}</span>
+                    </div>
+                </div>
+                <div class="comment-text">${escapeHtml(comment.comment_text)}</div>
+            </div>
+        `;
+    }).join('');
 }
 

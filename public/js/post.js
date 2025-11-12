@@ -1,0 +1,768 @@
+    
+    
+    
+    window.currentUserId = {
+        {
+            Auth::id() ?? 'null'
+        }
+    };
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-us', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
+    // Post burger menu
+    document.addEventListener('DOMContentLoaded', () => {
+        // Loading in replies
+        const urlHash = window.location.hash;
+
+        if (urlHash.startsWith('#reply-')) {
+            const replyId = urlHash.replace('#reply-', '');
+
+            // Since replies aren't loaded yet, we need to load ALL replies and then find the target
+            console.log(`Looking for reply ID: ${replyId}`);
+
+            // Get all comments on the page
+            const allComments = document.querySelectorAll('.comment');
+            let targetCommentFound = false;
+
+            // For each comment, try to load its replies
+            allComments.forEach((comment, index) => {
+                const commentId = comment.id.split('-')[1];
+                const repliesForm = comment.querySelector(`#replies-form-${commentId}`);
+
+                if (repliesForm) {
+                    // Add a delay for each comment to avoid overwhelming the server
+                    setTimeout(() => {
+                        console.log(`Loading replies for comment ${commentId}`);
+                        repliesForm.dispatchEvent(new Event('submit'));
+                    }, index * 200); // 200ms delay between each request
+                }
+            });
+
+            // Check for the target reply multiple times with increasing delays
+            const checkForTargetReply = (attempt = 1) => {
+                console.log(`Checking for reply ${replyId}, attempt ${attempt}`);
+                const targetReply = document.querySelector(`#reply-${replyId}`);
+
+                if (targetReply) {
+                    console.log(`Found reply ${replyId}!`);
+                    targetReply.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    // Blue border highlight effect
+                    targetReply.style.border = '2px solid #4a90e2';
+                    targetReply.style.borderRadius = '8px';
+                    setTimeout(() => {
+                        targetReply.style.border = '';
+                        targetReply.style.borderRadius = '6px'; // Reset to original border radius
+                    }, 3000);
+                    targetCommentFound = true;
+                } else if (attempt < 5) {
+                    // Try again with longer delay
+                    setTimeout(() => checkForTargetReply(attempt + 1), 1000 * attempt);
+                } else {
+                    console.log(`Could not find reply ${replyId} after 5 attempts`);
+                }
+            };
+
+            // Start checking after initial delay
+            setTimeout(() => checkForTargetReply(), 2000);
+        }
+
+        // Post share buttons
+        const postShareButton = document.querySelector(`#post-share-button-{{ $post->id }}`);
+        postShareButton.addEventListener('click', (e) => {
+            postUrl = `${window.location.origin}/post/{{ $post->id }}`;
+            navigator.clipboard.writeText(postUrl);
+            postShareButton.textContent = 'Copied!';
+            setTimeout(() => {
+                postShareButton.textContent = 'Share';
+            }, 1200);
+        });
+        // Post Settings button functions
+        const settingsButton = document.getElementById('settings-button');
+        const dotsIcon = document.getElementById('dots-icon');
+        const originalSrc = dotsIcon.src;
+        const hoverSrc = originalSrc.replace('dots.png', 'dots-alt.png');
+        const settingsDropdown = document.getElementById('settings-dropdown-menu');
+
+        const pinPostHomeButton = document.getElementById('pin-post-home-toggle-button');
+        const pinPostHomeCancel = document.getElementById('pin-home-cancel-button');
+        const pinPostHomeConfirm = document.querySelector('.pin-home-toggle-confirm-button');
+        const pinPostButton = document.getElementById('pin-post-toggle-button');
+        const pinPostCancel = document.getElementById('pin-cancel-button');
+        const pinPostConfirm = document.querySelector('.pin-toggle-confirm-button');
+        const editPostButton = document.getElementById('edit-post-button');
+        const editPostCancel = document.getElementById('edit-post-cancel');
+        const deletePostButton = document.getElementById('delete-post-button');
+        const deletePostCancel = document.getElementById('delete-post-cancel');
+
+        const postContentContainer = document.getElementById('post-content-container');
+        const pinPostHomeForm = document.getElementById('pin-home-post-form');
+        const pinPostForm = document.getElementById('pin-post-form');
+        const editPostForm = document.getElementById('edit-post-form');
+        const deletePostForm = document.getElementById('delete-post-form');
+
+        settingsButton.addEventListener('mouseenter', () => dotsIcon.src = hoverSrc);
+        settingsButton.addEventListener('mouseleave', () => dotsIcon.src = originalSrc);
+        settingsButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            settingsDropdown.classList.toggle('show-dropdown');
+        });
+        document.addEventListener('click', () => {
+            if (settingsDropdown.classList.contains('show-dropdown')) {
+                settingsDropdown.classList.remove('show-dropdown');
+            }
+        });
+
+        // Pin post home
+        if (pinPostHomeButton) {
+            pinPostHomeButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'block'
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+                if (settingsDropdown.classList.contains('show-dropdown')) {
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+
+                pinPostHomeConfirm.textContent = (parseInt('{{ $post->isPinnedHome }}')) ?
+                    'Unpin From Home' : 'Pin To Home';
+            })
+            pinPostHomeCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
+
+        // Pin post
+        if (pinPostButton) {
+            pinPostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
+                pinPostForm.style.display = 'block';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+                if (settingsDropdown.classList.contains('show-dropdown')) {
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+                const groupId = parseInt('{{ $post->group->id }}');
+                if (groupId != 1) pinPostConfirm.textContent = (parseInt('{{ $post->isPinned }}')) ? 'Unpin Post' : 'Pin Post';
+                else pinPostConfirm.textContent = (parseInt('{{ $post->isPinnedHome }}')) ? 'Unpin From Home' : 'Pin To Home';
+            });
+            pinPostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
+
+        // Edit post
+        if (editPostButton) {
+            editPostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'block';
+                deletePostForm.style.display = 'none';
+                if (settingsDropdown.classList.contains('show-dropdown')) {
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+            });
+            editPostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
+
+        // Delete post
+        if (deletePostButton) {
+            deletePostButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postContentContainer.style.display = 'none';
+                pinPostHomeForm.style.display = 'none'
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'block';
+                if (settingsDropdown.classList.contains('show-dropdown')) {
+                    settingsDropdown.classList.remove('show-dropdown');
+                }
+            });
+            deletePostCancel.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                postContentContainer.style.display = 'block';
+                pinPostHomeForm.style.display = 'none';
+                pinPostForm.style.display = 'none';
+                editPostForm.style.display = 'none';
+                deletePostForm.style.display = 'none';
+            });
+        }
+
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Comment Settings button functions
+        const comments = document.getElementsByClassName('comment');
+        Array.from(comments).forEach(comment => {
+            const commentSettingsButton = comment.querySelector('.settings-button');
+            if (commentSettingsButton) {
+                const commentId = commentSettingsButton.id.split('-')[2];
+                const commentDotsIcon = commentSettingsButton.querySelector('img');
+                const originalDotsIconSrc = commentDotsIcon.src;
+                const hoverDotsIconSrc = originalDotsIconSrc.replace('dots.png', 'dots-alt.png');
+                const commentDropdown = comment.querySelector('.dropdown-menu');
+
+                // Settings icon
+                commentSettingsButton.addEventListener('mouseenter', () => {
+                    commentDotsIcon.src = hoverDotsIconSrc;
+                });
+                commentSettingsButton.addEventListener('mouseleave', () => {
+                    commentDotsIcon.src = originalDotsIconSrc;
+                });
+
+                // Settings dropdown
+                commentSettingsButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    commentDropdown.classList.toggle('show-dropdown');
+                })
+                document.addEventListener('click', () => {
+                    if (commentDropdown.classList.contains('show-dropdown')) {
+                        commentDropdown.classList.remove('show-dropdown');
+                    }
+                })
+
+                // Settings edit
+                const commentContent = comment.querySelector('.comment-content');
+                const commentBottom = comment.querySelector('.comment-bottom');
+                const commentEditFormContainer = comment.querySelector('.comment-edit-form');
+                const commentDeleteFormContainer = comment.querySelector('.comment-delete-form');
+
+                const editButton = commentDropdown.querySelector(`#edit-comment-button-${commentId}`);
+                editButton.addEventListener('click', () => {
+                    commentContent.style.display = 'none';
+                    commentBottom.style.display = 'none';
+                    commentEditFormContainer.style.display = 'flex';
+                    commentDeleteFormContainer.style.display = 'none';
+                });
+                const commentEditForm = commentEditFormContainer.querySelector('form');
+                const editCancelButton = commentEditForm.querySelector('.edit-cancel-button');
+                editCancelButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    commentContent.style.display = 'block';
+                    commentBottom.style.display = 'flex';
+                    commentEditFormContainer.style.display = 'none';
+                    commentDeleteFormContainer.style.display = 'none';
+                })
+
+                // Settings delete
+                const deleteButton = commentDropdown.querySelector(`#delete-comment-button-${commentId}`);
+                deleteButton.addEventListener('click', () => {
+                    commentContent.style.display = 'none';
+                    commentBottom.style.display = 'none';
+                    commentEditFormContainer.style.display = 'none';
+                    commentDeleteFormContainer.style.display = 'flex';
+                });
+                const commentDeleteForm = commentDeleteFormContainer.querySelector('form');
+                const deleteCancelButton = commentDeleteForm.querySelector('.delete-cancel-button');
+                deleteCancelButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    commentContent.style.display = 'block';
+                    commentBottom.style.display = 'flex';
+                    commentEditFormContainer.style.display = 'none';
+                    commentDeleteFormContainer.style.display = 'none';
+                });
+            }
+        });
+        // Create Comment Form
+        const createCommentContainer = document.getElementById("create-comment-form");
+        const createCommentForm = createCommentContainer.querySelector('form');
+        const createCommentInput = createCommentContainer.querySelector('textarea');
+
+        createCommentInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                createCommentForm.submit();
+            }
+        })
+        // Post Voting
+        const post = document.querySelector('#post-{{ $post->id }}');
+        const postVoteContainer = post.querySelector("#vote-container");
+        const postUpvoteForm = postVoteContainer.querySelector("form:first-child");
+        const postDownvoteForm = postVoteContainer.querySelector("form:last-child");
+        const upArrow = postUpvoteForm.querySelector('img');
+        const downArrow = postDownvoteForm.querySelector('img');
+        const postVoteCount = postVoteContainer.querySelector('p')
+
+
+        postVoteContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // UPVOTE 
+        postUpvoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            try {
+                const response = await fetch(postUpvoteForm.action, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                        "Accept": "application/json",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    credentials: "same-origin",
+                    body: new URLSearchParams({
+                        _token: document.querySelector('meta[name="csrf-token"]').content
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    postVoteCount.textContent = data.voteCount;
+
+                    upArrow.src = (data.voteValue == 1) ?
+                        "{{ asset('/icons/up-arrow-alt.png') }}" :
+                        "{{ asset('/icons/up-arrow.png') }}";
+
+                    if (data.voteValue == 1) {
+                        downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                    }
+                }
+            } catch (error) {
+                console.error('Error: ', error);
+            }
+
+        })
+        // DOWNVOTE
+        postDownvoteForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            try {
+                const response = await fetch(postDownvoteForm.action, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                        "Accept": "application/json",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    credentials: "same-origin",
+                    body: new URLSearchParams({
+                        _token: document.querySelector('meta[name="csrf-token"]').content,
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    postVoteCount.textContent = data.voteCount;
+
+                    downArrow.src = (data.voteValue == -1) ?
+                        "{{ asset('/icons/down-arrow-alt.png') }}" :
+                        "{{ asset('/icons/down-arrow.png') }}";
+
+                    if (data.voteValue == -1) {
+                        upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                    }
+                }
+            } catch (error) {
+                console.error("Error: ", error);
+            }
+        });
+
+        // Comment Voting
+        // const comments = document.getElementsByClassName('comment');
+        Array.from(comments).forEach(comment => {
+            const commentId = comment.id.split('-')[1];
+            const commentVoteContainer = comment.querySelector(`#vote-container-${commentId}`);
+            const commentUpvoteForm = commentVoteContainer.querySelector('form:first-child');
+            const commentDownvoteForm = commentVoteContainer.querySelector('form:last-child');
+            const upArrow = commentUpvoteForm.querySelector('img');
+            const downArrow = commentDownvoteForm.querySelector('img');
+            const commentVoteCount = commentVoteContainer.querySelector('p');
+
+            commentVoteContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            // UPVOTE
+            commentUpvoteForm.addEventListener('submit', async (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                try {
+                    const response = await fetch(commentUpvoteForm.action, {
+                        method: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        credentials: 'same-origin',
+                        body: new URLSearchParams({
+                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        commentVoteCount.textContent = data.voteCount;
+
+                        upArrow.src = (data.voteValue == 1) ?
+                            "{{ asset('/icons/up-arrow-alt.png') }}" :
+                            "{{ asset('/icons/up-arrow.png') }}";
+
+                        if (data.voteValue == 1) {
+                            downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error: ", error);
+                }
+            });
+            // DOWNVOTE
+            commentDownvoteForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                try {
+                    const response = await fetch(commentDownvoteForm.action, {
+                        method: "POST",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        credentials: 'same-origin',
+                        body: new URLSearchParams({
+                            _token: document.querySelector('meta[name="csrf-token"]').content,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        commentVoteCount.textContent = data.voteCount;
+
+                        downArrow.src = (data.voteValue == -1) ?
+                            "{{ asset('/icons/down-arrow-alt.png') }}" :
+                            "{{ asset('/icons/down-arrow.png') }}";
+
+                        if (data.voteValue == -1) {
+                            upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error: ", error);
+                }
+            })
+
+            const commentShareButton = comment.querySelector('.share-button');
+            commentShareButton.addEventListener('click', () => {
+                const commentUrl = `${window.location.origin}/post/{{ $post->id }}#comment-${commentId}`;
+                navigator.clipboard.writeText(commentUrl);
+                console.log(commentShareButton);
+                commentShareButton.textContent = 'Copied';
+                setTimeout(() => {
+                    commentShareButton.textContent = 'Share';
+                }, 1200);
+            });
+
+            // Reply Button
+            const repliesForm = comment.querySelector(`#replies-form-${commentId}`);
+            const createReplyContainer = document.querySelector(`#create-reply-form-${commentId}`);
+            const createReplyForm = createReplyContainer.querySelector('form');
+            const replyTemplate = document.querySelector('#reply-template');
+            const replyContainer = document.querySelector(`#reply-container-${commentId}`);
+            // Replies Button
+            repliesForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (replyContainer.getAttribute('data-expanded') === 'true') {
+                    replyContainer.style.display = 'none';
+                    createReplyContainer.style.display = 'none';
+                    replyContainer.setAttribute('data-expanded', 'false');
+                } else {
+                    try {
+                        if (!replyContainer.hasChildNodes()) {
+                            const response = await fetch(repliesForm.action, {
+                                method: "GET",
+                                headers: {
+                                    'Accept': 'application/json'
+                                },
+                                credentials: 'same-origin'
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                Array.from(data.replies).forEach(reply => {
+                                    const clone = replyTemplate.content.cloneNode(true);
+
+                                    // clean the data
+                                    const createdAt = formatDate(reply.created_at);
+                                    const updatedAt = formatDate(reply.updated_at);
+
+                                    // apply the data
+                                    // reply top
+                                    clone.querySelector('.reply').id = `reply-${reply.id}`;
+                                    clone.querySelector('.username-link').href = `/user/${reply.user_id}`;
+                                    clone.querySelector('.username-link').textContent = `@${reply.user.name}`;
+                                    clone.querySelector('p').textContent = ` | ${createdAt}`;
+                                    const editIndicator = clone.querySelector('.edit-indicator');
+                                    if (reply.created_at != reply.updated_at) {
+                                        editIndicator.textContent = `Edited on ${updatedAt}`;
+                                        editIndicator.style = 'inline';
+                                    }
+                                    if (reply.user_id == window.currentUserId) {
+                                        const settingsContainer = clone.querySelector('.reply-settings');
+                                        settingsContainer.innerHTML =
+                                            `<div class='reply-settings-container'>
+                                        <button class='settings-button' id='reply-settings-button-${reply.id}'>
+                                            <img src='{{ asset('/icons/dots.png') }}' alt='Settings' id='reply-dots-icon-${reply.id}'>
+                                        </button>
+                                        <div class='dropdown-menu' id='reply-settings-dropdown-menu-${reply.id}'>
+                                            <button class='dropdown-item' id='edit-reply-button-${reply.id}'>Edit</button>
+                                            <button class='dropdown-item' id='delete-reply-button-${reply.id}'>Delete</button>
+                                        </div>
+                                    </div>`;
+                                    }
+                                    clone.querySelector('.reply-content p').textContent = reply.content;
+                                    // reply bottom
+                                    const cloneVote = clone.querySelector('.reply-bottom .reply-vote-container');
+                                    const replyVoteCount = cloneVote.querySelector('p');
+                                    const replyUpvoteForm = cloneVote.querySelector('form:first-child');
+                                    const replyDownvoteForm = cloneVote.querySelector('form:last-child');
+                                    const replyUpArrow = cloneVote.querySelector('form:first-child img');
+                                    const replyDownArrow = cloneVote.querySelector('form:last-child img');
+                                    replyUpvoteForm.action = `/reply/upvote/${reply.id}`;
+                                    replyUpArrow.src = (reply.userVote == 1) ?
+                                        "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                        "{{ asset('/icons/up-arrow.png') }}";
+                                    replyVoteCount.textContent = reply.votes;
+                                    replyDownvoteForm.action = `/reply/downvote/${reply.id}`;
+                                    replyDownArrow.src = (reply.userVote == -1) ?
+                                        "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                        "{{ asset('/icons/down-arrow.png') }}";
+                                    const replyShareButton = clone.querySelector('.share-button');
+                                    replyShareButton.id = `reply-share-button-${reply.id}`;
+
+
+
+                                    // reply edit form
+                                    const replyEditForm = clone.querySelector('.reply-edit-form form');
+                                    const replyEditInput = replyEditForm.querySelector('textarea');
+                                    replyEditForm.action = `/post/{{ $post->id }}/edit-reply/${reply.id}`;
+                                    replyEditInput.value = reply.content;
+                                    replyEditInput.name = `edit-reply-content-${reply.id}`;
+                                    replyEditInput.id = `edit-reply-content-${reply.id}`;
+                                    // reply delete form
+                                    const replyDeleteText = clone.querySelector('.reply-delete-form p');
+                                    const replyDeleteForm = clone.querySelector('.reply-delete-form form');
+                                    replyDeleteText.textContent = reply.content;
+                                    replyDeleteForm.action = `/post/{{ $post->id }}/delete-reply/${reply.id}`;
+                                    // Reply Voting
+                                    // UPVOTING
+                                    replyUpvoteForm.addEventListener('submit', async (e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+
+                                        try {
+                                            const response = await fetch(replyUpvoteForm.action, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                                },
+                                                credentials: 'same-origin',
+                                                body: new URLSearchParams({
+                                                    _token: document.querySelector('meta[name="csrf-token"]').content
+                                                })
+                                            });
+
+                                            if (response.ok) {
+                                                const data = await response.json();
+
+                                                replyVoteCount.textContent = data.voteCount;
+
+                                                replyUpArrow.src = (data.voteValue == 1) ?
+                                                    "{{ asset('/icons/up-arrow-alt.png') }}" :
+                                                    "{{ asset('/icons/up-arrow.png') }}";
+
+                                                if (data.voteValue == 1) {
+                                                    replyDownArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                                }
+                                            }
+                                        } catch (error) {
+                                            console.error("Error: ", error);
+                                        }
+                                    });
+
+                                    // DOWNVOTING
+                                    replyDownvoteForm.addEventListener('submit', async (e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+
+                                        try {
+                                            const response = await fetch(replyDownvoteForm.action, {
+                                                method: "POST",
+                                                headers: {
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                                },
+                                                credentials: 'same-origin',
+                                                body: new URLSearchParams({
+                                                    _token: document.querySelector('meta[name="csrf-token"]').content
+                                                })
+                                            });
+
+                                            if (response.ok) {
+                                                const data = await response.json();
+
+                                                replyVoteCount.textContent = data.voteCount;
+
+                                                replyDownArrow.src = (data.voteValue == -1) ?
+                                                    "{{ asset('/icons/down-arrow-alt.png') }}" :
+                                                    "{{ asset('/icons/down-arrow.png') }}";
+
+                                                if (data.voteValue == -1) {
+                                                    replyUpArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                                }
+                                            }
+                                        } catch (error) {
+                                            console.error("Error: ", error);
+                                        }
+                                    });
+                                    // Reply Share Button
+                                    replyShareButton.addEventListener('click', () => {
+                                        replyUrl = `${window.location.origin}/post/{{ $post->id }}#reply-${reply.id}`;
+                                        navigator.clipboard.writeText(replyUrl);
+                                        replyShareButton.textContent = 'Copied!';
+                                        setTimeout(() => {
+                                            replyShareButton.textContent = 'Share';
+                                        }, 1200);
+                                    });
+                                    // Appending
+                                    replyContainer.appendChild(clone);
+                                    // Reply Settings
+                                    if (reply.user_id == window.currentUserId) {
+                                        const clonedReply = replyContainer.querySelector('.reply:last-child');
+                                        const clonedSettings = clonedReply.querySelector('.reply-settings-container');
+                                        const clonedContent = clonedReply.querySelector('.reply-content');
+                                        const clonedBottom = clonedReply.querySelector('.reply-bottom');
+                                        const clonedEditContainer = clonedReply.querySelector('.reply-edit-form');
+                                        const clonedDeleteContainer = clonedReply.querySelector('.reply-delete-form')
+                                        // Reply Settings Dropdown
+                                        // Settings Button
+                                        const clonedSettingsButton = clonedSettings.querySelector('.settings-button');
+                                        const clonedSettingsButtonImg = clonedSettings.querySelector('.settings-button img');
+                                        const clonedSettingsDropdown = clonedSettings.querySelector('.dropdown-menu');
+                                        clonedSettingsButton.addEventListener('mouseenter', () => {
+                                            clonedSettingsButtonImg.src = '{{ asset("/icons/dots-alt.png") }}';
+                                        });
+                                        clonedSettingsButton.addEventListener('mouseleave', () => {
+                                            clonedSettingsButtonImg.src = '{{ asset("/icons/dots.png") }}';
+                                        });
+                                        clonedSettingsButton.addEventListener('click', (e) => {
+                                            e.stopPropagation();
+                                            clonedSettingsDropdown.classList.toggle('show-dropdown');
+                                        });
+                                        document.addEventListener('click', (e) => {
+                                            if (clonedSettingsDropdown.classList.contains('show-dropdown')) {
+                                                clonedSettingsDropdown.classList.remove('show-dropdown');
+                                            }
+                                        })
+                                        // Edit Button
+                                        const clonedSettingsEdit = clonedSettingsDropdown.querySelector(`#edit-reply-button-${reply.id}`);
+                                        clonedSettingsEdit.addEventListener('click', () => {
+                                            clonedContent.style.display = 'none';
+                                            clonedBottom.style.display = 'none';
+                                            clonedEditContainer.style.display = 'flex';
+                                            clonedDeleteContainer.style.display = 'none';
+                                        });
+                                        const clonedEditCancel = clonedEditContainer.querySelector('.edit-cancel-button');
+                                        clonedEditCancel.addEventListener('click', (e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+
+                                            clonedContent.style.display = 'flex';
+                                            clonedBottom.style.display = 'flex';
+                                            clonedEditContainer.style.display = 'none';
+                                            clonedDeleteContainer.style.display = 'none';
+                                        })
+                                        // Delete Button
+                                        const clonedSettingsDelete = clonedSettingsDropdown.querySelector(`#delete-reply-button-${reply.id}`);
+                                        clonedSettingsDelete.addEventListener('click', () => {
+                                            clonedContent.style.display = 'none';
+                                            clonedBottom.style.display = 'none';
+                                            clonedEditContainer.style.display = 'none';
+                                            clonedDeleteContainer.style.display = 'flex';
+                                        });
+                                        const clonedDeleteCancel = clonedDeleteContainer.querySelector('.delete-cancel-button');
+                                        clonedDeleteCancel.addEventListener('click', (e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+
+                                            clonedContent.style.display = 'flex';
+                                            clonedBottom.style.display = 'flex';
+                                            clonedEditContainer.style.display = 'none';
+                                            clonedDeleteContainer.style.display = 'none';
+                                        })
+                                    }
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error: ', error);
+                    }
+                    replyContainer.style.display = 'block';
+                    createReplyContainer.style.display = 'block';
+                    replyContainer.setAttribute('data-expanded', 'true');
+                }
+            });
+            // Create Reply Form
+            createReplyForm.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    createReplyForm.submit();
+                }
+            })
+        })
+
+    })

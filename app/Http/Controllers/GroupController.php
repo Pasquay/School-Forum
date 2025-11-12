@@ -299,14 +299,14 @@ class GroupController extends Controller
         // Sorting
         $sortBy = 'role'; // change this later
         $asc = 1;
-        
+
         // Filters 
         //SET THESE UP LATER
         $isMember = 1;
-        $isModerator = 1; 
-        $isOwner = 1; 
-        
-        $isAcademic = 1; 
+        $isModerator = 1;
+        $isOwner = 1;
+
+        $isAcademic = 1;
         $isSocial = 1;
         $isPrivate = 1;
 
@@ -314,27 +314,31 @@ class GroupController extends Controller
         $isMuted = 1;
 
         $groups = Group::query()
-                       ->join('group_members', function ($join) use ($user) {
-                            $join->on('groups.id', '=', 'group_members.group_id')
-                                 ->where('group_members.user_id', '=', $user->id);
-                       })
-                       ->select([
-                            'groups.*', 'group_members.role as user_role',
-                            'groups.*', 'group_members.is_starred as is_starred',
-                            'groups.*', 'group_members.is_muted as is_muted',
-                        ]);
+            ->join('group_members', function ($join) use ($user) {
+                $join->on('groups.id', '=', 'group_members.group_id')
+                    ->where('group_members.user_id', '=', $user->id);
+            })
+            ->select([
+                'groups.*',
+                'group_members.role as user_role',
+                'groups.*',
+                'group_members.is_starred as is_starred',
+                'groups.*',
+                'group_members.is_muted as is_muted',
+            ]);
 
         // SEARCH HERE
 
         // SORT HERE
-        switch($sortBy){
-            case 'role': default:
-                if($asc){
+        switch ($sortBy) {
+            case 'role':
+            default:
+                if ($asc) {
                     $groups->orderByRaw("FIELD(user_role, 'owner', 'moderator', 'member')")
-                           ->orderBy('name', 'asc');
+                        ->orderBy('name', 'asc');
                 } else {
                     $groups->orderByRaw("FIELD(user_role), 'member', 'moderator', 'owner')")
-                           ->orderBy('name', 'desc');
+                        ->orderBy('name', 'desc');
                 }
                 break;
         }
@@ -362,7 +366,7 @@ class GroupController extends Controller
             'groups',
         ));
     }
-    
+
     public function showGroup($id)
     {
         // Return to home page if $id is home group
@@ -650,7 +654,8 @@ class GroupController extends Controller
         ]);
     }
 
-    public function leaveGroupAlt($id){
+    public function leaveGroupAlt($id)
+    {
         $user = User::findOrFail(Auth::id());
         if(!is_array($id)){
             if(strpos($id, ',') !== false) $ids = explode(',', $id);
@@ -1997,6 +2002,104 @@ class GroupController extends Controller
         } catch (\Exception $e) {
             Log::error('Save draft error: ' . $e->getMessage());
             return response()->json(['message' => 'Failed to save draft'], 500);
+        }
+    }
+
+    public function startQuiz(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check membership
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            // Get or create submission
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $user->id
+                ],
+                ['status' => 'draft']
+            );
+
+            // Set quiz started time if not already set
+            if (!$submission->quiz_started) {
+                $submission->quiz_started = now();
+                $submission->save();
+            }
+
+            return response()->json([
+                'message' => 'Quiz started',
+                'quiz_started' => $submission->quiz_started
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Start quiz error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to start quiz'], 500);
+        }
+    }
+
+    public function saveQuizProgress(Request $request, $groupId, $assignmentId)
+    {
+        try {
+            $user = Auth::user();
+            $assignment = Assignment::findOrFail($assignmentId);
+
+            // Check membership
+            $membership = DB::table('group_members')
+                ->where('user_id', $user->id)
+                ->where('group_id', $groupId)
+                ->first();
+
+            if (!$membership) {
+                return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            // Get or create submission
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $user->id
+                ],
+                ['status' => 'draft']
+            );
+
+            // Save quiz responses
+            $responses = $request->input('quiz_responses', []);
+            foreach ($responses as $questionId => $response) {
+                StudentQuizResponse::updateOrCreate(
+                    [
+                        'submission_id' => $submission->id,
+                        'question_id' => $questionId
+                    ],
+                    [
+                        'selected_option_id' => $response['selected_option_id'] ?? null,
+                        'text_response' => $response['text_response'] ?? null
+                    ]
+                );
+            }
+
+            // Save time remaining (optional, can be used to restore timer)
+            $timeRemaining = $request->input('time_remaining');
+            if ($timeRemaining !== null) {
+                // Store in submission's additional data or a separate field
+                // For now, we'll just acknowledge it's received
+                Log::info("Quiz progress saved for submission {$submission->id}, time remaining: {$timeRemaining}s");
+            }
+
+            return response()->json([
+                'message' => 'Quiz progress saved successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Save quiz progress error: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to save quiz progress'], 500);
         }
     }
 
