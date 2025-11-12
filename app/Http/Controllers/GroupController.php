@@ -449,7 +449,6 @@ class GroupController extends Controller
         ));
     }
 
-    // SHOW GROUP PAGINATED
 
     public function toggleStar($id)
     {
@@ -470,6 +469,40 @@ class GroupController extends Controller
         ]);
     }
 
+    public function setStar(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+        $groupIds = $request->input('group_ids', []);
+        $value = $request->input('value');
+
+        $starredGroups = [];
+
+        foreach($groupIds as $groupId){
+            $group = $user->groups()->where('group_id', $groupId)->first();
+            if($group){
+                $user->groups()->updateExistingPivot($groupId, ['is_starred' => $value]);
+                $starredGroups[] = $group->name;
+            }
+        }
+
+        $message = '';
+        if($value){
+            if(count($starredGroups) > 1) $message = 'Groups starred successfully.';
+            else $message = 'Group starred successfully.';
+        } else {
+            if(count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
+            else $message = 'Group unstarred successfully.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'action_type' => 'star',
+            'action_value' => $value,
+            'starred_groups' => $starredGroups,
+            'message' => $message,
+        ]);
+    }
+    
     public function toggleMute($id)
     {
         $user = User::findOrFail(Auth::id());
@@ -486,6 +519,40 @@ class GroupController extends Controller
         return response()->json([
             'success' => true,
             'muteValue' => $newMuteState,
+        ]);
+    }
+
+    public function setMute(Request $request)
+    {
+        $user = User::findOrFail(Auth::id());
+        $groupIds = $request->input('group_ids', []);
+        $value = $request->input('value');
+
+        $mutedGroups = [];
+
+        foreach($groupIds as $groupId){
+            $group = $user->groups()->where('group_id', $groupId)->first();
+            if($group){
+                $user->groups()->updateExistingPivot($groupId, ['is_muted' => $value]);
+                $mutedGroups[] = $group->name;
+            }
+        }
+
+        $message = '';
+        if($value){
+            if(count($mutedGroups) > 1) $message = 'Groups muted successfully.';
+            else $message = 'Group muted successfully.';
+        } else {
+            if(count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
+            else $message = 'Group unmuted successfully.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'action_type' => 'mute',
+            'action_value' => $value,
+            'muted_groups' => $mutedGroups,
+            'message' => $message,
         ]);
     }
 
@@ -585,28 +652,25 @@ class GroupController extends Controller
 
     public function leaveGroupAlt($id){
         $user = User::findOrFail(Auth::id());
-        $membership = $user->groups()
-                           ->where('groups.id', $id)
-                           ->exists();
+        if(!is_array($id)){
+            if(strpos($id, ',') !== false) $ids = explode(',', $id);
+            else $ids = [$id];
+        } else $ids = $id;
 
-        if(!$membership){
-            return response()->json([
-                'success' => false,
-                'membership' => 0,
-                'message' => 'Not a member of this group yet',
-            ]);
-        } else {
-            $user->groups()->detach($id);
-
-            $group = Group::findOrFail($id);
-            $group->update(['member_count' => $group->getMemberCount()]);
-
-            return response()->json([
-                'success' => true,
-                'membership' => 0,
-                'message' => 'You have left group "' . $group->name . '" successfully.',
-            ]);
+        $leftGroups = [];
+        foreach($ids as $groupId){
+            $membership = $user->groups()->where('group_id', $groupId)->exists();
+            if ($membership) {
+                $user->groups()->detach($groupId);
+                $leftGroups[] = $groupId;
+            }
         }
+
+        return response()->json([
+            'success' => true,
+            'left_groups' => $leftGroups,
+            'message' => count($leftGroups) > 1 ? 'Groups left successfully.' : 'Group left successfully.',
+        ]);
     }
 
     public function showGroupSettings($id, Request $request)

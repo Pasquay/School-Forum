@@ -82,6 +82,106 @@
                     outline: none;
                     border-color: #4a90e2;
                 }
+            /* GROUP BULK ACTIONS */
+                #group-bulk-actions {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+                    padding: 0.8rem 0.8rem;
+                    margin-bottom: 1rem;
+                    border: 1px solid #f0f0f0;
+                    gap: 1rem;
+                    transition: background-color 0.2s;
+                }
+
+                #group-bulk-actions .group-bulk-select {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+                #group-bulk-actions .group-bulk-select button {
+                    background: #4a90e2;
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 0.3rem 1rem;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background 0.18s;
+                }
+                #group-bulk-actions .group-bulk-select button:hover {
+                    background: #357abd;
+                }
+
+                #group-bulk-actions .bulk-actions {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 0.2rem;
+                    flex-wrap: nowrap;
+                }
+                #group-bulk-actions .bulk-actions.right-actions {
+                    align-items: center;
+                    margin-left: auto;
+                    gap: 0.2rem;
+                }
+                #group-bulk-actions .bulk-actions form,
+                #group-bulk-actions .bulk-actions button {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 0;
+                    height: 12px;
+                }
+                #group-bulk-actions .bulk-actions button {
+                    background: none;
+                    border: none;
+                    padding: 0.25rem;
+                    margin: 0 0.1rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                #group-bulk-actions .bulk-actions img {
+                    width: 20px;
+                    height: 20px;
+                    object-fit: contain;
+                    display: block;
+                    background: none;
+                    border: none;
+                    box-shadow: none;
+                    padding: 0;
+                    margin: 16px 0 0 0;
+                }
+                #group-bulk-actions #bulk-leave-form {
+                    position: relative;
+                    top: -5px;
+                }
+                #group-bulk-actions .bulk-actions .leave-button {
+                    align-items: center;
+                    background-color: #dc3545;
+                    color: white;
+                    padding: 0.8rem 1.5rem;
+                    margin: 0 0 0 0.2rem;
+                    border-radius: 6px;
+                    width: 68px;
+                    height: 20px;
+                    text-align: center;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                    transition: background-color 0.2s;
+                    align-items: center;
+                    justify-content: center;
+                }
+                #group-bulk-actions .bulk-actions .leave-button:hover {
+                    background-color: #c82333;
+                }
         /* RIGHT SIDE */
             .right-side {
                 flex: 0 0 340px;
@@ -147,21 +247,6 @@
                 display: inline-block;
                 min-width: 120px;
             }
-            #leave-confirmation-modal #group-list ul {
-                padding: 0 0 0 1.2em;
-                list-style: disc;
-            }
-            #leave-confirmation-modal #group-list li {
-                margin-bottom: 0.3em;
-                font-size: 1rem;
-                color: #444;
-                background: #f7f7fa;
-                border-radius: 5px;
-                padding: 0.3em 0.8em;
-                display: block;
-                width: fit-content;
-                min-width: 120px;
-            }
             #leave-confirmation-modal #modal-actions {
                 display: flex;
                 justify-content: center;
@@ -211,6 +296,43 @@
         <div class="left-side">
             <div class="search-section">
                 <input type="text" placeholder="Search groups..." id="group-search">
+            </div>
+
+            <div id="group-bulk-actions">
+                <div class="group-bulk-select">
+                    <button id="select-all-button">Select all</button>
+                    <button id="select-none-button">Select none</button>
+                </div>
+                <div class="bulk-actions" style="display:none;">
+                    <form id="bulk-star-form" action="{{ route('group.set.star') }}" method="post">
+                        @csrf
+                        <button type="submit">
+                            <img src="{{ asset('/icons/star.png') }}" alt="">
+                        </button>
+                    </form>
+                    <form id="bulk-unstar-form" action="{{ route('group.set.star') }}" method="post">
+                        @csrf
+                        <button type="submit">
+                            <img src="{{ asset('/icons/star-alt.png') }}" alt="">
+                        </button>
+                    </form>
+                    <form id="bulk-unmute-form" action="{{ route('group.set.mute') }}" method="post">
+                        @csrf
+                        <button type="submit">
+                            <img src="{{ asset('/icons/mute-alt.png') }}" alt="">
+                        </button>
+                    </form>
+                    <form id="bulk-mute-form" action="{{ route('group.set.mute') }}" method="post">
+                        @csrf
+                        <button type="submit">
+                            <img src="{{ asset('/icons/mute.png') }}" alt="">
+                        </button>
+                    </form>
+                    <form id="bulk-leave-form" action="#" method="post">
+                        @csrf
+                        <button type="button" class="leave-button">Leave</button>
+                    </form>
+                </div>
             </div>
 
             @if($groups->count()>0) 
@@ -275,13 +397,12 @@
             groupList.style.textAlign = 'center';
         } else {
             modalHeader.textContent = "Are you sure you want to leave the following groups?";
-            let ul = document.createElement('ul');
-            toLeaveGroups.forEach(leaveGroup => {
-                let li = document.createElement('li');
-                li.textContent = leaveGroup.querySelector('.group-info p').textContent;
-                ul.appendChild(li);
-            });
-            groupList.appendChild(ul);
+            let p = document.createElement('p');
+            let groupNames = toLeaveGroups.map(leaveGroup => 
+                '• ' + leaveGroup.querySelector('.group-info p').textContent
+            );
+            p.innerHTML = groupNames.join('<br>');
+            groupList.appendChild(p);
             groupList.style.textAlign = 'left';
         }
 
@@ -310,10 +431,19 @@
         groups.forEach(group => {
             // VARIABLES
                 const groupid = group.dataset.groupid;
+            // Group Select Checkbox
+                const groupSelect = group.querySelector('.group-select');
+                if(groupSelect){
+                    groupSelect.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                    });
+                }
             // Onclick go to group page
                 group.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = `/group/${groupid}`;
+                    if(!document.querySelectorAll('.group-select:checked').length){
+                        e.preventDefault();
+                        window.location.href = `/group/${groupid}`;
+                    }
                 });
             // Star Toggle
                 const starForm = group.querySelector('.star-toggle-form');
@@ -425,7 +555,9 @@
                         e.preventDefault();
                         e.stopPropagation();
                         showLeaveConfirmationModal(group, 
-                            function onConfirm(){ leaveForm.requestSubmit(); }
+                            function onConfirm(){ 
+                                leaveForm.requestSubmit(); 
+                            }
                         );
                     })
 
@@ -458,6 +590,215 @@
         });
     }
 
-    addGroupCardEventListeners();
+    function toggleRightActions(shouldDisable){
+        const bulkActions = document.querySelector('.bulk-actions');
+        const rightActions = [
+            '.right-actions button',
+            '.right-actions input[type="submit"]',
+        ];
+
+        document.querySelectorAll(rightActions.join(',')).forEach(btn => {
+            btn.disabled = shouldDisable;
+            if(shouldDisable){
+                btn.classList.add('disabled-action');
+                bulkActions.style.display = 'inline';
+            } else {
+                btn.classList.remove('disabled-action');
+                bulkActions.style.display = 'none';
+            }
+        });
+
+    }
+
+    function updateRightActions(){
+        const groupSelects = document.querySelectorAll('.group-select');
+        const anyChecked = Array.from(groupSelects).some(cb => cb.checked);
+        toggleRightActions(anyChecked);
+    }
+
+    function addBulkActionEventListeners(){
+        // Variables
+        const bulkForms = Array.from(document.querySelectorAll('.bulk-actions form')).filter(
+            form => form.id !== 'bulk-leave-form'
+        );
+        const groupSelects = document.querySelectorAll('.group-select');
+        const selectAllBtn = document.querySelector('#select-all-button');
+        const selectNoneBtn = document.querySelector('#select-none-button');
+        const bulkLeaveForm = document.querySelector('#bulk-leave-form');
+        const bulkLeaveBtn = bulkLeaveForm.querySelector('.leave-button');
+
+        // Select All Button
+        selectAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            groupSelects.forEach(cb => cb.checked = true);
+            updateRightActions();
+        });
+
+        // Select None Button
+        selectNoneBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            groupSelects.forEach(cb => cb.checked = false);
+            updateRightActions();
+        })
+
+        // Star/Unstar & Mute/Unmute
+        bulkForms.forEach(form => {
+            form.addEventListener('submit', async(e) => {
+                e.preventDefault();
+
+                form.querySelectorAll('input[name="group_ids[]"]').forEach(el => el.remove());
+
+                const checked = Array.from(groupSelects).filter(cb => cb.checked);
+
+                if(checked.length === 0){
+                    alert('Select at least one group.');
+                    return;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+                checked.forEach(cb => {
+                    formData.append('group_ids[]', cb.value);
+                });
+
+                let value = 1;
+                if(form.id === 'bulk-unstar-form' || form.id === 'bulk-unmute-form'){
+                    value = 0;
+                }
+                formData.append('value', value);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        credentials: 'same-origin',
+                        body: formData.toString(),
+                    });
+
+                    if(response.ok){
+                        const data = await response.json();
+                        alert(data.message || 'Message not found');
+
+                        checked.forEach(cb => {
+                            const group = document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`);
+                            if(group){
+                                if(data.action_type === 'star'){
+                                    const starImg = group.querySelector('.star-toggle-form .star img');
+                                    if(starImg){
+                                        starImg.src = (data.action_value == 1)
+                                            ? "{{ asset('/icons/star.png') }}"                                        
+                                            : "{{ asset('/icons/star-alt.png') }}";                                        
+                                    }
+                                } else if(data.action_type === 'mute'){
+                                    const muteImg = group.querySelector('.mute-toggle-form .mute img');
+                                    if(muteImg){
+                                        muteImg.src = (data.action_value == 1)
+                                            ? "{{ asset('/icons/mute.png') }}"
+                                            : "{{ asset('/icons/mute-alt.png') }}";
+                                    }
+                                }
+                            }
+                            cb.checked = false;
+                            toggleRightActions(0);
+                        });
+                    } else {
+                        alert('An error occurred while processing the bulk action');
+                    }
+                } catch(e){
+                    console.error(e);
+                    alert('An error occurred while processing the bulk action');
+                }
+            });
+        });
+
+        // Bulk Leave Button Confirmation Modal
+        bulkLeaveBtn.addEventListener('click', (e) => {
+            const checked = Array.from(groupSelects).filter(cb => cb.checked);
+            let groups = '';
+            if(checked.length === 1){
+                groups = document.querySelector(`.group-info-manager[data-groupid="${checked[0].value}"]`);
+            } else {
+                groups = checked.map(cb => document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`));
+            }
+            e.preventDefault();
+            showLeaveConfirmationModal(groups,
+                function onConfirm(){
+                    bulkLeaveForm.requestSubmit();
+                }
+            )
+        })
+
+        // Bulk Leave Form
+        bulkLeaveForm.addEventListener('submit', async(e) => {
+            e.preventDefault();
+
+            bulkLeaveForm.querySelectorAll('input[name="group_ids[]"]').forEach(el => el.remove());
+
+            const checked = Array.from(groupSelects).filter(cb => cb.checked);
+
+            if(checked.length === 0){
+                alert('Select at least one group');
+                return;
+            } else if(checked.length === 1){
+                const groupId = checked[0].value;
+                bulkLeaveForm.action = `/group/${groupId}/leave-alt`;
+            } else {
+                const groupIds = checked.map(cb => cb.value).join(',');
+                bulkLeaveForm.action = `/group/${groupIds}/leave-alt`;
+            }
+            
+            const formData = new URLSearchParams();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+            checked.forEach(cb => {
+                formData.append('group_ids[]', cb.value);
+            });
+
+            try {
+                const response = await fetch(bulkLeaveForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                if(response.ok){
+                    const data = await response.json();
+                    alert(data.message || 'Message not found');
+
+                    checked.forEach(cb => {
+                        const group = document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`);
+                        if(group){
+                            group.remove();
+                        }
+                        cb.checked = false;
+                        toggleRightActions(0);
+                    })
+                }
+            } catch(e){
+                console.error("Error: ", e);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded',() => {
+        addGroupCardEventListeners();
+        addBulkActionEventListeners();
+        const groupSelects = document.querySelectorAll('.group-select');
+        groupSelects.forEach(cb => {
+            cb.addEventListener('change', updateRightActions);
+        })
+        const groups = document.querySelectorAll('.group-info-manager');
+        if(groups.length > 0){
+            groups[0].classList.add('top-group');
+            groups[groups.length-1].classList.add('bottom-group');
+        }
+    });
 </script>
 </html>

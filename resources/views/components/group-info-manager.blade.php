@@ -72,7 +72,6 @@
             gap: 0.75rem;
             padding: 0.5rem 1.2rem;
             border-bottom: 1px solid #f0f0f0;
-            border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -84,6 +83,13 @@
         .group-info-manager:hover {
             background-color: #f8f9fa;
             border-radius: 6px;
+        }
+        
+        .top-group {
+            border-radius: 6px 6px 0 0;
+        }
+        .bottom-group {
+            border-radius: 0 0 6px 6px;
         }
     /* GROUP INFO */
         .group-info-manager .group-info {
@@ -161,6 +167,12 @@
             align-items: center;
             border: none;
             box-shadow: none;
+        }
+
+        .disabled-action {
+            opacity: 0.5 !important;
+            pointer-events: none !important;
+            cursor: not-allowed !important;
         }
         /* STAR & MUTE BUTTON */
             .group-info-manager .right-actions button.star,

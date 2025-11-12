@@ -92,7 +92,9 @@ Route::controller(GroupController::class)->group(function () {
     Route::get('/groups/manage', 'showGroupsManager')->middleware('auth')->name('groups.manager'); // show groups manager page
     Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star/unstar a group
+    route::post('/group/setStar/', 'setStar')->middleware('auth')->name('group.set.star'); // set star manually
     Route::post('/group/toggleMute/{id}', 'toggleMute')->middleware('auth'); // mute/unmute a group
+    route::post('/group/setMute/', 'setMute')->middleware('auth')->name('group.set.mute'); // set mute manually
     Route::post('/group/{id}/request', 'requestToJoinGroup')->middleware('auth'); // request to join a group
     Route::post('/group/{id}/join', 'joinGroup')->middleware('auth')->name('group.join'); // join a group
     Route::post('/group/{id}/leave', 'leaveGroup')->middleware('auth')->name('group.leave'); // leave a group
