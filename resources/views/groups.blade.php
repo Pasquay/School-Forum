@@ -102,6 +102,11 @@
     </main>
     @include('components.back-to-top-button')
 </body>
+<script>
+    window.STAR_ICON = "{{ asset('/icons/star.png') }}";
+    window.STAR_ALT_ICON = "{{ asset('/icons/star-alt.png') }}";
+    window.MUTE_ICON = "{{ asset('/icons/mute.png') }}";
+    window.MUTE_ALT_ICON = "{{ asset('/icons/mute-alt.png') }}";
+</script>
 <script src="{{ asset('js/groups.js') }}"></script>
-
 </html>

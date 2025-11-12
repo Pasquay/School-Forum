@@ -373,14 +373,6 @@
                         }
                     })
                 }
-                // Manage Button
-                if (button.classList.contains('manage-button')) {
-                    form.method = 'GET';
-                    form.action = `/group/${groupid}/settings`;
-                    form.addEventListener('submit', (e) => {
-                        e.stopPropagation();
-                    })
-                }
 
                 // Mark Listener
                 group.setAttribute('data-listeners-attached', '1');
@@ -862,9 +854,9 @@
                         if (response.ok) {
                             const data = await response.json();
 
-                            starImg.src = data.starValue ?
-                                '{{ asset("/icons/star.png") }}' :
-                                '{{ asset("/icons/star-alt.png") }}';
+                            starImg.src = data.starValue 
+                                ? window.STAR_ICON 
+                                : window.STAR_ALT_ICON;
                         }
                     } catch (error) {
                         console.error('Error: ', error);

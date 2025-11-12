@@ -46,7 +46,7 @@ use Illuminate\Support\Facades\DB;
         <form action="" method="POST">
             @csrf
             @if($group->owner_id === Auth::id())
-            <button type="submit" class="manage-button">Manage</button>
+            <button type="button" class="manage-button" onclick="window.location.href='{{ url('/group/' . $group->id . '?settings=1') }}'">Manage</button>
             @elseif($userMembership)
             <button type="submit" class="leave-button">Leave</button>
             @elseif(!$group->is_private)
