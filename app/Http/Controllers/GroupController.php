@@ -1967,12 +1967,12 @@ class GroupController extends Controller
                     $submission = AssignmentSubmission::create([
                         'assignment_id' => $assignmentId,
                         'student_id' => $user->id,
-                        'status' => 'no_submission_required'
+                        'status' => 'draft'
                     ]);
-                } elseif ($submission->status !== 'no_submission_required') {
-                    $submission->status = 'no_submission_required';
-                    $submission->save();
                 }
+
+                // Surface a friendly status without persisting unsupported enum values
+                $submission->setAttribute('status', 'no_submission_required');
             } else {
                 if (!$submission) {
                     $submission = AssignmentSubmission::create([
@@ -1990,6 +1990,7 @@ class GroupController extends Controller
                     && ($submission->status === 'draft' || is_null($submission->date_submitted))
                     && (!$isPastDue || $assignment->allow_late_submissions);
             }
+
 
             // Format assignment dates to Pacific time for frontend
             $formattedAssignment = $assignment->toArray();
@@ -2453,24 +2454,27 @@ class GroupController extends Controller
                 }
             }
 
-            $defaultStatus = $assignment->submission_type === 'none'
-                ? 'no_submission_required'
-                : 'not_submitted';
-
-            // Get or create submission
+            // Always persist a valid enum value but surface friendly status labels in responses
             $submission = AssignmentSubmission::firstOrCreate(
                 [
                     'assignment_id' => $assignmentId,
                     'student_id' => $studentId
                 ],
                 [
-                    'status' => $defaultStatus
+                    'status' => 'draft'
                 ]
             );
 
-            if ($submission->status !== $defaultStatus && $assignment->submission_type === 'none') {
-                $submission->status = $defaultStatus;
-                $submission->save();
+            if ($assignment->submission_type === 'none') {
+                $submission->setAttribute('status', 'no_submission_required');
+            } elseif ($submission->status === 'draft' && is_null($submission->date_submitted)) {
+                $hasSavedWork = !empty($submission->submission_text)
+                    || !empty($submission->file_path)
+                    || !empty($submission->external_link);
+
+                if (!$hasSavedWork) {
+                    $submission->setAttribute('status', 'not_submitted');
+                }
             }
 
             // Load quiz responses if it's a quiz
@@ -2526,18 +2530,14 @@ class GroupController extends Controller
                 'teacher_feedback' => 'nullable|string'
             ]);
 
-            // Find submission (create if info-only assignment)
-            $defaultStatus = $assignment->submission_type === 'none'
-                ? 'no_submission_required'
-                : 'not_submitted';
-
+            // Find submission (create if needed) while persisting supported enum values
             $submission = AssignmentSubmission::firstOrCreate(
                 [
                     'assignment_id' => $assignmentId,
                     'student_id' => $studentId,
                 ],
                 [
-                    'status' => $defaultStatus,
+                    'status' => 'draft',
                 ]
             );
 
@@ -3130,9 +3130,16 @@ class GroupController extends Controller
     {
         try {
             $user = Auth::user();
-            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
-                ->where('student_id', $studentId)
-                ->firstOrFail();
+
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => 'draft',
+                ]
+            );
 
             $validated = $request->validate([
                 'comment_text' => 'required|string',
@@ -3162,9 +3169,15 @@ class GroupController extends Controller
     public function getSubmissionComments(Request $request, $groupId, $assignmentId, $studentId)
     {
         try {
-            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
-                ->where('student_id', $studentId)
-                ->firstOrFail();
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => 'draft',
+                ]
+            );
 
             $comments = $submission->comments()->with('user')->get();
 
