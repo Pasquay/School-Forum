@@ -35,9 +35,9 @@ class PostController extends Controller
         // Posts
         $posts = Post::whereNull('deleted_at')
             ->whereNotIn('id', $pinned->pluck('id')->all())
-            ->whereHas('group', function($query){
+            ->whereHas('group', function ($query) {
                 $query->where('is_private', 0)
-                      ->where('type', '!=', 'academic');
+                    ->where('type', '!=', 'academic');
             })
             ->latest()
             ->with(['group'])
@@ -330,7 +330,7 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post ' . $status . ' successfully');
         }
     }
-    
+
     public function edit($id, Request $request)
     {
         $postData = $request->validate([
@@ -346,8 +346,8 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post edited successfully');
         } else {
             return redirect()->back()->with('error', 'Invalid credentials');
-        }       
-    } 
+        }
+    }
 
     public function delete($id)
     {

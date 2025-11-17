@@ -481,20 +481,20 @@ class GroupController extends Controller
 
         $starredGroups = [];
 
-        foreach($groupIds as $groupId){
+        foreach ($groupIds as $groupId) {
             $group = $user->groups()->where('group_id', $groupId)->first();
-            if($group){
+            if ($group) {
                 $user->groups()->updateExistingPivot($groupId, ['is_starred' => $value]);
                 $starredGroups[] = $group->name;
             }
         }
 
         $message = '';
-        if($value){
-            if(count($starredGroups) > 1) $message = 'Groups starred successfully.';
+        if ($value) {
+            if (count($starredGroups) > 1) $message = 'Groups starred successfully.';
             else $message = 'Group starred successfully.';
         } else {
-            if(count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
+            if (count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
             else $message = 'Group unstarred successfully.';
         }
 
@@ -506,7 +506,7 @@ class GroupController extends Controller
             'message' => $message,
         ]);
     }
-    
+
     public function toggleMute($id)
     {
         $user = User::findOrFail(Auth::id());
@@ -534,20 +534,20 @@ class GroupController extends Controller
 
         $mutedGroups = [];
 
-        foreach($groupIds as $groupId){
+        foreach ($groupIds as $groupId) {
             $group = $user->groups()->where('group_id', $groupId)->first();
-            if($group){
+            if ($group) {
                 $user->groups()->updateExistingPivot($groupId, ['is_muted' => $value]);
                 $mutedGroups[] = $group->name;
             }
         }
 
         $message = '';
-        if($value){
-            if(count($mutedGroups) > 1) $message = 'Groups muted successfully.';
+        if ($value) {
+            if (count($mutedGroups) > 1) $message = 'Groups muted successfully.';
             else $message = 'Group muted successfully.';
         } else {
-            if(count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
+            if (count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
             else $message = 'Group unmuted successfully.';
         }
 
@@ -657,13 +657,13 @@ class GroupController extends Controller
     public function leaveGroupAlt($id)
     {
         $user = User::findOrFail(Auth::id());
-        if(!is_array($id)){
-            if(strpos($id, ',') !== false) $ids = explode(',', $id);
+        if (!is_array($id)) {
+            if (strpos($id, ',') !== false) $ids = explode(',', $id);
             else $ids = [$id];
         } else $ids = $id;
 
         $leftGroups = [];
-        foreach($ids as $groupId){
+        foreach ($ids as $groupId) {
             $membership = $user->groups()->where('group_id', $groupId)->exists();
             if ($membership) {
                 $user->groups()->detach($groupId);
