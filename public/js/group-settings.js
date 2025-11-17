@@ -449,7 +449,7 @@ function displaySidebarAssignments(assignments) {
 
 function createSidebarAssignmentHTML(assignment) {
     const statusClasses = [];
-    const hasSubmittedStatus = assignment.submission_status === 'submitted' || assignment.submission_status === 'graded';
+    const hasSubmittedStatus = ['submitted', 'graded', 'no_submission_required'].includes(assignment.submission_status);
     // Only add overdue class if user is a student AND not already submitted/graded
     if (assignment.is_overdue && !assignment.can_edit && !hasSubmittedStatus) statusClasses.push('overdue');
     if (assignment.is_closed) statusClasses.push('closed');
@@ -460,7 +460,8 @@ function createSidebarAssignmentHTML(assignment) {
             'draft': 'draft',
             'submitted': 'submitted',
             'submitted_late': 'late',
-            'graded': 'graded'
+            'graded': 'graded',
+            'no_submission_required': 'no-submission'
         }[assignment.submission_status];
         if (submissionClass) statusClasses.push(submissionClass);
     }
@@ -486,7 +487,8 @@ function createSidebarAssignmentHTML(assignment) {
             'draft': 'Draft Saved',
             'submitted': 'Submitted',
             'submitted_late': 'Submitted (Late)',
-            'graded': 'Graded'
+            'graded': 'Graded',
+            'no_submission_required': 'No Submission Required'
         }[assignment.submission_status] || 'Unknown';
         
         const statusClass = {
@@ -494,7 +496,8 @@ function createSidebarAssignmentHTML(assignment) {
             'draft': 'draft',
             'submitted': 'submitted',
             'submitted_late': 'late',
-            'graded': 'graded'
+            'graded': 'graded',
+            'no_submission_required': 'no-submission'
         }[assignment.submission_status] || 'unknown';
         
         statusBadges.push(`<span class="status-badge ${statusClass}">${statusText}</span>`);
@@ -1432,11 +1435,17 @@ function renderSubmissions(submissions, stats) {
     const listContainer = document.getElementById('submissions-list');
     
     // Render stats
-    statsContainer.innerHTML = `
+    let statsHtml = `
         <strong>${stats.submitted}</strong> submitted | 
         <strong>${stats.graded}</strong> graded | 
         <strong>${stats.not_submitted}</strong> not submitted
     `;
+
+    if (stats.no_submission_required && stats.no_submission_required > 0) {
+        statsHtml += ` | <strong>${stats.no_submission_required}</strong> no submission required`;
+    }
+
+    statsContainer.innerHTML = statsHtml;
     
     // Render submissions
     if (submissions.length === 0) {
@@ -1445,10 +1454,17 @@ function renderSubmissions(submissions, stats) {
     }
     
     listContainer.innerHTML = submissions.map(submission => {
-        const statusClass = submission.status === 'graded' ? 'graded' : 
-                          submission.status === 'submitted' ? 'submitted' : 'not-submitted';
-        const statusText = submission.status === 'graded' ? 'Graded' :
-                          submission.status === 'submitted' ? 'Submitted' : 'Not Submitted';
+        const statusMap = {
+            'graded': { className: 'graded', label: 'Graded' },
+            'submitted': { className: 'submitted', label: 'Submitted' },
+            'no_submission_required': { className: 'no-submission', label: 'No Submission Required' },
+            'not_submitted': { className: 'not-submitted', label: 'Not Submitted' },
+        };
+
+        const statusInfo = statusMap[submission.status] || statusMap['not_submitted'];
+        const submittedLabel = submission.status === 'no_submission_required'
+            ? 'Not required'
+            : (submission.submitted_at || 'Not submitted');
         
         return `
             <div class="submission-item" onclick="openGradeModal(${submission.student_id}, ${currentEditAssignment.id})">
@@ -1458,11 +1474,11 @@ function renderSubmissions(submissions, stats) {
                     </div>
                     <div class="submission-student-details">
                         <h4>${submission.student_name}</h4>
-                        <p>Submitted: ${submission.submitted_at || 'Not submitted'}</p>
+                        <p>Submitted: ${submittedLabel}</p>
                     </div>
                 </div>
                 <div class="submission-meta">
-                    <span class="submission-status-indicator ${statusClass}">${statusText}</span>
+                    <span class="submission-status-indicator ${statusInfo.className}">${statusInfo.label}</span>
                     ${submission.grade !== null ? `<span class="submission-grade">${submission.grade}/${currentEditAssignment.max_points}</span>` : ''}
                 </div>
             </div>

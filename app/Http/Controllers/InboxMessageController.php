@@ -26,10 +26,11 @@ class InboxMessageController extends Controller
 
     public function respond($id, Request $request){
         $message = InboxMessage::findOrFail($id);
-        $action = $request->input('action');
+        $action = strtolower($request->input('action', ''));
 
         if($message->recipient_id === Auth::id()){
-            $responseMessage = "";
+            $responseSuccess = true;
+            $responseMessage = 'Notification acknowledged.';
 
             switch($message->type){
                 case 'group_join_request':
@@ -130,13 +131,14 @@ class InboxMessageController extends Controller
                     $responseMessage = "Group \"{$group->name}\" moderator promotion accepted.";
                     $responseSuccess = true;
                     break;
-                case '':
+                case 'assignment_post':
+                    $responseMessage = 'Assignment notification marked as read.';
                     break;
-                case '':
+                case 'group_post_notification':
+                    $responseMessage = 'Post notification marked as read.';
                     break;
-                case '':
-                    break;
-                case '':
+                default:
+                    $responseMessage = 'Notification marked as read.';
                     break;
             }
 

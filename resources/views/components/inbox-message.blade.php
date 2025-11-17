@@ -211,10 +211,12 @@
                     >
                         @csrf
                         @if($message->type === 'group_join_request' || $message->type === 'group_invitation')
-                            <button type="submit" class="action-btn accept">Accept</button>
-                            <button type="submit" class="action-btn reject">Reject</button>
+                            <button type="submit" class="action-btn accept" data-action="accept">Accept</button>
+                            <button type="submit" class="action-btn reject" data-action="reject">Reject</button>
                         @elseif($message->type === 'moderator_action')
-                            <button type="submit" class="action-btn acknowledge">Acknowledge</button>
+                            <button type="submit" class="action-btn acknowledge" data-action="acknowledge">Acknowledge</button>
+                        @else
+                            <button type="submit" class="action-btn acknowledge" data-action="acknowledge">Mark as Read</button>
                         @endif
                     </form>
                 @else
@@ -236,7 +238,7 @@
 
                 const messageType = messageRow.dataset.messageType;
                 const messageId = messageRow.dataset.messageId;
-                const action = e.submitter.textContent.toLowerCase();
+                const action = (e.submitter.dataset.action || e.submitter.textContent).toLowerCase();
                 
                 const formData = new FormData();
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);

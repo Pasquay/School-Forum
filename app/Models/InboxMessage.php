@@ -58,4 +58,54 @@ class InboxMessage extends Model
                    ->where('responded', false)
                    ->exists();
     }
+
+    /**
+     * Send a notification message to multiple members of a group.
+     *
+     * @param  \App\Models\Group  $group
+     * @param  \App\Models\User   $sender
+     * @param  string               $type
+     * @param  string               $title
+     * @param  string               $body
+     * @param  array                $options  Supported keys: roles (array), exclude_sender (bool)
+     * @return void
+     */
+    public static function notifyGroupMembers(Group $group, User $sender, string $type, string $title, string $body, array $options = []): void
+    {
+        $roles = $options['roles'] ?? ['member'];
+        $excludeSender = $options['exclude_sender'] ?? true;
+
+        $membersQuery = $group->members();
+
+        if (!empty($roles)) {
+            $membersQuery->wherePivotIn('role', $roles);
+        }
+
+        if ($excludeSender) {
+            $membersQuery->where('users.id', '!=', $sender->id);
+        }
+
+        $recipientIds = $membersQuery->pluck('users.id')->unique()->values();
+
+        if ($recipientIds->isEmpty()) {
+            return;
+        }
+
+        $timestamp = now();
+
+        $messages = $recipientIds->map(function ($recipientId) use ($group, $sender, $type, $title, $body, $timestamp) {
+            return [
+                'sender_id' => $sender->id,
+                'recipient_id' => $recipientId,
+                'group_id' => $group->id,
+                'type' => $type,
+                'title' => $title,
+                'body' => $body,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
+        })->all();
+
+        self::insert($messages);
+    }
 }
