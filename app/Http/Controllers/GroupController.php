@@ -585,21 +585,21 @@ class GroupController extends Controller
             }
         }
 
-        $message = '';
-        if ($value) {
-            if (count($starredGroups) > 1) $message = 'Groups starred successfully.';
-            else $message = 'Group starred successfully.';
-        } else {
-            if (count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
-            else $message = 'Group unstarred successfully.';
-        }
+        // $message = '';
+        // if ($value) {
+        //     if (count($starredGroups) > 1) $message = 'Groups starred successfully.';
+        //     else $message = 'Group starred successfully.';
+        // } else {
+        //     if (count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
+        //     else $message = 'Group unstarred successfully.';
+        // }
 
         return response()->json([
             'success' => true,
             'action_type' => 'star',
             'action_value' => $value,
             'starred_groups' => $starredGroups,
-            'message' => $message,
+            // 'message' => $message,
         ]);
     }
 
@@ -638,21 +638,21 @@ class GroupController extends Controller
             }
         }
 
-        $message = '';
-        if ($value) {
-            if (count($mutedGroups) > 1) $message = 'Groups muted successfully.';
-            else $message = 'Group muted successfully.';
-        } else {
-            if (count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
-            else $message = 'Group unmuted successfully.';
-        }
+        // $message = '';
+        // if ($value) {
+        //     if (count($mutedGroups) > 1) $message = 'Groups muted successfully.';
+        //     else $message = 'Group muted successfully.';
+        // } else {
+        //     if (count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
+        //     else $message = 'Group unmuted successfully.';
+        // }
 
         return response()->json([
             'success' => true,
             'action_type' => 'mute',
             'action_value' => $value,
             'muted_groups' => $mutedGroups,
-            'message' => $message,
+            // 'message' => $message,
         ]);
     }
 

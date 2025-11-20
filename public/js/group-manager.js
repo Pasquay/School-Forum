@@ -311,7 +311,9 @@
 
                     if(response.ok){
                         const data = await response.json();
-                        alert(data.message || 'Message not found');
+                        if(data.message){
+                            alert(data.message);
+                        }
 
                         checked.forEach(cb => {
                             const group = document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`);
@@ -487,7 +489,7 @@
 
         const formData = new FormData(searchForm);
         formData.set('sort', sortValue);
-        
+
         const params = new URLSearchParams(formData);
         params.set('page', page);
 
