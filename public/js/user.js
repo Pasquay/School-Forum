@@ -291,12 +291,12 @@
 
                             const upArrow = upvoteForm.querySelector('img');
                             upArrow.src = data.voteValue == 1 ?
-                                "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                "{{ asset('/icons/up-arrow.png') }}";
+                                "/icons/up-arrow-alt.png" :
+                                "/icons/up-arrow.png";
 
                             const downArrow = downvoteForm.querySelector('img');
                             if (data.voteValue == 1) {
-                                downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                downArrow.src = "/icons/down-arrow.png";
                             }
                         }
                     } catch (error) {
@@ -329,12 +329,12 @@
 
                             const downArrow = downvoteForm.querySelector('img');
                             downArrow.src = data.voteValue == -1 ?
-                                "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                "{{ asset('/icons/down-arrow.png') }}";
+                                "/icons/down-arrow-alt.png" :
+                                "/icons/down-arrow.png";
 
                             const upArrow = upvoteForm.querySelector('img');
                             if (data.voteValue == -1) {
-                                upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                upArrow.src = "/icons/up-arrow.png";
                             }
                         }
                     } catch (error) {
@@ -422,12 +422,12 @@
                             voteCount.textContent = data.voteCount;
                             const upArrow = upvoteForm.querySelector('img');
                             upArrow.src = data.voteValue == 1 ?
-                                "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                "{{ asset('/icons/up-arrow.png') }}";
+                                "/icons/up-arrow-alt.png" :
+                                "/icons/up-arrow.png";
 
                             if (data.voteValue == 1) {
                                 const downArrow = downvoteForm.querySelector('img');
-                                downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                downArrow.src = "/icons/down-arrow.png";
                             }
                         }
                     } catch (error) {
@@ -459,12 +459,12 @@
                             voteCount.textContent = data.voteCount;
                             const downArrow = downvoteForm.querySelector('img');
                             downArrow.src = data.voteValue == -1 ?
-                                "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                "{{ asset('/icons/down-arrow.png') }}";
+                                "/icons/down-arrow-alt.png" :
+                                "/icons/down-arrow.png";
 
                             if (data.voteValue == -1) {
                                 const upArrow = upvoteForm.querySelector('img');
-                                upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                upArrow.src = "/icons/up-arrow.png";
                             }
                         }
                     } catch (error) {
@@ -548,12 +548,12 @@
                             voteCount.textContent = data.voteCount;
                             const upArrow = upvoteForm.querySelector('img');
                             upArrow.src = data.voteValue == 1 ?
-                                "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                "{{ asset('/icons/up-arrow.png') }}";
+                                "/icons/up-arrow-alt.png" :
+                                "/icons/up-arrow.png";
 
                             if (data.voteValue == 1) {
                                 const downArrow = downvoteForm.querySelector('img');
-                                downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                downArrow.src = "/icons/down-arrow.png";
                             }
                         }
                     } catch (error) {
@@ -585,12 +585,12 @@
                             voteCount.textContent = data.voteCount;
                             const downArrow = downvoteForm.querySelector('img');
                             downArrow.src = data.voteValue == -1 ?
-                                "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                "{{ asset('/icons/down-arrow.png') }}";
+                                "/icons/down-arrow-alt.png" :
+                                "/icons/down-arrow.png";
 
                             if (data.voteValue == -1) {
                                 const upArrow = upvoteForm.querySelector('img');
-                                upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                upArrow.src = "/icons/up-arrow.png";
                             }
                         }
                     } catch (error) {

@@ -138,7 +138,12 @@
                                         <input type="checkbox" id="comment-is-private">
                                         <span>Private (Teacher notes - not visible to student)</span>
                                     </label>
-                                    <button type="button" class="btn btn-primary btn-sm" id="add-feedback-btn">Add Feedback</button>
+                                    <button type="button"
+                                        class="btn btn-primary btn-sm"
+                                        id="add-feedback-btn"
+                                        onclick="window.addSubmissionComment && window.addSubmissionComment();">
+                                        Add Feedback
+                                    </button>
                                 </div>
                             </div>
                         </div>

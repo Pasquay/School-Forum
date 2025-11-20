@@ -105,7 +105,7 @@
         <div class="center">
             <div class="left">
                 <h3>Assignments</h3>
-                @if($group->owner_id === Auth::id())
+                @if($group->owner_id === Auth::id() || $group->isModerator(Auth::user()))
                 <button type="button" onclick="openCreateAssignmentModal()">Create Assignment</button>
                 @endif
                 <div class="assignments-list" id="sidebar-assignments-list">

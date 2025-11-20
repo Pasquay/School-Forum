@@ -92,7 +92,8 @@ async function loadAssignmentForStudent(assignmentId) {
         displayAssignmentInfo(data.assignment, data.submission, data.can_submit);
         
         // Load resubmission history if assignment allows resubmissions and student has submitted
-        if (data.assignment.allow_resubmissions && data.submission && data.submission.status !== 'draft') {
+        if (data.assignment.allow_resubmissions && data.submission &&
+            data.submission.status !== 'draft' && data.submission.status !== 'no_submission_required') {
             await loadResubmissionHistory(assignmentId);
         }
     } catch (error) {
@@ -120,6 +121,10 @@ function displayAssignmentInfo(assignment, submission, canSubmit) {
     if (submission.status === 'submitted' || submission.status === 'graded') {
         statusBadge.textContent = submission.is_late ? 'Submitted Late' : 'Submitted';
         statusBadge.className = `status-badge ${submission.status}`;
+        statusBadge.style.display = 'inline-block';
+    } else if (submission.status === 'no_submission_required') {
+        statusBadge.textContent = 'No Submission Required';
+        statusBadge.className = 'status-badge no-submission';
         statusBadge.style.display = 'inline-block';
     } else {
         statusBadge.textContent = 'Not Submitted';
@@ -175,6 +180,19 @@ function displayAssignmentInfo(assignment, submission, canSubmit) {
     // Removed: assignments don't have external_link, only submissions do
 
     // Handle submission section
+    const infoOnly = submission.status === 'no_submission_required';
+
+    if (infoOnly) {
+        hideEl('assignment-submission-form');
+        hideEl('submitted-view');
+        const closedMsg = document.getElementById('closed-message');
+        if (closedMsg) {
+            closedMsg.innerHTML = '<p class="info-message">✅ No submission is required for this assignment.</p>';
+            closedMsg.style.display = 'block';
+        }
+        return;
+    }
+
     if (submission.status === 'submitted' || submission.status === 'graded') {
         showSubmittedView(assignment, submission);
     } else if (canSubmit) {
@@ -670,7 +688,7 @@ async function autoSaveDraft() {
     if (isAutoSaving) return;
     
     // Don't auto-save if already submitted or graded
-    if (currentSubmission && (currentSubmission.status === 'submitted' || currentSubmission.status === 'graded')) {
+    if (currentSubmission && ['submitted', 'graded', 'no_submission_required'].includes(currentSubmission.status)) {
         return;
     }
     

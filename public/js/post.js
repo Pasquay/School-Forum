@@ -354,11 +354,11 @@
                     postVoteCount.textContent = data.voteCount;
 
                     upArrow.src = (data.voteValue == 1) ?
-                        "{{ asset('/icons/up-arrow-alt.png') }}" :
-                        "{{ asset('/icons/up-arrow.png') }}";
+                        "/icons/up-arrow-alt.png" :
+                        "/icons/up-arrow.png";
 
                     if (data.voteValue == 1) {
-                        downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                        downArrow.src = "/icons/down-arrow.png";
                     }
                 }
             } catch (error) {
@@ -391,11 +391,11 @@
                     postVoteCount.textContent = data.voteCount;
 
                     downArrow.src = (data.voteValue == -1) ?
-                        "{{ asset('/icons/down-arrow-alt.png') }}" :
-                        "{{ asset('/icons/down-arrow.png') }}";
+                        "/icons/down-arrow-alt.png" :
+                        "/icons/down-arrow.png";
 
                     if (data.voteValue == -1) {
-                        upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                        upArrow.src = "/icons/up-arrow.png";
                     }
                 }
             } catch (error) {
@@ -443,11 +443,11 @@
                         commentVoteCount.textContent = data.voteCount;
 
                         upArrow.src = (data.voteValue == 1) ?
-                            "{{ asset('/icons/up-arrow-alt.png') }}" :
-                            "{{ asset('/icons/up-arrow.png') }}";
+                            "/icons/up-arrow-alt.png" :
+                            "/icons/up-arrow.png";
 
                         if (data.voteValue == 1) {
-                            downArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                            downArrow.src = "/icons/down-arrow.png";
                         }
                     }
                 } catch (error) {
@@ -479,11 +479,11 @@
                         commentVoteCount.textContent = data.voteCount;
 
                         downArrow.src = (data.voteValue == -1) ?
-                            "{{ asset('/icons/down-arrow-alt.png') }}" :
-                            "{{ asset('/icons/down-arrow.png') }}";
+                            "/icons/down-arrow-alt.png" :
+                            "/icons/down-arrow.png";
 
                         if (data.voteValue == -1) {
-                            upArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                            upArrow.src = "/icons/up-arrow.png";
                         }
                     }
                 } catch (error) {
@@ -553,7 +553,7 @@
                                         settingsContainer.innerHTML =
                                             `<div class='reply-settings-container'>
                                         <button class='settings-button' id='reply-settings-button-${reply.id}'>
-                                            <img src='{{ asset('/icons/dots.png') }}' alt='Settings' id='reply-dots-icon-${reply.id}'>
+                                            <img src='/icons/dots.png' alt='Settings' id='reply-dots-icon-${reply.id}'>
                                         </button>
                                         <div class='dropdown-menu' id='reply-settings-dropdown-menu-${reply.id}'>
                                             <button class='dropdown-item' id='edit-reply-button-${reply.id}'>Edit</button>
@@ -571,13 +571,13 @@
                                     const replyDownArrow = cloneVote.querySelector('form:last-child img');
                                     replyUpvoteForm.action = `/reply/upvote/${reply.id}`;
                                     replyUpArrow.src = (reply.userVote == 1) ?
-                                        "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                        "{{ asset('/icons/up-arrow.png') }}";
+                                        "/icons/up-arrow-alt.png" :
+                                        "/icons/up-arrow.png";
                                     replyVoteCount.textContent = reply.votes;
                                     replyDownvoteForm.action = `/reply/downvote/${reply.id}`;
                                     replyDownArrow.src = (reply.userVote == -1) ?
-                                        "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                        "{{ asset('/icons/down-arrow.png') }}";
+                                        "/icons/down-arrow-alt.png" :
+                                        "/icons/down-arrow.png";
                                     const replyShareButton = clone.querySelector('.share-button');
                                     replyShareButton.id = `reply-share-button-${reply.id}`;
 
@@ -621,11 +621,11 @@
                                                 replyVoteCount.textContent = data.voteCount;
 
                                                 replyUpArrow.src = (data.voteValue == 1) ?
-                                                    "{{ asset('/icons/up-arrow-alt.png') }}" :
-                                                    "{{ asset('/icons/up-arrow.png') }}";
+                                                    "/icons/up-arrow-alt.png" :
+                                                    "/icons/up-arrow.png";
 
                                                 if (data.voteValue == 1) {
-                                                    replyDownArrow.src = "{{ asset('/icons/down-arrow.png') }}";
+                                                    replyDownArrow.src = "/icons/down-arrow.png";
                                                 }
                                             }
                                         } catch (error) {
@@ -658,11 +658,11 @@
                                                 replyVoteCount.textContent = data.voteCount;
 
                                                 replyDownArrow.src = (data.voteValue == -1) ?
-                                                    "{{ asset('/icons/down-arrow-alt.png') }}" :
-                                                    "{{ asset('/icons/down-arrow.png') }}";
+                                                    "/icons/down-arrow-alt.png" :
+                                                    "/icons/down-arrow.png";
 
                                                 if (data.voteValue == -1) {
-                                                    replyUpArrow.src = "{{ asset('/icons/up-arrow.png') }}";
+                                                    replyUpArrow.src = "/icons/up-arrow.png";
                                                 }
                                             }
                                         } catch (error) {
@@ -694,10 +694,10 @@
                                         const clonedSettingsButtonImg = clonedSettings.querySelector('.settings-button img');
                                         const clonedSettingsDropdown = clonedSettings.querySelector('.dropdown-menu');
                                         clonedSettingsButton.addEventListener('mouseenter', () => {
-                                            clonedSettingsButtonImg.src = '{{ asset("/icons/dots-alt.png") }}';
+                                            clonedSettingsButtonImg.src = '/icons/dots-alt.png';
                                         });
                                         clonedSettingsButton.addEventListener('mouseleave', () => {
-                                            clonedSettingsButtonImg.src = '{{ asset("/icons/dots.png") }}';
+                                            clonedSettingsButtonImg.src = '/icons/dots.png';
                                         });
                                         clonedSettingsButton.addEventListener('click', (e) => {
                                             e.stopPropagation();

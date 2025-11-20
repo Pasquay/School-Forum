@@ -577,20 +577,20 @@ class GroupController extends Controller
 
         $starredGroups = [];
 
-        foreach($groupIds as $groupId){
+        foreach ($groupIds as $groupId) {
             $group = $user->groups()->where('group_id', $groupId)->first();
-            if($group){
+            if ($group) {
                 $user->groups()->updateExistingPivot($groupId, ['is_starred' => $value]);
                 $starredGroups[] = $group->name;
             }
         }
 
         $message = '';
-        if($value){
-            if(count($starredGroups) > 1) $message = 'Groups starred successfully.';
+        if ($value) {
+            if (count($starredGroups) > 1) $message = 'Groups starred successfully.';
             else $message = 'Group starred successfully.';
         } else {
-            if(count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
+            if (count($starredGroups) > 1) $message = 'Groups unstarred successfully.';
             else $message = 'Group unstarred successfully.';
         }
 
@@ -602,7 +602,7 @@ class GroupController extends Controller
             'message' => $message,
         ]);
     }
-    
+
     public function toggleMute($id)
     {
         $user = User::findOrFail(Auth::id());
@@ -630,20 +630,20 @@ class GroupController extends Controller
 
         $mutedGroups = [];
 
-        foreach($groupIds as $groupId){
+        foreach ($groupIds as $groupId) {
             $group = $user->groups()->where('group_id', $groupId)->first();
-            if($group){
+            if ($group) {
                 $user->groups()->updateExistingPivot($groupId, ['is_muted' => $value]);
                 $mutedGroups[] = $group->name;
             }
         }
 
         $message = '';
-        if($value){
-            if(count($mutedGroups) > 1) $message = 'Groups muted successfully.';
+        if ($value) {
+            if (count($mutedGroups) > 1) $message = 'Groups muted successfully.';
             else $message = 'Group muted successfully.';
         } else {
-            if(count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
+            if (count($mutedGroups) > 1) $message = 'Groups unmuted successfully.';
             else $message = 'Group unmuted successfully.';
         }
 
@@ -753,15 +753,15 @@ class GroupController extends Controller
     public function leaveGroupAlt($id)
     {
         $user = User::findOrFail(Auth::id());
-        if(!is_array($id)){
-            if(strpos($id, ',') !== false) $ids = explode(',', $id);
+        if (!is_array($id)) {
+            if (strpos($id, ',') !== false) $ids = explode(',', $id);
             else $ids = [$id];
         } else $ids = $id;
 
         $leftGroups = []; 
         $ownedGroups = [];
 
-        foreach($ids as $groupId){
+        foreach ($ids as $groupId) {
             $membership = $user->groups()->where('group_id', $groupId)->exists();
             if ($membership) {
                 $group = Group::findOrFail($groupId);
@@ -1359,6 +1359,11 @@ class GroupController extends Controller
     {
         try {
             $group = Group::findOrFail($id);
+            $user = Auth::user();
+
+            if (!$user || ($group->owner_id !== $user->id && !$group->isModerator($user))) {
+                return back()->with('error', 'Only owners and moderators can create assignments.');
+            }
 
             // Auto-set submission_type for quiz/exam assignments
             if (in_array($request->assignment_type, ['quiz', 'exam']) && empty($request->submission_type)) {
@@ -1483,6 +1488,51 @@ class GroupController extends Controller
                 }
             }
 
+            $creator = $user;
+            $creatorRole = DB::table('group_members')
+                ->where('group_id', $group->id)
+                ->where('user_id', $creator->id)
+                ->value('role');
+
+            $canNotify = $group->owner_id === $creator->id
+                || in_array($creatorRole, ['owner', 'moderator'], true);
+
+            if ($canNotify) {
+                $groupName = e($group->name);
+                $creatorName = e($creator->name);
+                $assignmentName = e($assignment->assignment_name);
+                $assignmentTypeLabel = e(ucfirst($assignment->assignment_type));
+                $dueDate = null;
+
+                if (!empty($assignment->date_due)) {
+                    try {
+                        $dueDate = \Carbon\Carbon::parse($assignment->date_due)
+                            ->setTimezone('America/Los_Angeles')
+                            ->format('M d, Y g:i A T');
+                    } catch (\Exception $exception) {
+                        Log::warning('Unable to format assignment due date for inbox notification: ' . $exception->getMessage());
+                    }
+                }
+
+                $title = "New {$assignmentTypeLabel} in <a href='/group/{$group->id}'>{$groupName}</a>";
+                $body = "{$creatorName} published &ldquo;{$assignmentName}&rdquo; in <a href='/group/{$group->id}'>{$groupName}</a>.";
+
+                if ($dueDate) {
+                    $body .= " Due on {$dueDate}.";
+                }
+
+                $body .= " <a href='/group/{$group->id}/assignments/{$assignment->id}'>View assignment details</a>.";
+
+                InboxMessage::notifyGroupMembers(
+                    $group,
+                    $creator,
+                    'assignment_post',
+                    $title,
+                    $body,
+                    ['roles' => ['member']]
+                );
+            }
+
             return back()->with('success', 'Assignment created successfully!');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
@@ -1535,20 +1585,24 @@ class GroupController extends Controller
                 // Get student submission status if user is a student
                 $submissionStatus = null;
                 if ($membership->role !== 'owner' && $membership->role !== 'moderator') {
-                    $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
-                        ->where('student_id', $user->id)
-                        ->first();
-
-                    if ($submission) {
-                        if ($submission->status === 'graded') {
-                            $submissionStatus = 'graded';
-                        } elseif ($submission->status === 'submitted') {
-                            $submissionStatus = $submission->is_late ? 'submitted_late' : 'submitted';
-                        } else {
-                            $submissionStatus = 'draft';
-                        }
+                    if ($assignment->submission_type === 'none') {
+                        $submissionStatus = 'no_submission_required';
                     } else {
-                        $submissionStatus = 'not_submitted';
+                        $submission = AssignmentSubmission::where('assignment_id', $assignment->id)
+                            ->where('student_id', $user->id)
+                            ->first();
+
+                        if ($submission) {
+                            if ($submission->status === 'graded') {
+                                $submissionStatus = 'graded';
+                            } elseif ($submission->status === 'submitted') {
+                                $submissionStatus = $submission->is_late ? 'submitted_late' : 'submitted';
+                            } else {
+                                $submissionStatus = 'draft';
+                            }
+                        } else {
+                            $submissionStatus = 'not_submitted';
+                        }
                     }
                 }
 
@@ -2006,28 +2060,43 @@ class GroupController extends Controller
                 return response()->json(['message' => 'You are not a member of this group'], 403);
             }
 
-            // Get or create draft submission
+            // Get existing submission (if any)
             $submission = AssignmentSubmission::with(['quizResponses.selectedOption'])
                 ->where('assignment_id', $assignmentId)
                 ->where('student_id', $user->id)
                 ->first();
 
-            if (!$submission) {
-                // Create a new draft submission
-                $submission = AssignmentSubmission::create([
-                    'assignment_id' => $assignmentId,
-                    'student_id' => $user->id,
-                    'status' => 'draft'
-                ]);
+            $canSubmit = false;
+
+            if ($assignment->submission_type === 'none') {
+                if (!$submission) {
+                    $submission = AssignmentSubmission::create([
+                        'assignment_id' => $assignmentId,
+                        'student_id' => $user->id,
+                        'status' => 'draft'
+                    ]);
+                }
+
+                // Surface a friendly status without persisting unsupported enum values
+                $submission->setAttribute('status', 'no_submission_required');
+            } else {
+                if (!$submission) {
+                    $submission = AssignmentSubmission::create([
+                        'assignment_id' => $assignmentId,
+                        'student_id' => $user->id,
+                        'status' => 'draft'
+                    ]);
+                }
+
+                // Check if can submit: not closed, not already submitted, and (before due date OR late submissions allowed)
+                $isPastDue = method_exists($assignment, 'isPastDuePacific')
+                    ? $assignment->isPastDuePacific()
+                    : (now() > $assignment->date_due);
+                $canSubmit = !$assignment->is_closed
+                    && ($submission->status === 'draft' || is_null($submission->date_submitted))
+                    && (!$isPastDue || $assignment->allow_late_submissions);
             }
 
-            // Check if can submit: not closed, not already submitted, and (before due date OR late submissions allowed)
-            $isPastDue = method_exists($assignment, 'isPastDuePacific')
-                ? $assignment->isPastDuePacific()
-                : (now() > $assignment->date_due);
-            $canSubmit = !$assignment->is_closed
-                && ($submission->status === 'draft' || is_null($submission->date_submitted))
-                && (!$isPastDue || $assignment->allow_late_submissions);
 
             // Format assignment dates to Pacific time for frontend
             $formattedAssignment = $assignment->toArray();
@@ -2066,6 +2135,10 @@ class GroupController extends Controller
 
             if (!$membership) {
                 return response()->json(['message' => 'You are not a member of this group'], 403);
+            }
+
+            if ($assignment->submission_type === 'none') {
+                return response()->json(['message' => 'This assignment does not require a submission.'], 400);
             }
 
             // Get or create submission
@@ -2223,6 +2296,10 @@ class GroupController extends Controller
 
             if (!$membership) {
                 return back()->with('error', 'You are not a member of this group');
+            }
+
+            if ($assignment->submission_type === 'none') {
+                return back()->with('info', 'No submission is required for this assignment.');
             }
 
             // Check if assignment is closed
@@ -2409,9 +2486,24 @@ class GroupController extends Controller
                 ->get()
                 ->keyBy('student_id');
 
+            $noSubmissionRequired = $assignment->submission_type === 'none';
+
             // Build submissions array with all students
             $submissionsArray = [];
             foreach ($groupMembers as $member) {
+                if ($noSubmissionRequired) {
+                    $submissionsArray[] = [
+                        'student_id' => $member->id,
+                        'student_name' => $member->name,
+                        'student_email' => $member->email,
+                        'status' => 'no_submission_required',
+                        'grade' => null,
+                        'submitted_at' => null,
+                        'is_late' => false,
+                    ];
+                    continue;
+                }
+
                 $submission = $submissions->get($member->id);
 
                 $submissionsArray[] = [
@@ -2431,7 +2523,10 @@ class GroupController extends Controller
                 'total' => count($groupMembers),
                 'submitted' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'submitted' || $s['status'] === 'graded')),
                 'graded' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'graded')),
-                'not_submitted' => count(array_filter($submissionsArray, fn($s) => $s['status'] === 'not_submitted')),
+                'not_submitted' => $noSubmissionRequired
+                    ? 0
+                    : count(array_filter($submissionsArray, fn($s) => $s['status'] === 'not_submitted')),
+                'no_submission_required' => $noSubmissionRequired ? count($groupMembers) : 0,
             ];
 
             return response()->json([
@@ -2465,16 +2560,28 @@ class GroupController extends Controller
                 }
             }
 
-            // Get or create submission
+            // Always persist a valid enum value but surface friendly status labels in responses
             $submission = AssignmentSubmission::firstOrCreate(
                 [
                     'assignment_id' => $assignmentId,
                     'student_id' => $studentId
                 ],
                 [
-                    'status' => 'not_submitted'
+                    'status' => 'draft'
                 ]
             );
+
+            if ($assignment->submission_type === 'none') {
+                $submission->setAttribute('status', 'no_submission_required');
+            } elseif ($submission->status === 'draft' && is_null($submission->date_submitted)) {
+                $hasSavedWork = !empty($submission->submission_text)
+                    || !empty($submission->file_path)
+                    || !empty($submission->external_link);
+
+                if (!$hasSavedWork) {
+                    $submission->setAttribute('status', 'not_submitted');
+                }
+            }
 
             // Load quiz responses if it's a quiz
             if ($assignment->assignment_type === 'quiz' || $assignment->assignment_type === 'exam') {
@@ -2529,10 +2636,16 @@ class GroupController extends Controller
                 'teacher_feedback' => 'nullable|string'
             ]);
 
-            // Find submission
-            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
-                ->where('student_id', $studentId)
-                ->firstOrFail();
+            // Find submission (create if needed) while persisting supported enum values
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => 'draft',
+                ]
+            );
 
             // Update submission
             $submission->grade = $validated['grade'];
@@ -3123,9 +3236,16 @@ class GroupController extends Controller
     {
         try {
             $user = Auth::user();
-            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
-                ->where('student_id', $studentId)
-                ->firstOrFail();
+
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => 'draft',
+                ]
+            );
 
             $validated = $request->validate([
                 'comment_text' => 'required|string',
@@ -3155,9 +3275,15 @@ class GroupController extends Controller
     public function getSubmissionComments(Request $request, $groupId, $assignmentId, $studentId)
     {
         try {
-            $submission = AssignmentSubmission::where('assignment_id', $assignmentId)
-                ->where('student_id', $studentId)
-                ->firstOrFail();
+            $submission = AssignmentSubmission::firstOrCreate(
+                [
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                ],
+                [
+                    'status' => 'draft',
+                ]
+            );
 
             $comments = $submission->comments()->with('user')->get();
 

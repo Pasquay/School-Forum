@@ -118,16 +118,27 @@ function displayGradingSubmission(submission, assignment, student) {
 
     // Set submission meta
     const statusBadge = document.getElementById('grading-status-badge');
-    statusBadge.textContent = submission.status === 'graded' ? 'Graded' : 'Submitted';
-    statusBadge.className = `status-badge ${submission.status}`;
-    
-    if (submission.is_late) {
+    let statusLabel = 'Submitted';
+    let statusClassName = submission.status;
+
+    if (submission.status === 'graded') {
+        statusLabel = 'Graded';
+    } else if (submission.status === 'no_submission_required') {
+        statusLabel = 'No Submission Required';
+        statusClassName = 'no-submission';
+    }
+
+    statusBadge.textContent = statusLabel;
+    statusBadge.className = `status-badge ${statusClassName}`;
+
+    if (submission.is_late && submission.status !== 'no_submission_required') {
         statusBadge.textContent += ' (Late)';
         statusBadge.classList.add('late');
     }
 
-    const submittedDate = submission.date_submitted ? 
-        new Date(submission.date_submitted).toLocaleString() : 'Not submitted';
+    const submittedDate = submission.status === 'no_submission_required'
+        ? 'Not required'
+        : (submission.date_submitted ? new Date(submission.date_submitted).toLocaleString() : 'Not submitted');
     document.getElementById('grading-submission-date').textContent = `Submitted: ${submittedDate}`;
 
     // Set max points
@@ -155,6 +166,16 @@ function displayGradingSubmission(submission, assignment, student) {
 
     // Display content based on type
     hideAllGradingContent();
+
+    if (submission.status === 'no_submission_required') {
+        const container = document.getElementById('grading-text-content');
+        const display = document.getElementById('grading-text-display');
+        if (container && display) {
+            display.innerHTML = '<em style="color: #666;">No submission is required for this assignment.</em>';
+            container.style.display = 'block';
+        }
+        return;
+    }
 
     if (assignment.submission_type === 'text') {
         displayTextSubmission(submission);

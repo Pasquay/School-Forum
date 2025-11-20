@@ -7,9 +7,11 @@ use App\Models\User;
 use App\Models\Group;
 use App\Models\Reply;
 use App\Models\Comment;
+use App\Models\InboxMessage;
 use Illuminate\Http\Request;
 use App\Models\PinnedHomePost;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -33,9 +35,9 @@ class PostController extends Controller
         // Posts
         $posts = Post::whereNull('deleted_at')
             ->whereNotIn('id', $pinned->pluck('id')->all())
-            ->whereHas('group', function($query){
+            ->whereHas('group', function ($query) {
                 $query->where('is_private', 0)
-                      ->where('type', '!=', 'academic');
+                    ->where('type', '!=', 'academic');
             })
             ->latest()
             ->with(['group'])
@@ -209,12 +211,45 @@ class PostController extends Controller
             'create-post-content' => ['required', 'max:2000'],
         ]);
 
-        Post::create([
+        $post = Post::create([
             'title' => $postData['create-post-title'],
             'content' => $postData['create-post-content'],
             'user_id' => Auth::id(),
             'group_id' => $id,
         ]);
+
+        if ((int) $id !== 1) {
+            $group = Group::find($id);
+            $creator = Auth::user();
+
+            if ($group && $creator) {
+                $creatorRole = DB::table('group_members')
+                    ->where('group_id', $group->id)
+                    ->where('user_id', $creator->id)
+                    ->value('role');
+
+                $canNotify = $group->owner_id === $creator->id
+                    || in_array($creatorRole, ['owner', 'moderator'], true);
+
+                if ($canNotify) {
+                    $groupName = e($group->name);
+                    $creatorName = e($creator->name);
+                    $postTitle = e($post->title);
+
+                    $title = "{$creatorName} posted in <a href='/group/{$group->id}'>{$groupName}</a>";
+                    $body = "{$creatorName} shared &ldquo;{$postTitle}&rdquo; in <a href='/group/{$group->id}'>{$groupName}</a>. <a href='/post/{$post->id}'>Read the post</a>.";
+
+                    InboxMessage::notifyGroupMembers(
+                        $group,
+                        $creator,
+                        'group_post_notification',
+                        $title,
+                        $body,
+                        ['roles' => ['member']]
+                    );
+                }
+            }
+        }
 
         if ((int)$id === 1) return redirect()->back()->with('success', 'Post created successfully');
         else return redirect()->back()->with('success', 'Post created successfully');
@@ -295,7 +330,7 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post ' . $status . ' successfully');
         }
     }
-    
+
     public function edit($id, Request $request)
     {
         $postData = $request->validate([
@@ -311,8 +346,8 @@ class PostController extends Controller
             return redirect()->back()->with('success', 'Post edited successfully');
         } else {
             return redirect()->back()->with('error', 'Invalid credentials');
-        }       
-    } 
+        }
+    }
 
     public function delete($id)
     {
