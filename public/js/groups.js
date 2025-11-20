@@ -804,7 +804,7 @@
             const manageGroupButton = document.querySelector('.manage-group-button');
             manageGroupButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = "{{ route('groups.manager') }}";
+                window.location.href = window.GROUP_MANAGER_ROUTE;
             });
             // Create Group button
             const createGroupBtn = document.querySelector('.create-group-button');

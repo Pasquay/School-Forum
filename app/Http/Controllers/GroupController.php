@@ -293,26 +293,6 @@ class GroupController extends Controller
     {
         $user = Auth::user();
 
-        // Search //set this up later
-        $search = '';
-
-        // Sorting
-        $sortBy = 'role'; // change this later
-        $asc = 1;
-
-        // Filters 
-        //SET THESE UP LATER
-        $isMember = 1;
-        $isModerator = 1;
-        $isOwner = 1;
-
-        $isAcademic = 1;
-        $isSocial = 1;
-        $isPrivate = 1;
-
-        $isStarred = 1;
-        $isMuted = 1;
-
         $groups = Group::query()
             ->join('group_members', function ($join) use ($user) {
                 $join->on('groups.id', '=', 'group_members.group_id')
@@ -327,44 +307,161 @@ class GroupController extends Controller
                 'group_members.is_muted as is_muted',
             ]);
 
-        // SEARCH HERE
+        // RIGHT SIDE INFO
+            $groupJoinedCount      = $user->groups()->count();
+            $groupModeratedCount   = $user->groups()->wherePivot('role', 'moderator')->count();
+            $groupCreatedCount     = $user->groups()->wherePivot('role', 'owner')->count();
+            $groupEducationalCount = $user->groups()->where('type', 'academic')->count();
+            $groupSocialCount      = $user->groups()->where('type', 'social')->count();
+            $groupPrivateCount     = $user->groups()->where('is_private', true)->count();
+            $groupPublicCount      = $user->groups()->where('is_private', false)->count();
+            $groupStarredCount     = $user->groups()->wherePivot('is_starred', true)->count();
+            $groupMutedCount       = $user->groups()->wherePivot('is_muted', true)->count();
 
-        // SORT HERE
-        switch ($sortBy) {
-            case 'role':
-            default:
-                if ($asc) {
-                    $groups->orderByRaw("FIELD(user_role, 'owner', 'moderator', 'member')")
-                        ->orderBy('name', 'asc');
-                } else {
-                    $groups->orderByRaw("FIELD(user_role), 'member', 'moderator', 'owner')")
-                        ->orderBy('name', 'desc');
-                }
-                break;
-        }
+        // ORDER
+            $groups->orderByRaw("FIELD(user_role, 'owner', 'moderator', 'member')")
+                   ->orderBy('name', 'asc');
 
         // PAGINATION
-        $perPage = 10;
-        $currentPage = request('page', 1);
+            $perPage = 10;
+            $currentPage = request('page', 1);
 
-        $groups = $groups->get();
-        $groupsCount = $groups->count();
-        $offset = ($currentPage - 1) * $perPage;
-        $groupsItems = $groups->slice($offset, $perPage)->values();
+            $groups = $groups->get();
+            $groupsCount = $groups->count();
+            $offset = ($currentPage - 1) * $perPage;
+            $groupsItems = $groups->slice($offset, $perPage)->values();
 
-        $groups = new \Illuminate\Pagination\LengthAwarePaginator(
-            $groupsItems,
-            $groupsCount,
-            $perPage,
-            $currentPage,
-            ['path' => request()->url()]
-        );
-
-        // RIGHT SIDE INFO
+            $groups = new \Illuminate\Pagination\LengthAwarePaginator(
+                $groupsItems,
+                $groupsCount,
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
 
         return view('group-manager', compact(
             'groups',
+
+            // Right Side Info
+            'groupJoinedCount',
+            'groupModeratedCount',
+            'groupCreatedCount',
+            'groupEducationalCount',
+            'groupSocialCount',
+            'groupPrivateCount',
+            'groupPublicCount',
+            'groupStarredCount',
+            'groupMutedCount',
         ));
+    }
+
+    public function searchGroupsManager(Request $request)
+    {
+        // VARIABLES
+            $user = User::findOrFail(Auth::id());
+
+            $groups = Group::query()
+            ->join('group_members', function ($join) use ($user) {
+                $join->on('groups.id', '=', 'group_members.group_id')
+                    ->where('group_members.user_id', '=', $user->id);
+            })
+            ->select([
+                'groups.*',
+                'group_members.role as user_role',
+                'groups.*',
+                'group_members.is_starred as is_starred',
+                'groups.*',
+                'group_members.is_muted as is_muted',
+            ]);
+
+            // Search //set this up later
+                $search = $request->input('group-search', '');
+
+            // Sorting
+                $sort = $request->get('sort', 'membership');
+
+            // Filters 
+                $membership = $request->input('membership', []); // array: member, moderator, owner
+                $types = $request->input('type', []);            // Array: educational, social
+                $status = $request->input('status', []);         // Array: public, private
+                $isStarred = $request->input('starred', []);     // Array: starred, unstarred
+                $isMuted = $request->input('muted', []);         // Array: muted, unmuted
+
+        // FILTER
+            if(!empty($membership)){
+                $groups->whereIn('group_members.role', $membership);
+            }
+            if(!empty($types)){
+                $groups->whereIn('groups.type', $types);
+            }
+            if(!empty($status)){
+                $groups->whereIn('groups.is_private', array_map(function($s){
+                    return $s === 'private' ? 1 : 0;
+                }, $status));
+            }
+            if(!empty($isStarred)){
+                $groups->whereIn('group_members.is_starred', $isStarred);
+            }
+            if(!empty($isMuted)){
+                $groups->whereIn('group_members.is_muted', $isMuted);
+            }
+        // SEARCH
+            if(!empty($search)){
+                $groups->where(function($query) use ($search){
+                    $query->where('groups.name', 'like', '%' . $search . '%')
+                          ->orWhere('groups.description', 'like', '%' . $search . '%');
+                });
+            }
+        // ORDER
+            switch($sort){
+                case 'alphabetic':
+                    $groups->orderBy('groups.name', 'asc');
+                    break;
+                case 'member_count':
+                    $groups->orderBy('groups.member_count', 'desc')
+                           ->orderBy('groups.name', 'asc');
+                    break;
+                case 'join_date':
+                    $groups->orderBy('group_members.created_at', 'desc')
+                           ->orderBy('groups.name', 'asc');
+                    break;
+                case 'membership':
+                default:
+                    $groups->orderbyRaw("FIELD(group_members.role, 'owner', 'moderator', 'member')")
+                           ->orderBy('groups.name', 'asc');
+                    break;
+            }
+
+        // PAGINATION
+            $perPage = 10;
+            $currentPage = $request->input('page', 1);
+            
+            $groupsCollection = $groups->get();
+            $groupsCount = $groupsCollection->count();
+            $offset = ($currentPage - 1) * $perPage;
+            $groupsItems = $groupsCollection->slice($offset, $perPage)->values();
+            $groupsPaginated = new \Illuminate\Pagination\LengthAwarePaginator(
+                $groupsItems,
+                $groupsCount,
+                $perPage,
+                $currentPage,
+                ['path' => $request->url()]
+            );
+
+            $html = '';
+            foreach($groupsPaginated as $group){
+                $html .= view('components.group-info-manager', ['group' => $group])->render();
+            }
+            if($groupsPaginated->isEmpty()){
+                $html .= '<p class="empty" style="text-align:center;">No groups found.</p>';
+            }
+
+        return response()->json([
+            'html' => $html,
+            'curr_page' => $groupsPaginated->currentPage(),
+            'last_page' => $groupsPaginated->lastPage(),
+            'next_page' => $groupsPaginated->hasMorePages() ? $groupsPaginated->currentPage()+1 : null,
+        ]);
     }
 
     public function showGroup($id)
@@ -452,7 +549,6 @@ class GroupController extends Controller
             'assignments',
         ));
     }
-
 
     public function toggleStar($id)
     {
@@ -662,19 +758,29 @@ class GroupController extends Controller
             else $ids = [$id];
         } else $ids = $id;
 
-        $leftGroups = [];
+        $leftGroups = []; 
+        $ownedGroups = [];
+
         foreach($ids as $groupId){
             $membership = $user->groups()->where('group_id', $groupId)->exists();
             if ($membership) {
-                $user->groups()->detach($groupId);
-                $leftGroups[] = $groupId;
+                $group = Group::findOrFail($groupId);
+                if($group->isOwner($user)){
+                    $ownedGroups[] = $groupId;
+                } else {
+                    $user->groups()->detach($groupId);
+                    $leftGroups[] = $groupId;
+                } 
             }
         }
+
+        $message = count($leftGroups)>1 ? 'Groups left successfully.' : 'Group left successfully.';
 
         return response()->json([
             'success' => true,
             'left_groups' => $leftGroups,
-            'message' => count($leftGroups) > 1 ? 'Groups left successfully.' : 'Group left successfully.',
+            'message' => $message,
+            'owned_groups' => $ownedGroups,
         ]);
     }
 

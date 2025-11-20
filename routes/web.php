@@ -90,6 +90,7 @@ Route::controller(GroupController::class)->group(function () {
     Route::get('/groups/create', 'showCreateGroup')->middleware('auth'); // show group creation form
     Route::post('/groups/create-submit', 'createGroup')->middleware('auth'); // create group
     Route::get('/groups/manage', 'showGroupsManager')->middleware('auth')->name('groups.manager'); // show groups manager page
+    Route::get('/groups/manage/search', 'searchGroupsManager')->middleware('auth')->name('groups.manager.search'); // search groups page
     Route::get('/groups/{page}', 'showGroupsPaginated')->middleware('auth'); // show page 2+ groups page
     Route::post('/group/toggleStar/{id}', 'toggleStar')->middleware('auth'); // star/unstar a group
     route::post('/group/setStar/', 'setStar')->middleware('auth')->name('group.set.star'); // set star manually

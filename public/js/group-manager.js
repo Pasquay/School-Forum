@@ -213,6 +213,7 @@
 
     function toggleRightActions(shouldDisable){
         const bulkActions = document.querySelector('.bulk-actions');
+        const bulkBtns = bulkActions.querySelectorAll('button');
         const rightActions = [
             '.right-actions button',
             '.right-actions input[type="submit"]',
@@ -222,10 +223,18 @@
             btn.disabled = shouldDisable;
             if(shouldDisable){
                 btn.classList.add('disabled-action');
-                bulkActions.style.display = 'inline';
+                bulkBtns.forEach(bBtn => {
+                    bBtn.style.cursor = 'pointer';
+                    bBtn.style.opacity = '1';
+                    bBtn.disabled = false;
+                });
             } else {
                 btn.classList.remove('disabled-action');
-                bulkActions.style.display = 'none';
+                bulkBtns.forEach(bBtn => {
+                    bBtn.style.cursor = 'default';
+                    bBtn.style.opacity = '0.5';
+                    bBtn.disabled = true;
+                });
             }
         });
 
@@ -394,13 +403,16 @@
                     alert(data.message || 'Message not found');
 
                     checked.forEach(cb => {
-                        const group = document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`);
-                        if(group){
-                            group.remove();
+                        if(!data.owned_groups.map(String).includes(String(cb.value))){
+                            const group = document.querySelector(`.group-info-manager[data-groupid="${cb.value}"]`);
+                            if(group) group.remove();
+                            console.log("MEMBER: ", cb.value, '-', data.owned_groups);
+                        } else {
+                            console.log("OWNED: ", cb.value, '-', data.owned_groups);
                         }
                         cb.checked = false;
                         toggleRightActions(0);
-                    })
+                    });
                 }
             } catch(e){
                 console.error("Error: ", e);
@@ -408,9 +420,163 @@
         });
     }
 
+    function reloadGroupPagination(data){
+        const pagination = document.querySelector('.group-pagination');
+        if(pagination){
+            pagination.innerHTML = '';
+            if(data.last_page > 1){
+                const nav = document.createElement('nav');
+                nav.className = 'pagination-nav';
+
+                // Previous Button
+                    if(data.curr_page > 1){
+                        const prev = document.createElement('a');
+                        prev.href = '#';
+                        prev.className = 'pagination-btn';
+                        prev.textContent = 'Prev';
+                        prev.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            goToPage(data.curr_page - 1);
+                        });
+                        nav.appendChild(prev);
+                    }
+
+                // Page Numbers
+                    for(let i=1; i<=data.last_page; i++){
+                        if(i === data.curr_page){
+                            const span = document.createElement('span');
+                            span.className = 'pagination-btn';
+                            span.classList.add('active');
+                            span.textContent = i;
+                            nav.appendChild(span);
+                        } else {
+                            const page = document.createElement('a');
+                            page.href = '#';
+                            page.className = 'pagination-btn';
+                            page.textContent = i;
+                            page.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                goToPage(i);
+                            });
+                            nav.appendChild(page);
+                        }
+                    }
+                    
+                // Next Button
+                    if(data.curr_page < data.last_page){
+                        const next = document.createElement('a');
+                        next.href = '#';
+                        next.className = 'pagination-btn';
+                        next.textContent = 'Next';
+                        next.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            goToPage(data.curr_page + 1);
+                        });
+                        nav.appendChild(next);
+                    }
+
+                pagination.appendChild(nav);
+            }
+        }
+    }
+
+    function goToPage(page){
+        const searchForm = document.querySelector('#group-search-form');
+        const groupListContainer = document.querySelector('#group-list-container');
+        const sortValue = document.querySelector('.sort-btn.active').getAttribute('data-sort');
+
+        const formData = new FormData(searchForm);
+        formData.set('sort', sortValue);
+        
+        const params = new URLSearchParams(formData);
+        params.set('page', page);
+
+        fetch(searchForm.action + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            groupListContainer.innerHTML= data.html || '<p class="empty">No groups found.</p>';
+            addGroupCardEventListeners();
+            reloadGroupPagination({
+                curr_page: data.curr_page,
+                last_page: data.last_page
+            });
+        });
+    }
+
+    function addSearchSectionEventListeners(){
+        // Variables
+            const searchSection = document.querySelector('.search-bar-row');
+            const searchForm = document.querySelector('#group-search-form');
+            const searchBtn = document.querySelector('#search-btn');
+
+            const filterBtn = searchSection.querySelector('#toggle-filters-btn');
+            const filtersPanel = document.querySelector('#search-filters-panel');
+            const clearFiltersBtn = document.querySelector('#clear-filters-btn');
+
+            const sortSection = document.querySelector('.sort-buttons');
+            const sortBtns = sortSection.querySelectorAll('.sort-btn');
+        // Search Bar
+
+        // Search Button
+            searchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const sortValue = document.querySelector('.sort-btn.active').getAttribute('data-sort');
+                
+                const groupListContainer = document.querySelector('#group-list-container');
+                const formData = new FormData(searchForm);
+                formData.set('sort', sortValue);
+
+                const params = new URLSearchParams(formData).toString();
+
+                fetch(searchForm.action + '?' + params, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    groupListContainer.innerHTML = data.html || '<p class="empty">No groups found.</p>';
+                    addGroupCardEventListeners();
+                    reloadGroupPagination(data);
+                })
+            });
+        // Filter Button
+            filterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if(filtersPanel.style.display === 'none'){
+                    filtersPanel.style.display = 'inline';
+                } else {
+                    filtersPanel.style.display = 'none';
+                }
+            });
+        // Sorts
+            sortBtns.forEach(btn => {
+                btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    sortBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            })
+        // Clear Filter
+            clearFiltersBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                document.querySelectorAll('#search-filters-panel input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+                document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.sort-btn[data-sort="membership"]').classList.add('active');
+            });
+    }
+
     document.addEventListener('DOMContentLoaded',() => {
         addGroupCardEventListeners();
         addBulkActionEventListeners();
+        addSearchSectionEventListeners()
         const groupSelects = document.querySelectorAll('.group-select');
         groupSelects.forEach(cb => {
             cb.addEventListener('change', updateRightActions);

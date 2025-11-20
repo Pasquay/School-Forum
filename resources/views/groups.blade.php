@@ -103,6 +103,7 @@
     @include('components.back-to-top-button')
 </body>
 <script>
+    window.GROUP_MANAGER_ROUTE = "{{ route('groups.manager') }}";
     window.STAR_ICON = "{{ asset('/icons/star.png') }}";
     window.STAR_ALT_ICON = "{{ asset('/icons/star-alt.png') }}";
     window.MUTE_ICON = "{{ asset('/icons/mute.png') }}";
