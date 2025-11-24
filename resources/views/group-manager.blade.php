@@ -31,7 +31,7 @@
                     <div id="search-filters-panel" style="display: none;">
                         <div class="filters-sort-row">
                             <div class="filter-group">
-                                <span class="filter-label">Filter by:</span>
+                                <span class="filter-label">Filter by:<br><br></span>
                                 <div class="filter-row">
                                     <span class="filter-label">Membership:</span>
                                     <label><input type="checkbox" name="membership[]" value="member"> Member</label>
