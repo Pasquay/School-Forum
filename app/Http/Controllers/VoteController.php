@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class VoteController extends Controller
 {
-    public function togglePostUpvote($id){
+    public function togglePostUpvote($id)
+    {
         $vote = Vote::where([
             'post_id' => $id,
             'user_id' => Auth::id()
@@ -17,39 +18,43 @@ class VoteController extends Controller
         $post = Post::findOrFail($id);
 
         // Vote doesnt exist
-        if($vote == NULL){
+        if ($vote == NULL) {
             Vote::create([
                 'post_id' => $post->id,
                 'user_id' => Auth::id(),
                 'vote' => 1,
             ]);
-            return response()->json([
-                'success' => true,
-                'voteValue' => 1,
-                'voteCount' => $post->getVoteCountAttribute()
-            ]);
-        } 
-        // Is upvoted
-        else if ($vote->vote == 1){
-            $vote->update(['vote' => 0]);
-            return response()->json([
-                'success' => true,
-                'voteValue' => 0,
-                'voteCount' => $post->getVoteCountAttribute()
-            ]);
-        } 
-        // Is downvoted
-        else {
-            $vote->update(['vote' => 1]);
+            $post->refresh();
             return response()->json([
                 'success' => true,
                 'voteValue' => 1,
                 'voteCount' => $post->getVoteCountAttribute()
             ]);
         }
-    }            
+        // Is upvoted
+        else if ($vote->vote == 1) {
+            $vote->update(['vote' => 0]);
+            $post->refresh();
+            return response()->json([
+                'success' => true,
+                'voteValue' => 0,
+                'voteCount' => $post->getVoteCountAttribute()
+            ]);
+        }
+        // Is downvoted
+        else {
+            $vote->update(['vote' => 1]);
+            $post->refresh();
+            return response()->json([
+                'success' => true,
+                'voteValue' => 1,
+                'voteCount' => $post->getVoteCountAttribute()
+            ]);
+        }
+    }
 
-    public function togglePostDownvote($id){
+    public function togglePostDownvote($id)
+    {
         $vote = Vote::where([
             'post_id' => $id,
             'user_id' => Auth::id()
@@ -57,12 +62,13 @@ class VoteController extends Controller
         $post = Post::findOrFail($id);
 
         // Vote doesnt exist
-        if($vote == NULL){
+        if ($vote == NULL) {
             Vote::create([
                 'post_id' => $post->id,
                 'user_id' => Auth::id(),
                 'vote' => -1
             ]);
+            $post->refresh();
             return response()->json([
                 'success' => true,
                 'voteValue' => -1,
@@ -70,8 +76,9 @@ class VoteController extends Controller
             ]);
         }
         // Is downvoted
-        else if($vote->vote == -1){
+        else if ($vote->vote == -1) {
             $vote->update(['vote' => 0]);
+            $post->refresh();
             return response()->json([
                 'success' => true,
                 'voteValue' => 0,
@@ -81,6 +88,7 @@ class VoteController extends Controller
         // Is upvoted
         else {
             $vote->update(['vote' => -1]);
+            $post->refresh();
             return response()->json([
                 'success' => true,
                 'voteValue' => -1,

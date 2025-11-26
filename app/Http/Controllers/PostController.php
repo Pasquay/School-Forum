@@ -197,10 +197,34 @@ class PostController extends Controller
                 return $comment;
             });
 
+        // Right Side Groups
+        $user = User::findOrFail(Auth::id());
+
+        $createdGroups = $user->groups()
+            ->wherePivot('role', 'owner')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $moderatedGroups = $user->groups()
+            ->wherePivot('role', 'moderator')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $joinedGroups = $user->groups()
+            ->wherePivot('role', 'member')
+            ->orderBy('is_starred', 'desc')
+            ->orderBy('name', 'asc')
+            ->get();
+
         return view('post', compact(
             'post',
             'homeAdmin',
             'comments',
+            'createdGroups',
+            'moderatedGroups',
+            'joinedGroups',
         ));
     }
 

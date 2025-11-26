@@ -54,7 +54,7 @@
     }
 </style>
 <div class="create-post-form" id='create-post-form'>
-    <form action="/create-post/{{ $group->id }}" method='POST'>
+    <form action="/create-post/{{ $group->id ?? '' }}" method='POST'>
         @csrf
         <input type="text" name="create-post-title" id="create-post-title" placeholder="What's on your mind?" required>
         <textarea name="create-post-content" id="create-post-content" placeholder="Share your thoughts" style="display:none;" required></textarea>

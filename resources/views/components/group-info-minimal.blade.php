@@ -35,62 +35,75 @@
 </div>
 
 <style>
-    /* Main */
     .group-info-minimal {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 0.65rem 0.5rem;
+        border-radius: 6px;
         cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .group-info-minimal:last-child {
-        border-bottom: none;
+        transition: background 0.15s ease;
+        text-decoration: none;
+        color: inherit;
     }
 
     .group-info-minimal:hover {
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        margin: 0 -0.5rem;
-        padding: 0.75rem 0.5rem;
+        background: #f8f9fa;
     }
 
-    /* Group Photo */
     .group-info-minimal .group-default-photo {
         width: 32px;
         height: 32px;
-        background-color: #2d4a2b;
+        background: #2d4a2b;
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
         flex-shrink: 0;
-        border-radius: 8px;
+        border-radius: 6px;
     }
 
     .group-info-minimal img {
         width: 32px;
         height: 32px;
-        border-radius: 8px;
+        border-radius: 6px;
         flex-shrink: 0;
         object-fit: cover;
     }
 
-    /* Star */
+    .group-info-minimal p {
+        flex: 1;
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .group-info-minimal form {
-        margin-left: auto;
+        margin: 0;
     }
 
     .group-info-minimal .star {
         background: none;
         border: none;
-        padding: 0;
-        margin-left: auto;
+        padding: 0.25rem;
+        margin: 0;
         flex-shrink: 0;
         cursor: pointer;
+        border-radius: 3px;
+        transition: background 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .group-info-minimal .star:hover {
+        background: rgba(255, 193, 7, 0.08);
     }
 
     .group-info-minimal .star img {
