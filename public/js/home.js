@@ -123,172 +123,8 @@ const createPostForm = document.getElementById('create-post-form');
     let nextPage = 2;
     let loading = false;
 
-    // Scrolling
-    window.addEventListener('scroll', () => {
-        const postContainer = document.getElementById('posts-column');
-        const loader = document.getElementById('loader');
-        if (!loading && nextPage) {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-                loading = true;
-                loader.style.display = 'block';
-                fetch(`home?page=${nextPage}`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        postContainer.insertAdjacentHTML('beforeend', data.html);
-                        nextPage = data.next_page;
-                        loading = false;
-                        loader.style.display = 'none';
-                        
-                        // Reinitialize posts array with new posts
-                        initializePosts();
-                        
-                        //attach event listeners again
-                        // Post cards link to post pages
-                        Array.from(posts).forEach(post => {
-                            post.addEventListener('click', () => {
-                                window.location.href = `/post/${post.id}`;
-                            });
-                            // Post share buttons
-                            const shareButton = post.querySelector('.post-share-button');
-                            if (shareButton) {
-                                shareButton.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                    postUrl = `${window.location.origin}/post/${post.id}`;
-                                    navigator.clipboard.writeText(postUrl)
-                                        .then(() => {
-                                            const svg = shareButton.querySelector('svg');
-                                            shareButton.innerHTML = 'Copied!';
-                                            setTimeout(() => {
-                                                shareButton.innerHTML = '';
-                                                shareButton.appendChild(svg);
-                                                shareButton.appendChild(document.createTextNode('Share'));
-                                            }, 1200);
-                                        })
-                                })
-                            }
-                        });
-                        // Upvote and downvote logic
-                        Array.from(posts).forEach(post => {
-                            const voteInline = post.querySelector('.vote-inline');
-                            if (!voteInline) return;
-                            
-                            const upvoteForm = voteInline.querySelector('form:first-child');
-                            const downvoteForm = voteInline.querySelector('form:last-child');
-                            const voteCount = voteInline.querySelector('.vote-count');
-
-                            if (!upvoteForm || !downvoteForm || !voteCount) return;
-
-                            voteInline.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                            });
-
-                            // UPVOTE
-                            upvoteForm.addEventListener('submit', async (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                try {
-                                    const response = await fetch(upvoteForm.action, {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/x-www-form-urlencoded'
-                                        },
-                                        credentials: 'same-origin',
-                                        body: new URLSearchParams({
-                                            _token: document.querySelector('meta[name="csrf-token"]').content
-                                        })
-                                    });
-
-                                    if (response.ok) {
-                                        const data = await response.json();
-
-                                        voteCount.textContent = data.voteCount;
-
-                                    const upButton = upvoteForm.querySelector('button');
-                                    const downButton = downvoteForm.querySelector('button');
-                                    
-                                    upButton.setAttribute('data-voted', data.voteValue == 1 ? 'true' : 'false');
-                                    downButton.setAttribute('data-voted', 'false');
-                                    }
-                                } catch (error) {
-                                    console.error('Error:', error);
-                                }
-                            })
-
-                            // DOWNVOTE
-                            downvoteForm.addEventListener('submit', async (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                try {
-                                    const response = await fetch(downvoteForm.action, {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                            'Accept': 'application/json',
-                                            'Content-Type': 'application/x-www-form-urlencoded'
-                                        },
-                                        credentials: 'same-origin',
-                                        body: new URLSearchParams({
-                                            _token: document.querySelector('meta[name="csrf-token"]').content
-                                        })
-                                    });
-
-                                    if (response.ok) {
-                                        const data = await response.json();
-
-                                        voteCount.textContent = data.voteCount;
-
-                                    const upButton = upvoteForm.querySelector('button');
-                                    const downButton = downvoteForm.querySelector('button');
-                                    
-                                    downButton.setAttribute('data-voted', data.voteValue == -1 ? 'true' : 'false');
-                                    upButton.setAttribute('data-voted', 'false');
-                                    }
-                                } catch (error) {
-                                    console.error('Error:', error);
-                                }
-                            })
-                        });
-                    })
-            }
-        }
-        if (!nextPage) {
-            document.getElementById('home-bottom').style.display = 'block';
-        }
-    })
-    // Post cards link to post pages
-    Array.from(posts).forEach(post => {
-        post.addEventListener('click', () => {
-            window.location.href = `/post/${post.id}`;
-        });
-        // Post share buttons
-        const shareButton = post.querySelector('.post-share-button');
-        if (shareButton) {
-            shareButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                postUrl = `${window.location.origin}/post/${post.id}`;
-                navigator.clipboard.writeText(postUrl)
-                    .then(() => {
-                        const svg = shareButton.querySelector('svg');
-                        shareButton.innerHTML = 'Copied!';
-                        setTimeout(() => {
-                            shareButton.innerHTML = '';
-                            shareButton.appendChild(svg);
-                            shareButton.appendChild(document.createTextNode('Share'));
-                        }, 1200);
-                    })
-            })
-        }
-    });
-    // Upvote and downvote logic
-    Array.from(posts).forEach(post => {
+    // Function to attach voting event listeners
+    function attachVotingListeners(post) {
         const voteInline = post.querySelector('.vote-inline');
         if (!voteInline) return;
         
@@ -297,6 +133,12 @@ const createPostForm = document.getElementById('create-post-form');
         const voteCount = voteInline.querySelector('.vote-count');
 
         if (!upvoteForm || !downvoteForm || !voteCount) return;
+
+        // Check if listeners already attached
+        if (upvoteForm.dataset.listenerAttached === 'true') return;
+        
+        upvoteForm.dataset.listenerAttached = 'true';
+        downvoteForm.dataset.listenerAttached = 'true';
 
         voteInline.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -371,6 +213,95 @@ const createPostForm = document.getElementById('create-post-form');
                 console.error('Error:', error);
             }
         })
+    }
+
+    // Scrolling
+    window.addEventListener('scroll', () => {
+        const postContainer = document.getElementById('posts-column');
+        const loader = document.getElementById('loader');
+        if (!loading && nextPage) {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+                loading = true;
+                loader.style.display = 'block';
+                fetch(`home?page=${nextPage}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        postContainer.insertAdjacentHTML('beforeend', data.html);
+                        nextPage = data.next_page;
+                        loading = false;
+                        loader.style.display = 'none';
+                        
+                        // Reinitialize posts array with new posts
+                        initializePosts();
+                        
+                        //attach event listeners again
+                        // Post cards link to post pages
+                        Array.from(posts).forEach(post => {
+                            post.addEventListener('click', () => {
+                                window.location.href = `/post/${post.id}`;
+                            });
+                            // Post share buttons
+                            const shareButton = post.querySelector('.post-share-button');
+                            if (shareButton) {
+                                shareButton.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    postUrl = `${window.location.origin}/post/${post.id}`;
+                                    navigator.clipboard.writeText(postUrl)
+                                        .then(() => {
+                                            const svg = shareButton.querySelector('svg');
+                                            shareButton.innerHTML = 'Copied!';
+                                            setTimeout(() => {
+                                                shareButton.innerHTML = '';
+                                                shareButton.appendChild(svg);
+                                                shareButton.appendChild(document.createTextNode('Share'));
+                                            }, 1200);
+                                        })
+                                })
+                            }
+                        });
+                        // Upvote and downvote logic for dynamically loaded posts
+                        Array.from(posts).forEach(post => {
+                            attachVotingListeners(post);
+                        });
+                    })
+            }
+        }
+        if (!nextPage) {
+            document.getElementById('home-bottom').style.display = 'block';
+        }
+    })
+    // Post cards link to post pages
+    Array.from(posts).forEach(post => {
+        post.addEventListener('click', () => {
+            window.location.href = `/post/${post.id}`;
+        });
+        // Post share buttons
+        const shareButton = post.querySelector('.post-share-button');
+        if (shareButton) {
+            shareButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                postUrl = `${window.location.origin}/post/${post.id}`;
+                navigator.clipboard.writeText(postUrl)
+                    .then(() => {
+                        const svg = shareButton.querySelector('svg');
+                        shareButton.innerHTML = 'Copied!';
+                        setTimeout(() => {
+                            shareButton.innerHTML = '';
+                            shareButton.appendChild(svg);
+                            shareButton.appendChild(document.createTextNode('Share'));
+                        }, 1200);
+                    })
+            })
+        }
+    });
+
+    // Upvote and downvote logic for initial posts
+    Array.from(posts).forEach(post => {
+        attachVotingListeners(post);
     });
     // Right Side
     function addRightGroupEventListeners() {
