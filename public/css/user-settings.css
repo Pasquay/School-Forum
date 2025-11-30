@@ -5,19 +5,30 @@
               box-sizing: border-box;
             }
 
+            :root {
+                --color-dark-green: #2d4a2b;
+                --color-medium-green: #133c06;
+                --color-sage: #6a8e61;
+                --color-cream: #f5f3f0;
+                --color-white: #ffffff;
+            }
+
             body {
-                font-family: Arial, sans-serif;
-                background-color: #f5f5f5;
+                font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background: var(--color-cream);
                 padding-top: 72px;
+                min-height: 100vh;
+                color: #333;
+                line-height: 1.6;
             }
 
 
             #profile-nav-link {
-                color: #2d4a2b;
+                color: var(--color-dark-green);
             }
 
             #profile-nav-link:hover {
-                color: #133c06;
+                color: var(--color-medium-green);
             }
 
             main {
@@ -37,14 +48,14 @@
             }
 
             .settings-header {
-                margin-bottom: 1rem;
+                margin-bottom: 1.5rem;
                 text-align: start;
             }
 
             .settings-header h1 {
-                color: #333;
+                color: #1a1a1a;
                 font-size: 2rem;
-                font-weight: bold;
+                font-weight: 700;
                 margin-bottom: 1rem;
                 margin-left: 1.5rem;
                 background: none;
@@ -55,7 +66,7 @@
             .header-separator {
                 width: 100%;
                 height: 1px;
-                background-color: #ddd;
+                background-color: #e0e0e0;
                 margin: 0 auto;
             }
 
@@ -68,71 +79,64 @@
             }
         /* SETTINGS NAV */
             .settings-nav {
-                background-color: white;
+                background-color: #ffffff;
                 width: 100%;
                 max-width: none;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
                 padding: 1rem;
                 display: flex;
-                justify-content: flex-start;  /* Add this to align left */
-                gap: 0.5rem;  /* Add gap instead of margins */
-                transition: transform 0.2s ease;
+                justify-content: flex-start;
+                gap: 0.5rem;
+                transition: all 0.2s ease;
             }
 
             .settings-nav button.first {
-                margin-left: 0;  /* Keep this for consistency */
+                margin-left: 0;
             }
 
             .settings-nav button {
                 border: 0;
                 cursor: pointer;
                 color: #666;
-                background-color: white;
+                background-color: transparent;
                 text-decoration: none;
                 font-weight: 500;
-                font-size: medium;
-                transition: color 0.2s;
-                padding: 0.75rem 1.5rem;  /* Increase vertical, reduce horizontal padding */
-                margin: 0;  /* Remove margins since we're using gap */
-                flex: none;  /* Remove flex: 1 to stop buttons from stretching */
+                font-size: 0.95rem;
+                transition: all 0.2s ease;
+                padding: 0.75rem 1.5rem;
+                margin: 0;
+                flex: none;
                 text-align: center;
-                border-radius: 0.5rem;  /* Add border-radius to all buttons */
-                white-space: nowrap;  /* Prevent text wrapping */
+                border-radius: 8px;
             }
 
             .settings-nav button:hover {
-                color: #2d4a2b;
-                background-color: #f8f9fa;  /* Add subtle hover background */
+                color: var(--color-dark-green);
+                background-color: rgba(45, 74, 43, 0.05);
             }
 
             .settings-nav button.active {
-                border: 0;
-                border-radius: 0.5rem;
-                cursor: pointer;
-                color: #2d4a2b;
-                background-color: #e8f5e9;
-                text-decoration: none;
-                font-size: medium;
-                transition: all 0.2s ease;  /* Smooth all transitions */
+                color: var(--color-dark-green);
+                background-color: rgba(45, 74, 43, 0.1);
+                font-weight: 600;
             }
 
             .settings-nav button.active:hover {
-                color: #133c06;  /* Darker blue on hover */
-                background-color: #c8e6c9;  /* Slightly darker background */
+                background-color: rgba(45, 74, 43, 0.15);
             }
 
         /* SETTINGS COLUMNS */
             .groups-column,
             .profile-column, 
             .preferences-column {
-                width: 100%; /* Use full width */
-                max-width: none; /* Remove max-width constraint */
+                width: 100%;
+                max-width: none;
                 margin: 1.5rem 0 0 0;
                 padding: 2rem;
-                background-color: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                background-color: #ffffff;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem;
@@ -195,22 +199,23 @@
                 }
             /* Save Changes Button Style */
                 .sliding-btn {
-                    background-color: #2d4a2b;
-                    color: #fff;
+                    background: var(--color-dark-green);
+                    color: white;
                     border: none;
-                    border-radius: 6px;
-                    padding: 0.75rem 1rem;
+                    border-radius: 8px;
+                    padding: 0.75rem 1.5rem;
+                    font-weight: 600;
                     cursor: pointer;
-                    box-shadow: 0 2px 4px rgba(45, 74, 43, 0.08);
-                    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+                    box-shadow: 0 2px 5px rgba(45, 74, 43, 0.2);
+                    transition: all 0.2s ease;
                     align-self: flex-start;
                 }
                 
                 .sliding-btn:hover,
                 .sliding-btn:focus {
-                    background-color: #133c06;
-                    color: #fff;
-                    box-shadow: 0 4px 8px rgba(45, 74, 43, 0.15);
+                    background: var(--color-medium-green);
+                    box-shadow: 0 4px 10px rgba(45, 74, 43, 0.3);
+                    transform: translateY(-2px);
                     outline: none;
                 }
         /* RESPONSIVE */
