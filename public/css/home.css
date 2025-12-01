@@ -202,16 +202,19 @@ main {
 }
 
 .filter-select {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 2.5rem 0.6rem 1rem;
     border: 1px solid #e4e4e4;
     border-radius: 6px;
     font-size: 0.9rem;
     font-family: inherit;
-    background: #fafafa;
+    background: #fafafa url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23333" d="M6 9L1 4h10z"/></svg>') no-repeat right 0.8rem center;
+    background-size: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
     color: #333;
     font-weight: 500;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .filter-select:focus {
@@ -219,6 +222,23 @@ main {
     border-color: rgba(45, 74, 43, 0.4);
     background: #ffffff;
     box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.1);
+}
+
+.filter-select option {
+    background: #ffffff;
+    color: #333;
+    padding: 0.5rem;
+}
+
+.filter-select option:checked {
+    background: linear-gradient(var(--color-dark-green), var(--color-dark-green));
+    background-color: var(--color-dark-green) !important;
+    color: #ffffff !important;
+}
+
+.filter-select option:hover {
+    background: var(--color-dark-green);
+    color: #ffffff;
 }
 
 /* Create Post Modal */

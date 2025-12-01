@@ -402,7 +402,7 @@
             padding: 6px 14px;
             border-radius: 6px;
             background: #f5f5f5;
-            color: #3182ce;
+            color: var(--color-dark-green);
             text-decoration: none;
             font-weight: 500;
             font-size: 1rem;
@@ -412,15 +412,15 @@
         }
         
         .pagination-btn.active {
-            background: #3182ce;
+            background: var(--color-dark-green);
             color: #fff;
             font-weight: bold;
             pointer-events: none;
-            box-shadow: 0 2px 8px rgba(49,130,206,0.10);
+            box-shadow: 0 2px 8px rgba(45, 74, 43, 0.10);
         }
         
         .pagination-btn:hover:not(.active) {
-            background: #225ea8;
+            background: var(--color-medium-green);
             color: #fff;
         }
 

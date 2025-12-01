@@ -63,32 +63,34 @@
 </div>
 <style>
     /* MAIN */
-        .group-info-manager {
-            display: flex;
-            align-items: center;
-            background-color: white;
-            gap: 0.75rem;
-            padding: 0.5rem 1.2rem;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+    .group-info-manager {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        gap: 0.75rem;
+        padding: 0.5rem 1.2rem;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
 
     .group-info-manager:last-child {
         border-bottom: none;
     }
 
-        .group-info-manager:hover {
-            background-color: #f8f9fa;
-            border-radius: 6px;
-        }
-        
-        .top-group {
-            border-radius: 6px 6px 0 0;
-        }
-        .bottom-group {
-            border-radius: 0 0 6px 6px;
-        }
+    .group-info-manager:hover {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+    }
+
+    .top-group {
+        border-radius: 6px 6px 0 0;
+    }
+
+    .bottom-group {
+        border-radius: 0 0 6px 6px;
+    }
+
     /* GROUP INFO */
     .group-info-manager .group-info {
         display: flex;
@@ -142,13 +144,13 @@
     }
 
     .group-info-manager .group-role.owner {
-        background: #e6f3ff;
-        color: #2176c7;
+        background: #d4e7d2;
+        color: #2d4a2b;
     }
 
     .group-info-manager .group-role.moderator {
-        background: #f6eaff;
-        color: #8e44ad;
+        background: #e0f2e0;
+        color: #133c06;
     }
 
     .group-info-manager .group-role.member {
@@ -164,31 +166,32 @@
         margin-left: auto;
     }
 
-        .group-info-manager .right-actions form,
-        .group-info-manager .right-actions button {
-            display: inline-flex;
-            align-items: center;
-            border: none;
-            box-shadow: none;
-        }
+    .group-info-manager .right-actions form,
+    .group-info-manager .right-actions button {
+        display: inline-flex;
+        align-items: center;
+        border: none;
+        box-shadow: none;
+    }
 
-        .disabled-action {
-            opacity: 0.5 !important;
-            pointer-events: none !important;
-            cursor: not-allowed !important;
-        }
-        /* STAR & MUTE BUTTON */
-            .group-info-manager .right-actions button.star,
-            .group-info-manager .right-actions button.mute {
-                background: none;
-                border: none;
-                padding: 0.25rem;
-                margin: 0 0.1rem;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+    .disabled-action {
+        opacity: 0.5 !important;
+        pointer-events: none !important;
+        cursor: not-allowed !important;
+    }
+
+    /* STAR & MUTE BUTTON */
+    .group-info-manager .right-actions button.star,
+    .group-info-manager .right-actions button.mute {
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        margin: 0 0.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
     .group-info-manager .right-actions img.star,
     .group-info-manager .right-actions img.mute {
@@ -223,11 +226,11 @@
     }
 
     .group-info-manager .manage-button {
-        background-color: #4a90e2;
+        background-color: #2d4a2b;
     }
 
     .group-info-manager .manage-button:hover {
-        background-color: #357abd;
+        background-color: #133c06;
     }
 
     .group-info-manager .leave-button {

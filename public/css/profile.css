@@ -1025,12 +1025,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             vertical-align: bottom;
-            color: #1565c0;
+            color: var(--color-dark-green);
             text-decoration: underline;
             font-size: 0.98em;
         }
         .social-link:hover {
-            color: #0d47a1;
+            color: var(--color-medium-green);
             text-decoration: underline;
         }
 

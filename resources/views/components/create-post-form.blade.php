@@ -8,44 +8,49 @@
     .create-post-form form {
         width: 100%;
         background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         padding: 1.5rem;
         display: flex;
         flex-direction: column;
         gap: 1rem;
+        border: 1px solid #e8e8e8;
     }
 
     .create-post-form input,
     .create-post-form textarea {
         width: 100%;
         padding: 0.75rem 1rem;
-        border: 2px solid #e1e1e1;
-        border-radius: 8px;
+        border: 2px solid #e8e8e8;
+        border-radius: 10px;
         font-size: 1rem;
-        transition: border-color 0.2s ease;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         margin-bottom: 0;
     }
 
     .create-post-form button {
         width: 100%;
-        background-color: #4a90e2;
+        background-color: #2d4a2b;
         color: white;
         padding: 0.75rem 1.5rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 1rem;
         font-weight: 500;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         cursor: pointer;
-        transition: background-color 0.2s;
         margin-top: 0;
+    }
+
+    .create-post-form button:hover {
+        background-color: #133c06;
     }
 
     .create-post-form input:focus,
     .create-post-form textarea:focus {
         outline: none;
-        border-color: #4a90e2;
-        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+        border-color: rgba(45, 74, 43, 0.4);
+        box-shadow: 0 0 0 3px rgba(45, 74, 43, 0.1);
     }
 
     .create-post-form textarea {
