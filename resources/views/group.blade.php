@@ -242,7 +242,7 @@
                     <button class="main-tab-btn" data-tab="assignments">All Assignments</button>
                 </div>
 
-                <!-- Posts Tab Content -->
+                <!-- Posts Tab Content --> 
                 <div id="posts-content" class="main-tab-content active">
                     @if($pinned->count() > 0)
                     @foreach($pinned as $post)
