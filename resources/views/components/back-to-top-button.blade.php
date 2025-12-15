@@ -3,7 +3,7 @@
         position: fixed;
         bottom: 2rem;
         right: 2rem;
-        background: #4a90e2;
+        background: #133c06;
         border: none;
         border-radius: 50%;
         width: 50px;
@@ -18,31 +18,30 @@
         align-items: center;
         justify-content: center;
         padding: 0;
-        overflow: hidden; 
+        overflow: hidden;
     }
-    
-    .back-to-top-button img {
-        width: 80%; 
-        height: 80%; 
-        object-fit: cover;
-        border-radius: 50%;
+
+    .back-to-top-button svg {
+        width: 24px;
+        height: 24px;
+        color: white;
         transition: transform 0.2s ease;
     }
-    
+
     .back-to-top-button:hover {
         transform: translateY(0);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
-    
-    .back-to-top-button:hover img {
-        transform: scale(1.1);
+
+    .back-to-top-button:hover svg {
+        transform: translateY(-2px);
     }
-    
+
     .back-to-top-button.show {
         opacity: 1;
         transform: translateY(0);
     }
-    
+
     @media (max-width: 768px) {
         .back-to-top-button {
             bottom: 1rem;
@@ -50,30 +49,23 @@
             width: 45px;
             height: 45px;
         }
-        
-        .back-to-top-button img {
-            width: 90%;
-            height: 90%;
-        }
     }
 </style>
 
-<button 
-    id='back-to-top-button' 
+<button
+    id='back-to-top-button'
     class='back-to-top-button'
     style='display: none;'
-    aria-label='back-to-top'
->
-    <img 
-        src="{{ asset('/icons/back-to-top.png') }}" 
-        alt="↑"
-    >
+    aria-label='back-to-top'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6-6 6" />
+    </svg>
 </button>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const backToTopBtn = document.getElementById('back-to-top-button');
-        
+
         // Back to Top Button Click
         backToTopBtn.addEventListener('click', () => {
             window.scrollTo({

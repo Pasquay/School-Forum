@@ -9,15 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class CommentVoteController extends Controller
 {
-    public function toggleCommentUpvote($id){
+    public function toggleCommentUpvote($id)
+    {
         $vote = CommentVote::where([
             'comment_id' => $id,
             'user_id' => Auth::id()
         ])->first();
         $comment = Comment::findOrFail($id);
-        
+
         // Vote doesnt exist
-        if($vote == NULL){
+        if ($vote == NULL) {
             CommentVote::create([
                 'comment_id' => $comment->id,
                 'user_id' => Auth::id(),
@@ -27,16 +28,16 @@ class CommentVoteController extends Controller
                 'success' => true,
                 'voteValue' => 1,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
         // Is upvoted
-        else if($vote->vote == 1){
+        else if ($vote->vote == 1) {
             $vote->update(['vote' => 0]);
             return response()->json([
                 'success' => true,
                 'voteValue' => 0,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
         // else, update vote = 1
         else {
@@ -45,11 +46,12 @@ class CommentVoteController extends Controller
                 'success' => true,
                 'voteValue' => 1,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
     }
-    
-    public function toggleCommentDownvote($id){
+
+    public function toggleCommentDownvote($id)
+    {
         $vote = CommentVote::where([
             'comment_id' => $id,
             'user_id' => Auth::id()
@@ -57,7 +59,7 @@ class CommentVoteController extends Controller
         $comment = Comment::findOrFail($id);
 
         // Vote doesnt exist
-        if($vote == NULL){
+        if ($vote == NULL) {
             CommentVote::create([
                 'comment_id' => $comment->id,
                 'user_id' => Auth::id(),
@@ -67,16 +69,16 @@ class CommentVoteController extends Controller
                 'success' => true,
                 'voteValue' => -1,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
         // Is downvoted
-        else if($vote->vote == -1){
+        else if ($vote->vote == -1) {
             $vote->update(['vote' => 0]);
             return response()->json([
                 'success' => true,
                 'voteValue' => 0,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
         // Is upvoted
         else {
@@ -85,7 +87,7 @@ class CommentVoteController extends Controller
                 'success' => true,
                 'voteValue' => -1,
                 'voteCount' => $comment->getVoteCountAttribute()
-            ]);
+            ], 200, ['Content-Type' => 'application/json']);
         }
     }
 }

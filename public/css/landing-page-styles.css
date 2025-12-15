@@ -878,7 +878,7 @@ body::after {
 
 .gsi-material-button:not(:disabled):active .gsi-material-button-state,
 .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
-    background-color: #001d35;
+    background-color: rgba(45, 74, 43, 0.5);
     opacity: 12%;
 }
 
@@ -888,7 +888,7 @@ body::after {
 }
 
 .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
-    background-color: #001d35;
+    background-color: rgba(45, 74, 43, 0.5);
     opacity: 8%;
 }
 

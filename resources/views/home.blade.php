@@ -16,44 +16,55 @@
     @include('components.navbar', ['active' => 'home'])
 
     @if (session()->has('success'))
-    <div class="success-message">
-        <div
-            style="background-color: #d4edda;
-                     color: #155724;
-                     padding: 1rem; 
-                     border-radius: 8px; 
-                     margin-top: -0.5rem;
-                     margin-bottom: 1rem; 
-                     text-align: center;">
+    <div class="success-message" onclick="this.style.display='none'">
+        <div>
             {{ session('success') }}
         </div>
     </div>
     @endif
     @if ($errors->any())
-    <div
-        style="background-color: #f8d7da; 
-            color: #721c24; 
-            padding: 1rem; 
-            border-radius: 8px; 
-            margin-top: -0.5rem;
-            margin-bottom: 1rem;
-            text-align: center;">
-        <ul style="margin: 0; padding-left: 1rem;">
+    <div class="error-message" onclick="this.style.display='none'">
+        <div>
             @foreach ($errors->all() as $error)
-            <p>{{ $error }}</p>
+            {{ $error }}
             @endforeach
-        </ul>
+        </div>
     </div>
     @endif
     <main>
         <div class="left-side">
-            <div class="create-post-form" id='create-post-form'>
-                <form action="/create-post/1" method='POST'>
-                    @csrf
-                    <input type="text" name="create-post-title" id='create-post-title' placeholder="What's on your mind?" required>
-                    <textarea name="create-post-content" id='create-post-content' placeholder='Share your thoughts' style='display:none;' required></textarea>
-                    <button type="submit" id='create-post-submit' style='display:none;'>Post</button>
-                </form>
+            <div class="action-bar">
+                <button type="button" class="create-post-btn" id="create-post-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Create Post
+                </button>
+                <input type="text" class="search-input" id="search-input" placeholder="Search posts...">
+                <select class="filter-select" id="filter-select">
+                    <option value="all">All Posts</option>
+                    <option value="new">Newest</option>
+                    <option value="top">Top Rated</option>
+                    <option value="discussed">Most Discussed</option>
+                </select>
+            </div>
+
+            <!-- Create Post Modal -->
+            <div class="create-post-modal" id="create-post-modal" style="display: none;">
+                <div class="modal-backdrop" id="modal-backdrop"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Create a Post</h3>
+                        <button type="button" class="modal-close" id="modal-close">&times;</button>
+                    </div>
+                    <form action="/create-post/1" method="POST" id="create-post-form">
+                        @csrf
+                        <input type="text" name="create-post-title" id="create-post-title" placeholder="Post title" required>
+                        <textarea name="create-post-content" id="create-post-content" placeholder="What's on your mind?" required></textarea>
+                        <button type="submit" class="submit-post-btn">Post</button>
+                    </form>
+                </div>
             </div>
             <div class="posts-column" id='posts-column'>
                 <!-- PINNED POSTS -->

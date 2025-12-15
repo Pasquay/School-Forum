@@ -1,233 +1,258 @@
 <style>
-    .inbox-message-row {
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-        margin-bottom: 1.5rem;
-        padding: 1.5rem;
-        transition: all 0.2s ease;
-        border-left: 4px solid #4a90e2;
-        position: relative;
-    }
-
-    .inbox-message-row:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .inbox-message-row.unread {
-        background: #f8fbff;
-        border-left-color: #4a90e2;
-    }
-
-    .inbox-message-row.read {
-        opacity: 0.85;
-        border-left-color: #6c757d;
-    }
-
-    .inbox-message-content {
+    .notification-item {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .inbox-message-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .inbox-message-type {
-        background: #4a90e2;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: capitalize;
-    }
-
-    .inbox-message-date {
-        font-size: 0.85rem;
-        color: #6c757d;
-        font-weight: 500;
-    }
-
-    .inbox-message-main-container {
-        display: flex;
-        gap: 2rem;
         align-items: flex-start;
+        padding: 12px 20px;
+        border-bottom: 1px solid #f9f9f9;
+        position: relative;
+        transition: background-color 0.2s ease;
     }
 
-    .inbox-message-main {
-        flex: 1;
+    .notification-item:hover {
+        background-color: #f8f9fa;
     }
 
-    .inbox-message-main h3 {
-        font-size: 1.1rem;
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item.unread {
+        background-color: #f8fbff;
+    }
+
+    .notification-avatar-wrapper {
+        position: relative;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+
+    .notification-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #133c06;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
         font-weight: 600;
-        color: #2d3436;
-        margin: 0 0 0.75rem 0;
+        font-size: 18px;
+    }
+
+    .notification-badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #133c06;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #fff;
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .notification-badge.group_join_request,
+    .notification-badge.group_invitation {
+        background-color: #6a8e61;
+    }
+
+    .notification-badge.moderator_action {
+        background-color: #9c27b0;
+    }
+
+    .notification-badge.assignment_post {
+        background-color: #ffc107;
+        color: #333;
+    }
+
+    .notification-badge.group_post_notification {
+        background-color: #dc3545;
+    }
+
+    .notification-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .notification-content p {
+        margin: 0 0 8px 0;
+        font-size: 17px;
         line-height: 1.4;
+        color: #333;
+        margin-bottom: 0;
     }
 
-    .inbox-message-main h3 a {
-        color: #4a90e2;
-        text-decoration: none;
-        transition: color 0.2s ease;
+    .notification-content p a {
+        color: #133c06;
     }
 
-    .inbox-message-main h3 a:hover {
-        color: #357abd;
+    .notification-content p a:hover {
         text-decoration: underline;
     }
 
-    .inbox-message-main p {
-        font-size: 0.95rem;
-        color: #636e72;
-        line-height: 1.5;
-        margin: 0;
+    .notification-content .username {
+        font-weight: 600;
+        color: #000;
     }
 
-    .inbox-message-main p a {
-        color: #4a90e2;
-        text-decoration: none;
+    .notification-content .action {
+        color: #555;
+    }
+
+    .notification-content .item-name {
+        font-weight: 600;
+        color: #000;
+    }
+
+    .notification-time {
+        font-size: 13px;
+        color: #888;
+        margin-left: auto;
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding-top: 5px;
+        padding-left: 10px;
+    }
+
+    .notification-unread-indicator {
+        width: 8px;
+        height: 8px;
+        background-color: #28a745;
+        border-radius: 50%;
+        margin-left: 10px;
+        flex-shrink: 0;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .notification-actions button {
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
         font-weight: 500;
     }
 
-    .inbox-message-main p a:hover {
-        color: #357abd;
-        text-decoration: underline;
-    }
-
-    .inbox-message-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        min-width: 100px;
-    }
-
-    .action-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
+    .notification-actions .decline-button {
+        background-color: #e0e0e0;
+        color: #333;
         border: none;
-        font-weight: 600;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
 
-    .action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .notification-actions .decline-button:hover {
+        background-color: #d0d0d0;
     }
 
-    .action-btn.accept {
-        background: #00b894;
+    .notification-actions .accept-button {
+        background-color: #333;
         color: #fff;
+        border: none;
     }
 
-    .action-btn.accept:hover {
-        background: #00a085;
+    .notification-actions .accept-button:hover {
+        background-color: #555;
     }
 
-    .action-btn.reject {
-        background: #e17055;
+    .notification-actions .acknowledge-button {
+        background-color: #28a745;
         color: #fff;
+        border: none;
     }
 
-    .action-btn.reject:hover {
-        background: #d63031;
-    }
-
-    .action-btn.acknowledge {
-        background: #4a90e2;
-        color: #fff;
-    }
-
-    .action-btn.acknowledge:hover {
-        background: #357abd;
+    .notification-actions .acknowledge-button:hover {
+        background-color: #218838;
     }
 
     .responded-badge {
-        background: #00b894;
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 15px;
-        font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #133c06;
+        font-size: 10px;
         font-weight: 600;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        opacity: 50%;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .inbox-message-main-container {
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .inbox-message-actions {
-            flex-direction: row;
-            justify-content: flex-start;
-            min-width: auto;
-        }
-
-        .action-btn {
-            flex: 1;
-            min-width: 80px;
-        }
+    .clear-message-btn {
+        background: none;
+        border: none;
+        color: #133c06;
+        cursor: pointer;
+        font-size: 18px;
+        margin-left: 10px;
+        transition: color 0.2s ease;
+        flex-shrink: 0;
     }
 </style>
 
 <div
-    class="inbox-message-row {{ $message->responded ? 'read' : 'unread' }}"
+    class="notification-item {{ $message->responded ? 'read' : 'unread' }}"
     data-message-id="{{ $message->id }}"
     data-message-type="{{ $message->type }}">
-    <div class="inbox-message-content">
-        <div class="inbox-message-header">
-            <span class="inbox-message-type">{{ ucfirst(str_replace('_', ' ', $message->type)) }}</span>
-            <span class="inbox-message-date">{{ $message->created_at->format('M d, Y H:i') }}</span>
+
+    <div class="notification-avatar-wrapper">
+        <div class="notification-avatar">
+            {{ strtoupper(substr($message->type, 0, 1)) }}
         </div>
-
-        <div class="inbox-message-main-container">
-            <div class="inbox-message-main">
-                <h3>{!! $message->title !!}</h3>
-                <p>{!! $message->body !!}</p>
-            </div>
-
-            <div class="inbox-message-actions">
-                @if(!$message->responded)
-                <form action="/inbox/{{ $message->id }}/respond" method="POST"
-                    class="inbox-message-form"
-                    data-message-id="{{ $message->id }}">
-                    @csrf
-                    @if($message->type === 'group_join_request' || $message->type === 'group_invitation')
-                    <button type="submit" class="action-btn accept" data-action="accept">Accept</button>
-                    <button type="submit" class="action-btn reject" data-action="reject">Reject</button>
-                    @elseif($message->type === 'moderator_action')
-                    <button type="submit" class="action-btn acknowledge" data-action="acknowledge">Acknowledge</button>
-                    @else
-                    <button type="submit" class="action-btn acknowledge" data-action="acknowledge">Mark as Read</button>
-                    @endif
-                </form>
-                @else
-                <div class="responded-badge">Responded</div>
-                @endif
-            </div>
+        <div class="notification-badge {{ $message->type }}">
+            @if($message->type === 'group_join_request' || $message->type === 'group_invitation')
+            +
+            @elseif($message->type === 'moderator_action')
+            ★
+            @elseif($message->type === 'assignment_post')
+            📝
+            @else
+            ●
+            @endif
         </div>
     </div>
+
+    <div class="notification-content">
+        <p>{!! $message->title !!}</p>
+
+        @if(!$message->responded)
+        <form action="/inbox/{{ $message->id }}/respond" method="POST"
+            class="inbox-message-form"
+            data-message-id="{{ $message->id }}">
+            @csrf
+            <div class="notification-actions">
+                @if($message->type === 'group_join_request' || $message->type === 'group_invitation')
+                <button type="submit" class="decline-button" data-action="reject">Decline</button>
+                <button type="submit" class="accept-button" data-action="accept">Accept</button>
+                @else
+                <button type="submit" class="acknowledge-button" data-action="acknowledge">Mark as Read</button>
+                @endif
+            </div>
+
+        </form>
+        @else
+        <span class="responded-badge">responded</span>
+        @endif
+    </div>
+
+    <span class="notification-time">{{ $message->created_at->diffForHumans() }}</span>
+
+    <button class="clear-message-btn" data-message-id="{{ $message->id }}" title="Clear message">✕</button>
+
+    @if(!$message->responded)
+    <div class="notification-unread-indicator"></div>
+    @endif
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const messageRow = document.querySelector('.inbox-message-row[data-message-id="{{ $message->id }}"]');
+        const messageRow = document.querySelector('.notification-item[data-message-id="{{ $message->id }}"]');
         const form = messageRow?.querySelector('.inbox-message-form');
 
         if (form) {
@@ -255,79 +280,128 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // ADD TO READ MESSAGES
-                        const readMessages = document.querySelector('.read-messages');
-                        if (readMessages) {
-                            const messageClone = messageRow.cloneNode(true);
+                        // Find ALL instances of this message (in both unread and any clones)
+                        const allMessageInstances = document.querySelectorAll(`.notification-item[data-message-id="${messageId}"]`);
+
+                        allMessageInstances.forEach((instance) => {
+                            // Update the instance to "read" state
+                            instance.classList.remove('unread');
+                            instance.classList.add('read');
+
+                            // Remove unread indicator
+                            const unreadIndicator = instance.querySelector('.notification-unread-indicator');
+                            if (unreadIndicator) {
+                                unreadIndicator.remove();
+                            }
+
+                            // Replace form/actions with responded badge
+                            const formElement = instance.querySelector('.inbox-message-form');
+                            const actionsDiv = instance.querySelector('.notification-actions');
+
+                            if (formElement) {
+                                formElement.remove();
+                            }
+
+                            if (actionsDiv && !instance.querySelector('.responded-badge')) {
+                                const respondedBadge = document.createElement('span');
+                                respondedBadge.className = 'responded-badge';
+                                respondedBadge.textContent = '✓';
+                                actionsDiv.parentElement.appendChild(respondedBadge);
+                                actionsDiv.remove();
+                            }
+                        });
+
+                        // Move from unread to read section
+                        const unreadSection = document.querySelector('[data-section="unread"]');
+                        const readSection = document.querySelector('[data-section="read"]');
+                        const unreadMessage = unreadSection?.querySelector(`.notification-item[data-message-id="${messageId}"]`);
+
+                        if (unreadMessage && readSection) {
+                            // Create clean clone for read section
+                            const messageClone = unreadMessage.cloneNode(true);
                             messageClone.classList.remove('unread');
                             messageClone.classList.add('read');
 
-                            const actionsDiv = messageClone.querySelector('.inbox-message-actions');
-                            if (actionsDiv) {
-                                actionsDiv.innerHTML = '<div class="responded-badge">Responded</div>';
+                            // Ensure no form in clone
+                            const cloneForm = messageClone.querySelector('.inbox-message-form');
+                            if (cloneForm) {
+                                cloneForm.remove();
                             }
 
-                            const readHeader = readMessages.querySelector('h2');
+                            // Ensure responded badge exists in clone
+                            if (!messageClone.querySelector('.responded-badge')) {
+                                const content = messageClone.querySelector('.notification-content');
+                                const respondedBadge = document.createElement('span');
+                                respondedBadge.className = 'responded-badge';
+                                respondedBadge.textContent = '✓';
+                                content.appendChild(respondedBadge);
+                            }
+
+                            // Re-attach clear button event
+                            const cloneClearBtn = messageClone.querySelector('.clear-message-btn');
+                            if (cloneClearBtn) {
+                                cloneClearBtn.addEventListener('click', handleClearMessage);
+                            }
+
                             messageClone.style.opacity = '0';
-                            messageClone.style.transform = 'translateX(-30px)';
+                            messageClone.style.transform = 'translateX(-20px)';
                             messageClone.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
 
-                            if (readHeader) {
-                                readHeader.insertAdjacentElement('afterend', messageClone);
-                            } else {
-                                readMessages.appendChild(messageClone);
-                            }
+                            readSection.insertBefore(messageClone, readSection.firstChild);
 
                             setTimeout(() => {
                                 messageClone.style.opacity = '1';
                                 messageClone.style.transform = 'translateX(0)';
                             }, 10);
+
+                            // Remove from unread section with animation
+                            unreadMessage.style.transition = 'opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease';
+                            unreadMessage.style.opacity = '0';
+                            unreadMessage.style.transform = 'translateX(-30px)';
+                            unreadMessage.style.maxHeight = '0';
+                            unreadMessage.style.paddingTop = '0';
+                            unreadMessage.style.paddingBottom = '0';
+
+                            setTimeout(() => {
+                                unreadMessage.remove();
+                            }, 300);
                         }
-
-                        // REMOVE FROM UNREAD
-                        messageRow.style.transition = 'opacity 0.3s ease, transform 0.3s ease, height 0.3s ease';
-                        messageRow.style.opacity = '0';
-                        messageRow.style.transform = 'translateX(-50px)';
-                        messageRow.style.height = '0';
-                        messageRow.style.marginBottom = '0';
-                        messageRow.style.paddingTop = '0';
-                        messageRow.style.paddingBottom = '0';
-
-                        setTimeout(() => {
-                            messageRow.remove();
-                        }, 300);
                     } else {
-                        // Show error in a more elegant way
-                        const errorDiv = document.createElement('div');
-                        errorDiv.style.cssText = `
-                            position: fixed; top: 20px; right: 20px; 
-                            background: #e17055; color: white; 
-                            padding: 1rem; border-radius: 8px; 
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                            z-index: 9999; font-weight: 600;
-                        `;
-                        errorDiv.textContent = data.message || 'An error occurred';
-                        document.body.appendChild(errorDiv);
-
-                        setTimeout(() => errorDiv.remove(), 3000);
+                        alert(data.message || 'An error occurred');
                     }
                 } catch (error) {
                     console.error('Error: ', error);
-                    // Show network error elegantly
-                    const errorDiv = document.createElement('div');
-                    errorDiv.style.cssText = `
-                        position: fixed; top: 20px; right: 20px; 
-                        background: #d63031; color: white; 
-                        padding: 1rem; border-radius: 8px; 
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                        z-index: 9999; font-weight: 600;
-                    `;
-                    errorDiv.textContent = 'Network error. Please try again.';
-                    document.body.appendChild(errorDiv);
-
-                    setTimeout(() => errorDiv.remove(), 3000);
+                    alert('Network error. Please try again.');
                 }
             });
+        }
+
+        // Handle clear message button
+        function handleClearMessage() {
+            const messageId = this.dataset.messageId;
+
+            if (confirm('Are you sure you want to clear this message?')) {
+                // Find and remove ALL instances of this message
+                const allMessageInstances = document.querySelectorAll(`.notification-item[data-message-id="${messageId}"]`);
+
+                allMessageInstances.forEach((instance) => {
+                    instance.style.transition = 'opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease';
+                    instance.style.opacity = '0';
+                    instance.style.transform = 'translateX(-30px)';
+                    instance.style.maxHeight = '0';
+                    instance.style.paddingTop = '0';
+                    instance.style.paddingBottom = '0';
+
+                    setTimeout(() => {
+                        instance.remove();
+                    }, 300);
+                });
+            }
+        }
+
+        const clearBtn = messageRow?.querySelector('.clear-message-btn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', handleClearMessage);
         }
     });
 </script>
